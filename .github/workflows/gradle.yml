@@ -1,0 +1,109 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+ Build-Test-Release:
+    runs-on: ubuntu-latest
+    steps:
+     # Check out current repository
+    - name: Fetch Sources
+      uses: actions/checkout@v2
+    - name: Set up JDK 14
+      uses: actions/setup-java@v1
+      with:
+        java-version: 14
+    #when you don't
+    - name: Change wrapper permissions
+      run: chmod +x ./gradlew
+
+    # Cache Gradle dependencies
+    - name: Setup Gradle Dependencies Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties') }}
+        
+    # Cache Gradle Wrapper
+    - name: Setup Gradle Wrapper Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+    #Build all mods
+    - name: Build mod jar
+      run: ./gradlew deploy -PgithubRepo="$GITHUB_REPOSITORY"
+
+    #upload to action artifact
+    - name: Upload built jar file
+      uses: actions/upload-artifact@v2
+      with:
+        #replace with your mods name
+        #TODO how to get current repo name
+        name: Example-Mods
+        path: build/libs/Example-Mods.jar
+
+    - name: Upload built android jar file
+      uses: actions/upload-artifact@v2
+      with:
+        #replace with your mods name
+        name: Example-Mods-Dexed
+        path: build/libs/Example-Mods-Dexed.jar
+
+    - name: Remove Old Release Drafts
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases \
+          | tr '\r\n' ' ' \
+          | jq '.[] | select(.draft == true) | .id' \
+          | xargs -I '{}' \
+        curl -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases/{}
+
+    #cat eqv
+    - name: Read changelog
+      id: manifest
+      uses: juliangruber/read-file-action@v1
+      with:
+       path: ./Changelog.md
+     
+    # Create new release draft - which is not publicly visible and requires manual acceptance
+    - name: Create Release Draft
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        #write it by yourself, not worth automating it
+        tag_name: "Snapshot"
+        release_name: "0.0.0"
+        body: "${{ steps.manifest.outputs.content }}"
+        draft: true
+
+    #upload to release
+    - name: Upload Dex Core
+      id: upload-release-core-dex
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ./build/libs/Example-Mods-Dexed.jar
+        asset_name: dexed-Example-Mods.jar
+        asset_content_type: application/zip
+
+    #upload to release
+    #wait Dex Core work on pc too
+    - name: Upload Core
+      id: upload-release-core
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ./build/libs/Example-Mods.jar
+        asset_name: Example-Mods.jar
+        asset_content_type: application/zip
+
+
+  

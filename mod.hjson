@@ -1,0 +1,10 @@
+name: "Example-Mods"
+displayName: "Example Mods"
+description: "Example Mods Description
+ new line"
+author: "Author"
+main: "Premain.Main"
+minGameVersion: 125
+version: 0.1.0
+hidden: true
+repo: "o7-Fire/Mindustry-Mods-Template"

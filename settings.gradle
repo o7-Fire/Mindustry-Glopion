@@ -1,0 +1,14 @@
+rootProject.name = modsNname
+println "JDK: " + JavaVersion.current()
+
+/*
+if(!(JavaVersion.current().ordinal() < JavaVersion.VERSION_14.ordinal())){
+    include 'Desktop'
+    include 'Tools'
+}
+ */
+
+
+
+
+
