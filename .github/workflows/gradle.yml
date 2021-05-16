@@ -40,15 +40,8 @@ jobs:
       with:
         #replace with your mods name
         #TODO how to get current repo name
-        name: Example-Mods
-        path: build/libs/Example-Mods.jar
-
-    - name: Upload built android jar file
-      uses: actions/upload-artifact@v2
-      with:
-        #replace with your mods name
-        name: Example-Mods-Dexed
-        path: build/libs/Example-Mods-Dexed.jar
+        name: Mindustry-Glopion
+        path: build/libs/Mindustry-Glopion-Dexed.jar
 
     - name: Remove Old Release Drafts
       env:
@@ -88,22 +81,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: ./build/libs/Example-Mods-Dexed.jar
-        asset_name: dexed-Example-Mods.jar
+        asset_path: ./build/libs/Mindustry-Glopion-Dexed.jar
+        asset_name: dexed-Mindustry-Glopion.jar
         asset_content_type: application/zip
 
-    #upload to release
-    #wait Dex Core work on pc too
-    - name: Upload Core
-      id: upload-release-core
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: ./build/libs/Example-Mods.jar
-        asset_name: Example-Mods.jar
-        asset_content_type: application/zip
 
 
   

@@ -10,5 +10,17 @@ if(!(JavaVersion.current().ordinal() < JavaVersion.VERSION_14.ordinal())){
 
 
 
+def use = { ... names ->
+    for(String name : names){
+        include(name)
+        project(name).projectDir = new File(settingsDir, "../${name.substring(1).replace(":", "/")}")
+    }
+}
 
 
+if(new File(settingsDir, '../Atom').exists()) {
+    use(
+            ":Atom",
+            ":Atom:Atomic"
+    )
+}

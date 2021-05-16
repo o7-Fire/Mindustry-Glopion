@@ -1,10 +1,9 @@
-name: "Example-Mods"
-displayName: "Example Mods"
-description: "Example Mods Description
- new line"
-author: "Author"
+name: "Mindustry-Glopion"
+displayName: "Mindustry-Glopion"
+description: "Bottom Text"
+author: "o7-Fire, Itzbenz"
 main: "Premain.Main"
-minGameVersion: 125
+minGameVersion: 126.2
 version: 0.1.0
 hidden: true
-repo: "o7-Fire/Mindustry-Mods-Template"
+repo: "o7-Fire/Mindustry-Glopion"

@@ -94,6 +94,7 @@ allprojects {
 
         //From Root to every project
         dependencies{
+            implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
             compileOnly ("com.github.Anuken.Arc:arc-core:$arcHash"){
                 because("provided")
             }
@@ -117,7 +118,20 @@ ext{
         Files.write(f.toPath(), modhjson.toString().getBytes(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
     } catch (ignored) {
     }
-
+    File props = new File(projectDir, 'gradle.properties')
+    File atom = new File(projectDir, '../Atom')
+    if(atom.exists() && props.exists()) {
+        String s = new String(Runtime.getRuntime().exec("git rev-parse HEAD", new String[0], atom).getInputStream().readAllBytes()).trim();
+        if(s != atomHash) {
+            Properties properties = new Properties()
+            StringWriter writer = new StringWriter();
+            properties.load(props.toURI().toURL().openStream());
+            properties.put("atomHash", s);
+            properties.store(writer, "Touch")
+            Files.writeString(props.toPath(), writer.getBuffer().toString(), StandardOpenOption.WRITE);
+            atomHash = s;
+        }
+    }
 }
 //Root Module only
 dependencies {
@@ -126,7 +140,7 @@ dependencies {
 //make .class jar with executable main and MANIFEST.MF
 //your typical jar
 task base(type: Jar){
-    archiveFileName = modsNname + ".jar"//Example-Mods,jar
+    archiveFileName = modsNname + ".jar"//Mindustry-Glopion,jar
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
@@ -155,7 +169,7 @@ task baseJar{
     if(new File(sdkD8).exists()) {
         def files = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(sdkJar)])//all dependency go
         def dependencies = files.collect { "--classpath $it.path" }.join(" ")//argument builder
-        def cmd = "${sdkD8} $dependencies --min-api ${minAndroidApi} --output Dex.jar ${modsNname}.jar"//should output Dex.jar from Example-Mods.jar
+        def cmd = "${sdkD8} $dependencies --min-api ${minAndroidApi} --output Dex.jar ${modsNname}.jar"//should output Dex.jar from Mindustry-Glopion.jar
         def dir = new File(projectDir, "build/libs/");
         dir.mkdirs()//cuz sike, file not found exception
         doLast {
