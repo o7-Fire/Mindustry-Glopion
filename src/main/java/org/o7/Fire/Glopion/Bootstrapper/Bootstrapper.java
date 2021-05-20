@@ -6,6 +6,7 @@ import arc.func.Boolp;
 import arc.func.Cons;
 import arc.func.Floatc;
 import arc.func.Intc;
+import arc.scene.ui.SettingsDialog;
 import arc.util.Log;
 import arc.util.async.Threads;
 import mindustry.Vars;
@@ -44,7 +45,7 @@ public class Bootstrapper extends Mod {
                 }
                 out.close();
                 in.close();
-                
+    
                 if (!canceled.get()){
                     done.run();
                     Log.infoTag("Downloader", furl + " has been downloaded to " + dest.absolutePath());
@@ -56,16 +57,20 @@ public class Bootstrapper extends Mod {
     }
     
     public static void downloadUI() {
-        ui.showCustomConfirm(Main.url, Main.jar.absolutePath() + " doesn't exist\n Do you want download glopion", "Yes", "No", () -> {
-            try {
-                boolean[] cancel = {false};
-                float[] progress = {0};
-                int[] length = {0};
-                
-                
-                BaseDialog dialog = new BaseDialog("@be.updating");
-                download(Main.url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
-                    if (Main.jar.exists()){
+        ui.showCustomConfirm(Main.url, Main.jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", Bootstrapper::downloadGUI, () -> Vars.mods.setEnabled(Vars.mods.getMod(Main.class), false));
+    }
+    
+    public static void downloadGUI() {
+        
+        try {
+            boolean[] cancel = {false};
+            float[] progress = {0};
+            int[] length = {0};
+            
+            
+            BaseDialog dialog = new BaseDialog("Downloading");
+            download(Main.url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
+                if (Main.jar.exists()){
                         Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
                     }else{
                         ui.showErrorMessage(Main.jar.absolutePath() + " still doesn't exist ??? how");
@@ -85,16 +90,18 @@ public class Bootstrapper extends Mod {
             }catch(Exception e){
                 ui.showException(e);
             }
-            
-        }, () -> Vars.mods.setEnabled(Vars.mods.getMod(Main.class), false));
+        
+        
     }
     
     @Override
     public void init() {
-        if (Main.downloadThing){
+    
+        if (Main.downloadThing || Core.settings.getBool("glopion-auto-update", false)){
             Log.infoTag("Glopion-Bootstrapper", "");
             Log.infoTag("Glopion-Bootstrapper", "Downloading: " + Main.url);
-            if (!Vars.headless){
+            boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + Main.url);
+            if (!Vars.headless && b){
                 Main.runOnUI(Bootstrapper::downloadUI);
             }else{
                 boolean[] cancel = {false};
@@ -102,7 +109,17 @@ public class Bootstrapper extends Mod {
                 int[] length = {0};
                 download(Main.url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {}, Main::handleException);
             }
-            
+        
         }
+        Main.runOnUI(() -> {
+            SettingsDialog.SettingsTable st = new SettingsDialog.SettingsTable();
+            st.button("Purge Local Glopion", Main.jar::delete);
+            if (!Vars.mobile) st.checkPref("glopion-deep-patch", "Deep Patch", false);
+            st.checkPref("glopion-auto-update", "Force Update", true);
+            ui.settings.game.row().table(t -> {
+                t.add("Glopion Bootstrapper Settings").growX().center().row();
+                t.add(st).growX().growY();
+            }).growX();
+        });
     }
 }

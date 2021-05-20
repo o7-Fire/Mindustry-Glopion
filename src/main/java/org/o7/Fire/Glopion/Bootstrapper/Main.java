@@ -22,6 +22,9 @@ public class Main extends Mod {
     public static Main main;
     
     static {
+        if (Core.settings.getBool("glopion-deep-patch", false) && !Vars.mobile){
+            flavor = flavor + "-DeepPatch";
+        }
         flavor = flavor + "-";
         flavor = flavor + (Vars.android ? "Android" : "Desktop");
         Log.infoTag("Mindustry-Version", Version.buildString());
@@ -55,7 +58,7 @@ public class Main extends Mod {
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
                 classLoader = Vars.platform.loadJar(jar, "wtf ?");
-                unloaded = (Class<? extends Mod>) Class.forName(("org.o7.Fire.Glopion" + flavor.replace('-', '.') + ".Main"), true, classLoader);
+                unloaded = (Class<? extends Mod>) Class.forName(("org.o7.Fire.Glopion" + flavor.replace('-', '.') + "Main"), true, classLoader);
             }catch(Exception e){
                 handleException(e);
                 return;
