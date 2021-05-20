@@ -1,0 +1,142 @@
+import arc.util.OS
+
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+apply plugin: 'java'
+
+dependencies {
+
+}
+ext{
+    
+}
+task base(type: Jar){
+    archiveFileName = project.name + ".jar"//Mindustry-Glopion,jar
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
+    }
+    with jar//what is this
+    manifest {
+        attributes 'Main-Class': modsNJavaMain//what
+    }
+
+
+    from(rootDir){
+        include "mod.hjson"//assuming the rootdir is actually current folder
+        include "icon.png"
+    }
+}
+//source code documentation instead of decompiled .class, if you use jitpack that is
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+}
+//not jar task
+//just handle making dexed jar after making typical jar
+task baseJar{
+    dependsOn base//typical jar
+    //collect dependencies needed for desugaring
+    if(new File(sdkD8).exists()) {
+        def files = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(sdkJar)])//all dependency go
+        def dependencies = files.collect { "--classpath $it.path" }.join(" ")//argument builder
+        def cmd = "${sdkD8} $dependencies --min-api ${minAndroidApi} --output Dex.jar ${project.name}.jar"//should output Dex.jar from Mindustry-Glopion.jar
+        def dir = new File(projectDir, "build/libs/");
+        dir.mkdirs()//cuz sike, file not found exception
+        doLast {
+            if (new File(sdkD8).exists() && new File(sdkJar).exists()) {
+                println(cmd)//comment this to disable spam
+                Runtime.getRuntime().exec(cmd, new String[0], dir).waitForProcessOutput(System.out, System.err)
+            }
+        }
+    }else {
+        println "No sdkD8 detected on ANDROID_HOME, skipping desugaring"//y not
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+    options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
+    if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+        options.compilerArgs.addAll(['--release', '8'])//android 4.4 like java 8
+    }
+}
+//here we combine typical jar and dex jar to make
+//typical-dex.jar
+//if android sdk exist
+task makeJar(type: Jar){
+    dependsOn baseJar//dex jar
+    if(new File(sdkD8).exists()) {//some people don't have android SDK
+        archiveFileName = project.name + "-Dexed.jar"
+
+        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+        if (new File(sdkD8).exists()) {
+            from() {
+                zipTree(new File(projectDir, "build/libs/Dex.jar"))//include Dex.jar
+            }
+        }
+    }else {
+        println "No sdkD8 detected on ANDROID_HOME, skipping making Combined Dex-Class Jar"
+    }
+    from() {
+        zipTree(new File(projectDir, "build/libs/${project.name}.jar"))//include YourModsName.jar or typical.jar
+    }
+}
+//TODO add more dependsOn
+//if you have multiple version of mods
+task deploy(type: Jar) {
+    dependsOn makeJar
+}
+//need this for jitpack, so i can read mods source code without using browser
+artifacts {
+    archives sourcesJar
+    archives base
+}
+
+//h
+//add progress bar
+static void downloadMindustry(URL u, File mindustry){
+    mindustry.getParentFile().mkdirs();
+    if(mindustry.exists())return ;
+    mindustry.createNewFile();
+    System.out.println("Downloading: " + u.toString());
+    FileOutputStream f = new FileOutputStream(mindustry);
+    arc.util.io.Streams.copy(u.openStream(), f);
+    f.close()
+
+}
+//don't crash
+static void copyToMindustry(File f){
+    File target = new File(OS.getAppDataDirectoryString("Mindustry"))
+    target = new File(target, "mods")
+    target = new File(target, f.getName())
+    target.getParentFile().mkdirs()
+    System.out.println("Copying: " + f.getAbsolutePath() + " to "+ target.getAbsolutePath());
+    Files.copy(f.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+}
+//how lazy to download this
+task download(){
+    doLast{
+        URL u = new URL("https://github.com/Anuken/Mindustry/releases/download/" + mindustryHash + "/Mindustry.jar");
+        File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+        downloadMindustry(u, mindustry);
+    }
+}
+//don't want open file manager
+task copyMods(){
+    dependsOn base//you don't need dex jar for pc
+    doLast{
+        copyToMindustry(new File(new File(projectDir.toString()), "build/libs/"+project.name+".jar"))
+    }
+}
+//java -jar Mindustry.jar
+//cooler java -jar Mindustry.jar
+task run(type: JavaExec) {
+    dependsOn download
+    dependsOn copyMods//make class jar then copy it, why the hell you need to dex it
+    URL u = new URL("https://github.com/Anuken/Mindustry/releases/download/" + mindustryHash + "/Mindustry.jar");
+    File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+    println(mindustry.getAbsolutePath())
+    classpath = files(mindustry.getAbsolutePath())
+    classpath += sourceSets.main.runtimeClasspath
+    main = "mindustry.desktop.DesktopLauncher"
+}

@@ -1,0 +1,35 @@
+apply plugin: 'java'
+
+ext{
+    core = aproj(":core")
+}
+dependencies {
+
+    implementation(core)
+}
+
+task base(type: Jar){
+
+    archiveFileName = modsNname + ".jar"//Mindustry-Glopion,jar
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
+    for(File f : configurations.runtimeClasspath.toList()){
+        if(f.exists()) {
+            from(f.isDirectory() ? f : zipTree(f))
+            System.out.println("Yes: " + f.getAbsolutePath())
+        }else
+            System.out.println("Don't: " + f.getAbsolutePath())
+    }
+
+    from files(sourceSets.main.output.classesDirs)
+    from files(sourceSets.main.output.resourcesDir)
+    with jar//what is this
+    manifest {
+        attributes 'Main-Class': modsNJavaMain//what
+    }
+
+
+    from(rootDir){
+        include "mod.hjson"//assuming the rootdir is actually current folder
+        include "icon.png"
+    }
+}
