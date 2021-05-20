@@ -24,3 +24,6 @@ if(new File(settingsDir, '../Atom').exists()) {
             ":Atom:Atomic"
     )
 }
+include 'core'
+include 'desktop'
+

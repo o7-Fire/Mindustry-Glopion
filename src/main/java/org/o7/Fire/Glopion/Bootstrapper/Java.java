@@ -1,4 +1,4 @@
-package Premain;
+package org.o7.Fire.Glopion.Bootstrapper;
 
 import javax.swing.*;
 

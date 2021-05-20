@@ -74,7 +74,7 @@ jobs:
         draft: true
 
     #upload to release
-    - name: Upload Dex Core
+    - name: Upload Dex Jar Bootstrapper
       id: upload-release-core-dex
       uses: actions/upload-release-asset@v1
       env:

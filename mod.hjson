@@ -2,7 +2,7 @@ name: "Mindustry-Glopion"
 displayName: "Mindustry-Glopion"
 description: "Bottom Text"
 author: "o7-Fire, Itzbenz"
-main: "Premain.Main"
+main: "org.o7.Fire.Glopion.Bootstrapper.Main"
 minGameVersion: 126.2
 version: 0.1.0
 hidden: true

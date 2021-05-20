@@ -29,6 +29,8 @@ apply plugin: 'java-library'
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
+
+
 //github CI don't sort folder by default
 static File getLatestFolder(File fe){
     ArrayList<File> f = new ArrayList<>();
@@ -54,7 +56,16 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
         maven { url 'https://jitpack.io' }
     }
+    group = 'com.o7.Fire.Glopion'
+    version = '0.1.0'
 
+    ext.aproj = { String module ->
+        if(findProject(module) != null){
+            return project(module)
+        }else{
+            return project(":"+ modsNname + module)
+        }
+    }
     ext {
 
         //automatically detect latest shit and skipping it if doesn't exists
@@ -94,7 +105,7 @@ allprojects {
 
         //From Root to every project
         dependencies{
-            implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
+            //
             compileOnly ("com.github.Anuken.Arc:arc-core:$arcHash"){
                 because("provided")
             }
@@ -104,10 +115,17 @@ allprojects {
             compileOnly ("com.github.Anuken.Mindustry:core:$mindustryHash"){
                 because("provided")
             }
+            compileOnly ("com.github.Anuken.Mindustry:desktop:$mindustryHash")
         }
 
     }
+}
+subprojects {
 
+    dependencies{
+        implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
+        compileOnly(rootProject)
+    }
 
 }
 ext{
@@ -265,6 +283,7 @@ task run(type: JavaExec) {
     dependsOn copyMods//make class jar then copy it, why the hell you need to dex it
     URL u = new URL("https://github.com/Anuken/Mindustry/releases/download/" + mindustryHash + "/Mindustry.jar");
     File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+    println(mindustry.getAbsolutePath())
     classpath = files(mindustry.getAbsolutePath())
     classpath += sourceSets.main.runtimeClasspath
     main = "mindustry.desktop.DesktopLauncher"

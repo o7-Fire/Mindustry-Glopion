@@ -4,7 +4,7 @@ ext{
     core = aproj(":core")
 }
 dependencies {
-
+    implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
     implementation(core)
 }
 
