@@ -34,15 +34,6 @@ jobs:
     - name: Build mod jar
       run: ./gradlew deploy -PgithubRepo="$GITHUB_REPOSITORY"
 
-    #upload to action artifact
-    - name: Upload built jar file
-      uses: actions/upload-artifact@v2
-      with:
-        #replace with your mods name
-        #TODO how to get current repo name
-        name: Mindustry-Glopion
-        path: build/libs/Mindustry-Glopion-Dexed.jar
-
     - name: Remove Old Release Drafts
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

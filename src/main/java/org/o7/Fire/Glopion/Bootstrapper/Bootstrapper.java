@@ -114,8 +114,13 @@ public class Bootstrapper extends Mod {
         Main.runOnUI(() -> {
             SettingsDialog.SettingsTable st = new SettingsDialog.SettingsTable();
             st.button("Purge Local Glopion", Main.jar::delete);
+            st.row();
             if (!Vars.mobile) st.checkPref("glopion-deep-patch", "Deep Patch", false);
+            st.row();
             st.checkPref("glopion-auto-update", "Force Update", true);
+            st.row();
+            st.add("Provider URL:").growX().row();
+            st.field(Main.baseURL, s -> Core.settings.put("glopion-url", s));
             ui.settings.game.row().table(t -> {
                 t.add("Glopion Bootstrapper Settings").growX().center().row();
                 t.add(st).growX().growY();
