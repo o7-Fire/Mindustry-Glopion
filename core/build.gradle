@@ -1,4 +1,5 @@
 
 dependencies {
+    testImplementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
 
 }

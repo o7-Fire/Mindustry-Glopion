@@ -8,9 +8,10 @@ import mindustry.Vars;
 import mindustry.core.Version;
 import mindustry.game.EventType;
 import mindustry.mod.Mod;
+import mindustry.mod.Mods;
 
 public class Main extends Mod {
-    public final static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/release/");
+    public final static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/files/");
     public static String url = null;
     public static String flavor = Core.settings.getString("glopion-flavor", "Release");
     public static ClassLoader classLoader;
@@ -20,15 +21,15 @@ public class Main extends Mod {
     public static Bootstrapper bootstrapper;
     public static Fi jar;
     public static Main main;
-    
+    public static String classpath = "org.o7.Fire.Glopion.";
     static {
         if (Core.settings.getBool("glopion-deep-patch", false) && !Vars.mobile){
             flavor = flavor + "-DeepPatch";
         }
-        flavor = flavor + "-";
-        flavor = flavor + (Vars.android ? "Android" : "Desktop");
+        classpath = classpath + flavor.replace('-', '.') + ".Main";
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
+        Log.infoTag("Glopion-Bootstrapper", "Classpath: " + classpath);
         load();
     }
     
@@ -41,6 +42,15 @@ public class Main extends Mod {
             }catch(Exception e){
                 handleException(e);
             }
+        }
+    }
+    
+    public static void disable() {
+        Mods.LoadedMod mod = Vars.mods.getMod(Main.class);
+        if (mod != null){
+            Core.settings.put("mod-" + mod.name + "-enabled", false);
+            mod.state = Mods.ModState.disabled;
+            runOnUI(() -> Vars.ui.showInfoFade("Disabling Bootstrapper"));
         }
     }
     
@@ -58,13 +68,13 @@ public class Main extends Mod {
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
                 classLoader = Vars.platform.loadJar(jar, "wtf ?");
-                unloaded = (Class<? extends Mod>) Class.forName(("org.o7.Fire.Glopion" + flavor.replace('-', '.') + "Main"), true, classLoader);
+                unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
             }catch(Exception e){
                 handleException(e);
                 return;
             }
         }else{
-            Log.warn(jar.absolutePath() + " doesn't exist");
+            Log.warn(jar.absolutePath() + " doesn't exist, loading in next startup to prevent game freeze");
             downloadThing = true;
         }
         

@@ -1,15 +1,19 @@
 package org.o7.Fire.Glopion.Bootstrapper;
 
 import arc.Core;
+import arc.Events;
 import arc.files.Fi;
 import arc.func.Boolp;
 import arc.func.Cons;
 import arc.func.Floatc;
 import arc.func.Intc;
 import arc.scene.ui.SettingsDialog;
+import arc.scene.ui.layout.Cell;
+import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.async.Threads;
 import mindustry.Vars;
+import mindustry.game.EventType;
 import mindustry.gen.Icon;
 import mindustry.graphics.Pal;
 import mindustry.mod.Mod;
@@ -57,7 +61,7 @@ public class Bootstrapper extends Mod {
     }
     
     public static void downloadUI() {
-        ui.showCustomConfirm(Main.url, Main.jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", Bootstrapper::downloadGUI, () -> Vars.mods.setEnabled(Vars.mods.getMod(Main.class), false));
+        ui.showCustomConfirm(Main.url, Main.jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", Bootstrapper::downloadGUI, Main::disable);
     }
     
     public static void downloadGUI() {
@@ -109,22 +113,33 @@ public class Bootstrapper extends Mod {
                 int[] length = {0};
                 download(Main.url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {}, Main::handleException);
             }
-        
+    
         }
-        Main.runOnUI(() -> {
-            SettingsDialog.SettingsTable st = new SettingsDialog.SettingsTable();
-            st.button("Purge Local Glopion", Main.jar::delete);
-            st.row();
-            if (!Vars.mobile) st.checkPref("glopion-deep-patch", "Deep Patch", false);
-            st.row();
-            st.checkPref("glopion-auto-update", "Force Update", true);
-            st.row();
-            st.add("Provider URL:").growX().row();
-            st.field(Main.baseURL, s -> Core.settings.put("glopion-url", s));
-            ui.settings.game.row().table(t -> {
-                t.add("Glopion Bootstrapper Settings").growX().center().row();
-                t.add(st).growX().growY();
-            }).growX();
-        });
+        Cell<Table> t = ui.settings.game.row().table().growX();
+        Main.runOnUI(() -> buildUI(t.get()));
+        Events.on(EventType.ResizeEvent.class, s -> buildUI(t.get()));
+    }
+    
+    public void buildUI(Table t) {
+        t.reset();
+        SettingsDialog.SettingsTable st = new SettingsDialog.SettingsTable();
+        if (!Vars.mobile) st.checkPref("glopion-deep-patch", "Deep Patch", false);
+        st.row();
+        st.checkPref("glopion-auto-update", "Force Update", true);
+        st.row();
+        
+        t.add("Glopion Bootstrapper Settings").growX().center().row();
+        t.add("Provider URL:").growX().row();
+        t.field(Main.baseURL, s -> Core.settings.put("glopion-url", s)).growX().row();
+        t.button("Purge Local Glopion", Main.jar::delete).growX().row();
+        t.button("Reset Bootstrapper Configuration", () -> {
+            Core.settings.remove("glopion-auto-update");
+            Core.settings.remove("glopion-url");
+            Core.settings.remove("glopion-deep-patch");
+            ui.showInfoFade("Bootstrapper Configuration Reseted");
+            buildUI(t);
+        }).growX().row();
+        t.add(st).growX().growY();
+        
     }
 }
