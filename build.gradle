@@ -69,15 +69,18 @@ allprojects {
     ext {
 
         //automatically detect latest shit and skipping it if doesn't exists
-        sdkRoot = System.getenv("ANDROID_HOME")//or just replace it by direct path if you don't need github CI
+        //export ANDROID_HOME=~/android-sdk
+
+        sdkRoot = System.getenv("ANDROID_HOME")//or just replace it by direct path if you don't need github
         if(sdkRoot == null)
             sdkRoot = new File("SDK").getAbsolutePath()
         sdkD8 = sdkRoot + "nope"
         sdkJar = sdkRoot + "nope"//nopped in case folder didn't exist
-        if(new File(sdkRoot).exists()) {
+        sdkRootf = new File(sdkRoot)
+        if(sdkRootf.exists()) {
             try {
-                sdkD8 = new File(getLatestFolder(new File(sdkRoot, 'build-tools/')), "d8").getAbsolutePath()
-                sdkJar = new File(getLatestFolder(new File(sdkRoot, "platforms/")), "android.jar").getAbsolutePath()
+                sdkD8 = new File(getLatestFolder(new File(sdkRootf, 'build-tools/')), "d8").getAbsolutePath()
+                sdkJar = new File(getLatestFolder(new File(sdkRootf, "platforms/")), "android.jar").getAbsolutePath()
             }catch(ignored){
                 //FileNotFoundException
             }
@@ -86,7 +89,7 @@ allprojects {
             sdkJar = new File(sdkRoot, "nope").getAbsolutePath()
         if(!new File(sdkD8).exists())
             sdkD8 = new File(sdkRoot, "nope").getAbsolutePath()
-  
+
         //imagine writing json
         modhjson = ""
         modhjson += 'name: "' + modsNname + '"\n'
@@ -129,7 +132,9 @@ subprojects {
 
 }
 ext{
+
     //rewrite mod.hjson everytime gradle rollin
+    //println System.getenv("ANDROID_HOME")
     try {
         File f = new File(projectDir, "mod.hjson")
         f.delete()

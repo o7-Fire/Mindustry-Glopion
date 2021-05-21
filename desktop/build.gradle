@@ -1,10 +1,40 @@
 apply plugin: 'java'
 
 ext{
-    core = aproj(":core")
+    dependsProject = [':core']
 }
 dependencies {
     implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
-    implementation(core)
+    dependsProject.collect{ implementation(aproj(it))}
 }
 
+task base( type: Jar , dependsOn: dependsProject.collect{ it+":compileJava"}) {
+    archiveFileName = "${mindustryHash}.jar"
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    manifest {
+        attributes 'Main-Class': modsNJavaMain//what
+    }
+    from {
+        configurations.runtimeClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from files(dependsProject.collect{ aproj(it).sourceSets.main.output })
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'//deprecated
+    from sourceSets.main.allSource
+}
+artifacts {
+    archives sourcesJar
+    archives base
+}
+task Nightly(type: Copy){
+    dependsOn base
+    from(new File(projectDir, "build/libs/${mindustryHash}.jar"))
+    into(new File(rootDir, "files/Nightly/DeepPatch/"))
+}
+task Release(type: Copy){
+    dependsOn base
+    from(new File(projectDir, "build/libs/${mindustryHash}.jar"))
+    into(new File(rootDir, "files/Release/DeepPatch/"))
+}

@@ -127,8 +127,10 @@ public class Bootstrapper extends Mod {
         st.row();
         st.checkPref("glopion-auto-update", "Force Update", true);
         st.row();
-        
+    
         t.add("Glopion Bootstrapper Settings").growX().center().row();
+        t.add("Glopion Flavor:").growX().row();
+        t.field(Main.flavor, s -> Core.settings.put("glopion-flavor", s)).growX().row();
         t.add("Provider URL:").growX().row();
         t.field(Main.baseURL, s -> Core.settings.put("glopion-url", s)).growX().row();
         t.button("Purge Local Glopion", Main.jar::delete).growX().row();
@@ -136,6 +138,7 @@ public class Bootstrapper extends Mod {
             Core.settings.remove("glopion-auto-update");
             Core.settings.remove("glopion-url");
             Core.settings.remove("glopion-deep-patch");
+            Core.settings.remove("glopion-flavor");
             ui.showInfoFade("Bootstrapper Configuration Reseted");
             buildUI(t);
         }).growX().row();
