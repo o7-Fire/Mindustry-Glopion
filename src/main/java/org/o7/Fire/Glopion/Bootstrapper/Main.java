@@ -67,7 +67,7 @@ public class Main extends Mod {
                 classLoader = Vars.platform.loadJar(jar, "wtf ?");
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
                 info = "Class: " + unloaded.getCanonicalName() + "\n" + "Flavor: " + flavor + "\n" + "Classpath: " + jar.absolutePath() + "\n" + "Size: " + jar.length() + " bytes\n" + "Classloader: " + classLoader.getClass().getSimpleName();
-            }catch(Exception e){
+            }catch(Throwable e){
                 handleException(e);
                 return;
             }
