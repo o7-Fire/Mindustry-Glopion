@@ -1,26 +1,16 @@
-# Mindustry-Mods-Template
-V6\
-Note: automatically use d8 and make dexed jar if detected
+# Project Glopion
 
-### How to get indexed by mods browser
-![](https://cdn.discordapp.com/attachments/713346278003572777/821210982449807380/unknown.png)
+![](https://img.shields.io/github/v/tag/o7-Fire/Mindustry-Glopion?label=Mindustry-Glopion)
+![](https://img.shields.io/github/v/release/Anuken/Mindustry?label=Mindustry-Latest)
+![](https://img.shields.io/badge/java-14.0.2-orange)
+![](https://img.shields.io/badge/Android%20API-14-blue)
 
-### How to build and run
-- gradle run
+~~ozone with extra/less step~~
 
-### How to make jar for android
-- install Android SDK ???
-- add to ANDROID_HOME environment
-- gradle makeJar
-- Dex = Dex only no class
-- Example-Mods = class only no dex
-- Example-Mods-Dexed = class and dex
+# Work In Progress (brb in 2 years)
 
-![](https://cdn.discordapp.com/attachments/713346278003572777/821212560820404274/unknown.png)
+use the code `o7-Fire/Mindustry-Glopion` to get glopion for free
 
-### Edit the gradle.properties instead of mod.hjson
+![](https://media.discordapp.net/attachments/840181901288538112/845661460104347718/unknown.png)
 
-### Editing Changelog.md will affect the release description
-![](https://cdn.discordapp.com/attachments/796869250533818418/821228000523059220/unknown.png)
-
-### Automatically create a new draft everytime you push 
+what you just see is the pinnacle of Java and now the fall

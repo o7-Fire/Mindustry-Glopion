@@ -140,6 +140,7 @@ public class Bootstrapper extends Mod {
             Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
             boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || !jar.exists();
             if (!Vars.headless && b){
+                //sometime jar already exist
                 Main.runOnUI(() -> Bootstrapper.downloadUI(url));
             }else{
                 long size = jar.length();
