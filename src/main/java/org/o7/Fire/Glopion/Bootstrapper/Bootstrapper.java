@@ -7,6 +7,7 @@ import arc.func.Boolp;
 import arc.func.Cons;
 import arc.func.Floatc;
 import arc.func.Intc;
+import arc.graphics.Color;
 import arc.scene.ui.ScrollPane;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
@@ -65,6 +66,7 @@ public class Bootstrapper extends Mod {
     
     Properties release = new Properties();
     
+    //merge this
     public static void downloadUI(String url) {
         ui.showCustomConfirm(url, Main.jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", () -> Bootstrapper.downloadGUI(url), Main::disable);
     }
@@ -123,7 +125,7 @@ public class Bootstrapper extends Mod {
         
                     boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + url);
                     if (!Vars.headless && b){
-                        Main.runOnUI(() -> Bootstrapper.downloadGUI(url));
+                        Main.runOnUI(() -> Bootstrapper.downloadUI(url));
                     }else{
                         boolean[] cancel = {false};
                         float[] progress = {0};
@@ -145,18 +147,31 @@ public class Bootstrapper extends Mod {
     public void buildUI(Table t) {
         t.reset();
         t.add("Glopion Bootstrapper Settings").growX().center().row();
-        t.check("Force Update", Core.settings.getBool("glopion-auto-update", true), b -> Core.settings.put("glopion-auto-update", b)).growX().row();
-        t.button("Glopion Flavor " + Core.settings.getString("glopion-flavor", flavor), () -> {
+        t.check("Force Update", Core.settings.getBool("glopion-auto-update", true), b -> Core.settings.put("glopion-auto-update", b)).row();
+        t.button("Glopion Flavor [accent]" + Core.settings.getString("glopion-flavor", flavor), () -> {
             new BaseDialog("Glopion Flavor") {
                 {
                     addCloseButton();
+                    build();
+                }
+            
+                @Override
+                public void addCloseListener() {
+                    super.addCloseListener();
+                    buildUI(t);
+                }
+            
+                void build() {
+                    cont.clear();
                     Table table = new Table(t -> {
                         for (Map.Entry<Object, Object> o : release.entrySet()) {
-                            t.button(o.getKey() + ": " + o.getValue(), () -> {
+                            Cell c = t.button(o.getKey() + ": " + o.getValue(), () -> {
                                 Core.settings.put("glopion-flavor", o.getKey() + "");
-                                hide();
-                                buildUI(t);
-                            }).disabled(String.valueOf(o.getKey()).startsWith("Desktop") && Vars.mobile).growX().row();
+                                build();
+                            }).disabled(String.valueOf(o.getKey()).startsWith("Desktop") && Vars.mobile || String.valueOf(o.getKey()).startsWith("Note")).growX();
+                            if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + ""))
+                                c.color(Color.goldenrod);
+                            c.row();
                         }
                     });
                     ScrollPane scrollPane = new ScrollPane(table);
