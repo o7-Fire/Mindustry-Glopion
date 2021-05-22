@@ -11,9 +11,8 @@ import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 
 public class Main extends Mod {
-    public static String url = null;
-    public static String flavor = Core.settings.getString("glopion-flavor", "Release");
-    public static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/files/");
+    public static String flavor = Core.settings.getString("glopion-flavor", "Release-" + Version.buildString());
+    public static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/");
     public static ClassLoader classLoader;
     public static Class<? extends Mod> unloaded = null;
     public static Mod loaded = null;
@@ -22,10 +21,8 @@ public class Main extends Mod {
     public static Fi jar;
     public static Main main;
     public static String classpath = "org.o7.Fire.Glopion.";
+    
     static {
-        if (Core.settings.getBool("glopion-deep-patch", false) && !Vars.mobile){
-            flavor = flavor + "-DeepPatch";
-        }
         classpath = classpath + flavor.replace('-', '.') + ".Main";
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
@@ -62,8 +59,6 @@ public class Main extends Mod {
         System.setProperty("glopion.loaded", "1");
         
         String path = flavor.replace('-', '/') + "/" + Version.buildString() + ".jar";
-        baseURL = baseURL.endsWith("/") ? baseURL : baseURL + "/";
-        url = baseURL + path;
         jar = Core.files.cache(path);
         if (jar.exists()){
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());

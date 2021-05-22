@@ -4,7 +4,7 @@ dependencies {
 }
 
 task base(type: Jar){
-    archiveFileName = "${mindustryHash}.jar"//Mindustry-Glopion,jar
+    archiveFileName = "core.jar"//Mindustry-Glopion,jar
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
@@ -23,7 +23,7 @@ task baseJar{
     if(new File(sdkD8).exists()) {
         def files = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(sdkJar)])//all dependency go
         def dependencies = files.collect { "--classpath $it.path" }.join(" ")//argument builder
-        def cmd = "${sdkD8} $dependencies --min-api ${minAndroidApi} --output Dex.jar ${mindustryHash}.jar"//should output Dex.jar from Mindustry-Glopion.jar
+        def cmd = "${sdkD8} $dependencies --min-api ${minAndroidApi} --output Dex.jar core.jar"//should output Dex.jar from Mindustry-Glopion.jar
         def dir = new File(buildDir, "libs/");
         dir.mkdirs()//cuz sike, file not found exception
         doLast {
@@ -39,7 +39,7 @@ task baseJar{
 
 task makeJar(type: Jar){
     dependsOn baseJar//dex jar
-    archiveFileName = "${mindustryHash}-Dexed.jar"
+    archiveFileName = "core-Dexed.jar"
     if(new File(sdkD8).exists()) {//some people don't have android SDK
         duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
         if (new File(sdkD8).exists()) {
@@ -51,19 +51,10 @@ task makeJar(type: Jar){
         println "No sdkD8 detected on ANDROID_HOME, skipping making Combined Dex-Class Jar"
     }
     from() {
-        zipTree(new File(projectDir, "build/libs/${mindustryHash}.jar"))//include YourModsName.jar or typical.jar
+        zipTree(new File(projectDir, "build/libs/core.jar"))//include YourModsName.jar or typical.jar
     }
 }
-task Nightly(type: Copy){
-    dependsOn makeJar
-    from(new File(projectDir, "build/libs/${mindustryHash}-Dexed.jar"))
-    into(new File(rootDir, "files/Nightly/"))
-}
-task Release(type: Copy){
-    dependsOn makeJar
-    from(new File(projectDir, "build/libs/${mindustryHash}-Dexed.jar"))
-    into(new File(rootDir, "files/Release/"))
-}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'//deprecated
     from sourceSets.main.allSource

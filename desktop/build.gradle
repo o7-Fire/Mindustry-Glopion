@@ -9,7 +9,7 @@ dependencies {
 }
 
 task base( type: Jar , dependsOn: dependsProject.collect{ it+":compileJava"}) {
-    archiveFileName = "${mindustryHash}.jar"
+    archiveFileName = "desktop.jar"
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
         attributes 'Main-Class': modsNJavaMain//what
@@ -27,14 +27,4 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 artifacts {
     archives sourcesJar
     archives base
-}
-task Nightly(type: Copy){
-    dependsOn base
-    from(new File(projectDir, "build/libs/${mindustryHash}.jar"))
-    into(new File(rootDir, "files/Nightly/DeepPatch/"))
-}
-task Release(type: Copy){
-    dependsOn base
-    from(new File(projectDir, "build/libs/${mindustryHash}.jar"))
-    into(new File(rootDir, "files/Release/DeepPatch/"))
 }

@@ -236,9 +236,12 @@ task makeJar(type: Jar){
 }
 //TODO add more dependsOn
 //if you have multiple version of mods
-task deploy(type: Jar) {
+task deploy {
     dependsOn makeJar
+    dependsOn ":core:makeJar"
+    dependsOn ":desktop:base"
 }
+
 //need this for jitpack, so i can read mods source code without using browser
 artifacts {
     archives sourcesJar
