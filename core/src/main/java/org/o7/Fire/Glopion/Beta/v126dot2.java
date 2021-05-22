@@ -1,7 +1,7 @@
 package org.o7.Fire.Glopion.Beta;
 
-import org.o7.Fire.Glopion.Release.Main;
+import org.o7.Fire.Glopion.Core;
 
-public class v126dot2 extends Main {
+public class v126dot2 extends Core {
 
 }
