@@ -11,8 +11,9 @@ public class Run {
         if (System.getProperty("glopion-deepPatch") == null){
             bootstrap.getLoader().addURL(Cache.tryCache("https://github.com/Anuken/Mindustry/releases/download/v126.2/Mindustry.jar"));
             System.setProperty("glopion-deepPatch", "1");
+            System.setProperty("dev", "1");
         }
-        bootstrap.loadMain("mindustry.desktop.DesktopLauncher", args);
+        bootstrap.loadMain("Premain.MindustryLauncher", args);
     }
     
     public static class Server {

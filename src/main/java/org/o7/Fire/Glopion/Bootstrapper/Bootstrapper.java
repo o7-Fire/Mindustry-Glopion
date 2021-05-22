@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Bootstrapper;
 
 import arc.Core;
 import arc.Events;
+import arc.Net;
 import arc.files.Fi;
 import arc.func.Boolp;
 import arc.func.Cons;
@@ -35,7 +36,7 @@ import java.util.TreeMap;
 import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Bootstrapper.Main.*;
 public class Bootstrapper extends Mod {
-    private static void download(String furl, Fi dest, Intc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
+    public static void download(String furl, Fi dest, Intc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
         Threads.daemon(() -> {
             try {
                 dest.parent().mkdirs();
@@ -89,6 +90,7 @@ public class Bootstrapper extends Mod {
                 }else{
                     ui.showErrorMessage(Main.jar.absolutePath() + " still doesn't exist ??? how");
                 }
+                dialog.hide();
             }, e -> {
                 dialog.hide();
                 ui.showException(e);
@@ -99,52 +101,70 @@ public class Bootstrapper extends Mod {
                 cancel[0] = true;
                 dialog.hide();
             }).size(210f, 64f);
-                dialog.setFillParent(false);
-                dialog.show();
-            }catch(Exception e){
-                ui.showException(e);
-            }
-        
-        
-    }
-
-    @Override
-    public void init() {
+            dialog.setFillParent(false);
+            dialog.show();
+        }catch(Exception e){
+            ui.showException(e);
+        }
     
+    
+    }
+    
+    public void fetchRelease(Cons<Net.HttpResponse> succ) {
         baseURL = baseURL.endsWith("/") ? baseURL : baseURL + "/";
         Core.net.httpGet(baseURL + "release.properties", suc -> {
             try {
+                release.clear();
                 release.load(suc.getResultAsStream());
-                String url;
-                if (release.getProperty(flavor) != null) url = release.getProperty(flavor);
-                else{
+                if (release.getProperty(flavor) == null){
                     Log.warn("@ Flavor doesn't exist @", flavor, release);
                     runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
                     return;
+                }else{
+                    runOnUI(() -> ui.showInfoFade("Fetched: [green]" + release.size() + " [white]Flavor"));
                 }
-                if (Main.downloadThing || Core.settings.getBool("glopion-auto-update", true)){
-                    Log.infoTag("Glopion-Bootstrapper", "");
-                    Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
-                    boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || downloadThing;
-                    if (!Vars.headless && b){
-                        Main.runOnUI(() -> Bootstrapper.downloadUI(url));
-                    }else{
-                        long size = jar.length();
-                        boolean[] cancel = {false};
-                        float[] progress = {0};
-                        int[] length = {0};
-                        download(url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
-                            if (downloadThing || size != jar.length())
-                                runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
-                        }, Main::handleException);
-                    }
-                }
+                succ.get(suc);
             }catch(IOException e){
                 handleException(e);
             }
         }, Log::err);
+    }
     
+    public void tryDownload() {
+        String url = release.getProperty(flavor);
+        if (url == null) return;
+        String path = flavor.replace('-', '/') + ".jar";
+        jar = Core.files.cache(path);
+        if (!jar.exists() || Core.settings.getBool("glopion-auto-update", true)){
+            Log.infoTag("Glopion-Bootstrapper", "");
+            Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
+            boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || !jar.exists();
+            if (!Vars.headless && b){
+                Main.runOnUI(() -> Bootstrapper.downloadUI(url));
+            }else{
+                long size = jar.length();
+                boolean[] cancel = {false};
+                float[] progress = {0};
+                int[] length = {0};
+                download(url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
+                    if (downloadThing || size != jar.length())
+                        runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
+                }, Main::handleException);
+            }
+        }
+    }
     
+    public void downloadIfNotExist() {
+        String url = release.getProperty(flavor);
+        if (url == null) return;
+        jar = Core.files.cache(flavor.replace('-', '/') + ".jar");
+        if (!jar.exists()) tryDownload();
+    }
+    
+    @Override
+    public void init() {
+        fetchRelease(suc -> tryDownload());
+        
         Cell<Table> t = ui.settings.game.row().table().growX();
         Main.runOnUI(() -> buildUI(t.get()));
         Events.on(EventType.ResizeEvent.class, s -> buildUI(t.get()));
@@ -194,36 +214,56 @@ public class Bootstrapper extends Mod {
             }.show();
         }).disabled(s -> release.isEmpty()).growX().row();
         t.button("Provider URL", () -> {
-            ui.showTextInput("Provider URL", "URL", Core.settings.getString("glopion-url", baseURL), s -> {
-                s = s.endsWith("/") ? s : s + "/";
-                ui.loadfrag.show("Checking");
-                String finalS = s;
-                Core.net.httpGet(s + "release.properties", suc -> {
-                    ui.loadfrag.hide();
-                    Properties sike = new Properties();
-                    try {
-                        sike.load(suc.getResultAsStream());
-                    }catch(IOException e){
+            new BaseDialog("Provider URL") {
+                String s = Core.settings.getString("glopion-url", baseURL);
+                
+                {
+                    addCloseButton();
+                    cont.field(s, ss -> s = ss).growX().row();
+                    cont.button("Ok", this::confirm).growX();
+                }
+                
+                void confirm() {
+                    s = s.endsWith("/") ? s : s + "/";
+                    ui.loadfrag.show("Checking");
+                    String finalS = s;
+                    Core.net.httpGet(s + "release.properties", suc -> {
+                        ui.loadfrag.hide();
+                        Properties temp = new Properties();
+                        try {
+                            temp.load(suc.getResultAsStream());
+                        }catch(IOException e){
+                            ui.showException(e);
+                            e.printStackTrace();
+                            return;
+                        }
+                        if (temp.size() < 2){
+                            ui.showErrorMessage("Empty/None/404 ??\n" + temp + " \n" + suc.getResultAsString());
+                            return;
+                        }
+                        ui.showInfoFade("Loaded: " + temp.size() + " flavor");
+                        release = temp;
+                        Core.settings.put("glopion-url", finalS);
+                        buildUI(t);
+                    }, e -> {
                         ui.showException(e);
-                        e.printStackTrace();
-                        return;
-                    }
-                    if (sike.size() < 2){
-                        ui.showErrorMessage("Empty ??\n" + suc.getResultAsString());
-                        return;
-                    }
-                    ui.showInfoFade("Loaded: " + sike.size() + " flavor");
-                    release = sike;
-                    Core.settings.put("glopion-url", finalS);
-                    buildUI(t);
-                }, e -> {
-                    ui.showException(e);
-                    ui.loadfrag.hide();
-                });
+                        ui.loadfrag.hide();
+                    });
+                }
+            }.show();
+            
+        }).growX().row();
+        t.button("Refresh", () -> {
+            buildUI(t);
+            fetchRelease(suc -> {
+                buildUI(t);
+                downloadIfNotExist();
             });
         }).growX().row();
-        t.button("Refresh", () -> buildUI(t)).growX().row();
-        t.button("Purge Local Glopion", Main.jar::delete).growX().row();
+        t.button("Purge Local Glopion", () -> {
+            jar.delete();
+            downloadIfNotExist();
+        }).growX().row();
         t.button("Reset Bootstrapper Configuration", () -> {
             Core.settings.remove("glopion-auto-update");
             Core.settings.remove("glopion-url");
@@ -231,7 +271,14 @@ public class Bootstrapper extends Mod {
             ui.showInfoFade("Bootstrapper Configuration Reseted");
             buildUI(t);
         }).growX().row();
-    
-    
+        if (loaded != null){
+            t.button("Loaded: [accent]" + loaded.getClass().getSimpleName(), () -> new BaseDialog("Loaded Glopion") {
+                {
+                    addCloseButton();
+                    cont.add(info + "\nURL: " + release.getProperty(flavor)).growX().growY();
+                }
+            }.show()).growX().row();
+        }
+        
     }
 }

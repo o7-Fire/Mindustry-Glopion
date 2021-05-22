@@ -21,7 +21,7 @@ public class Main extends Mod {
     public static Fi jar;
     public static Main main;
     public static String classpath = "org.o7.Fire.Glopion.";
-    
+    public static String info = "None";
     static {
         classpath = classpath + flavor.replace(".", "dot").replace('-', '.');
         ;
@@ -66,6 +66,7 @@ public class Main extends Mod {
             try {
                 classLoader = Vars.platform.loadJar(jar, "wtf ?");
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
+                info = "Class: " + unloaded.getCanonicalName() + "\n" + "Flavor: " + flavor + "\n" + "Classpath: " + jar.absolutePath() + "\n" + "Size: " + jar.length() + " bytes\n" + "Classloader: " + classLoader.getClass().getSimpleName();
             }catch(Exception e){
                 handleException(e);
                 return;
