@@ -9,6 +9,7 @@ import arc.func.Floatc;
 import arc.func.Intc;
 import arc.graphics.Color;
 import arc.scene.ui.ScrollPane;
+import arc.scene.ui.TextButton;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
@@ -28,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Bootstrapper.Main.*;
@@ -164,13 +166,19 @@ public class Bootstrapper extends Mod {
                 void build() {
                     cont.clear();
                     Table table = new Table(t -> {
+                        TreeMap<String, String> map = new TreeMap<>();
                         for (Map.Entry<Object, Object> o : release.entrySet()) {
-                            Cell c = t.button(o.getKey() + ": " + o.getValue(), () -> {
+                            if ((o.getKey() + "").startsWith("Note"))
+                                t.add(o.getKey() + ": " + o.getValue()).growX().row();
+                            else map.put(o.getKey() + "", o.getValue() + "");
+                        }
+                        for (Map.Entry<String, String> o : map.entrySet()) {
+                            Cell<TextButton> c = t.button(o.getKey() + ": " + o.getValue(), () -> {
                                 Core.settings.put("glopion-flavor", o.getKey() + "");
                                 build();
-                            }).disabled(String.valueOf(o.getKey()).startsWith("Desktop") && Vars.mobile || String.valueOf(o.getKey()).startsWith("Note")).growX();
+                            }).growX().disabled(o.getKey().startsWith(" Desktop ") && Vars.mobile);
                             if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + ""))
-                                c.color(Color.goldenrod);
+                                c.color(Color.gold);
                             c.row();
                         }
                     });
