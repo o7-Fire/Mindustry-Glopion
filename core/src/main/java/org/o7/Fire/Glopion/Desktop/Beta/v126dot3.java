@@ -1,4 +1,4 @@
-package org.o7.Fire.Glopion.Beta;
+package org.o7.Fire.Glopion.Desktop.Beta;
 
 import org.o7.Fire.Glopion.Release.Main;
 
