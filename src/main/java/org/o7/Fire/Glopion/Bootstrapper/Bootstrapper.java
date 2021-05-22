@@ -125,7 +125,6 @@ public class Bootstrapper extends Mod {
                 if (Main.downloadThing || Core.settings.getBool("glopion-auto-update", true)){
                     Log.infoTag("Glopion-Bootstrapper", "");
                     Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
-        
                     boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || downloadThing;
                     if (!Vars.headless && b){
                         Main.runOnUI(() -> Bootstrapper.downloadUI(url));
