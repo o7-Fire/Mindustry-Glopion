@@ -9,7 +9,7 @@ task base(type: Jar){
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
     }
-
+    with jar
     manifest {
         attributes 'Main-Class': modsNJavaMain//what
     }

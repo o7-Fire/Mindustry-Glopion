@@ -59,7 +59,7 @@ public class Main extends Mod {
         }
         System.setProperty("glopion.loaded", "1");
         
-        String path = flavor.replace('-', '/') + "/" + Version.buildString() + ".jar";
+        String path = flavor.replace('-', '/') + ".jar";
         jar = Core.files.cache(path);
         if (jar.exists()){
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
