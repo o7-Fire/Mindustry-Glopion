@@ -129,11 +129,13 @@ public class Bootstrapper extends Mod {
                     if (!Vars.headless && b){
                         Main.runOnUI(() -> Bootstrapper.downloadUI(url));
                     }else{
+                        long size = jar.length();
                         boolean[] cancel = {false};
                         float[] progress = {0};
                         int[] length = {0};
                         download(url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
-                            runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
+                            if (downloadThing || size != jar.length())
+                                runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
                         }, Main::handleException);
                     }
                 }
