@@ -14,6 +14,7 @@ task base( type: Jar , dependsOn: dependsProject.collect{ it+":compileJava"}) {
     manifest {
         attributes 'Main-Class': modsNJavaMain//what
     }
+    with jar
     from {
         configurations.runtimeClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
     }
