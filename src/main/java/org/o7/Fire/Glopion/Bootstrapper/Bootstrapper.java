@@ -202,10 +202,11 @@ public class Bootstrapper extends Mod {
                                 Core.settings.put("glopion-flavor", o.getKey() + "");
                                 build();
                             }).growX().disabled(o.getKey().startsWith("Desktop") && Vars.mobile);
-                            if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + ""))
+                            if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + "")){
                                 c.color(Color.green);
-                            else if (o.getKey().contains(Version.buildString())) c.color(Color.blue);
-                            else c.color(Color.crimson);
+                                c.disabled(true);
+                            }else if (o.getKey().contains(Version.buildString())) c.color(Color.sky);
+                            else c.color(Color.coral);
                             c.row();
                         }
                     });
