@@ -23,7 +23,8 @@ public class Main extends Mod {
     public static String classpath = "org.o7.Fire.Glopion.";
     
     static {
-        classpath = classpath + flavor.replace('-', '.') + ".Main";
+        classpath = classpath + flavor.replace(".", "").replace('-', '.').replaceAll("^\\d+\\.", "");
+        ;
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
         Log.infoTag("Glopion-Bootstrapper", "Classpath: " + classpath);

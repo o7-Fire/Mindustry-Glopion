@@ -7,9 +7,7 @@ import arc.func.Boolp;
 import arc.func.Cons;
 import arc.func.Floatc;
 import arc.func.Intc;
-import arc.scene.ui.Dialog;
 import arc.scene.ui.ScrollPane;
-import arc.scene.ui.SettingsDialog;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
@@ -116,13 +114,13 @@ public class Bootstrapper extends Mod {
                 if (release.contains(flavor)) url = release.getProperty(flavor);
                 else{
                     Log.warn("@ Flavor doesn't exist", release);
-                    runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
+                    runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist\n" + release));
                     return;
                 }
-                if (Main.downloadThing || Core.settings.getBool("glopion-auto-update", false)){
+                if (Main.downloadThing || Core.settings.getBool("glopion-auto-update", true)){
                     Log.infoTag("Glopion-Bootstrapper", "");
                     Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
-                
+        
                     boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + url);
                     if (!Vars.headless && b){
                         Main.runOnUI(() -> Bootstrapper.downloadGUI(url));
@@ -146,17 +144,15 @@ public class Bootstrapper extends Mod {
     
     public void buildUI(Table t) {
         t.reset();
-        SettingsDialog.SettingsTable st = new SettingsDialog.SettingsTable();
-        st.row();
-        st.checkPref("glopion-auto-update", "Force Update", true);
-        st.row();
         t.add("Glopion Bootstrapper Settings").growX().center().row();
+        t.check("Force Update", Core.settings.getBool("glopion-auto-update", true), b -> Core.settings.put("glopion-auto-update", b)).growX().row();
         t.button("Glopion Flavor " + Core.settings.getString("glopion-flavor", flavor), () -> {
-            new Dialog("") {
+            new BaseDialog("Glopion Flavor") {
                 {
+                    addCloseButton();
                     Table table = new Table(t -> {
                         for (Map.Entry<Object, Object> o : release.entrySet()) {
-                            cont.button(o.getKey() + ": " + o.getValue(), () -> {
+                            t.button(o.getKey() + ": " + o.getValue(), () -> {
                                 Core.settings.put("glopion-flavor", o.getKey() + "");
                                 hide();
                                 buildUI(t);
@@ -167,8 +163,8 @@ public class Bootstrapper extends Mod {
                     cont.add(scrollPane).growX().growY();
                 }
             }.show();
-        }).disabled(s -> release.isEmpty());
-        t.button("Provider URL: " + Core.settings.getString("glopion-url", baseURL), () -> {
+        }).disabled(s -> release.isEmpty()).growX().row();
+        t.button("Provider URL", () -> {
             ui.showTextInput("Provider URL", "URL", Core.settings.getString("glopion-url", baseURL), s -> {
                 s = s.endsWith("/") ? s : s + "/";
                 ui.loadfrag.show("Checking");
@@ -183,10 +179,11 @@ public class Bootstrapper extends Mod {
                         e.printStackTrace();
                         return;
                     }
-                    if (sike.isEmpty()){
+                    if (sike.size() < 2){
                         ui.showErrorMessage("Empty ??\n" + suc.getResultAsString());
                         return;
                     }
+                    ui.showInfoFade("Loaded: " + sike.size() + " flavor");
                     release = sike;
                     Core.settings.put("glopion-url", finalS);
                     buildUI(t);
@@ -196,6 +193,7 @@ public class Bootstrapper extends Mod {
                 });
             });
         }).growX().row();
+        t.button("Refresh", () -> buildUI(t)).growX().row();
         t.button("Purge Local Glopion", Main.jar::delete).growX().row();
         t.button("Reset Bootstrapper Configuration", () -> {
             Core.settings.remove("glopion-auto-update");
@@ -204,8 +202,7 @@ public class Bootstrapper extends Mod {
             ui.showInfoFade("Bootstrapper Configuration Reseted");
             buildUI(t);
         }).growX().row();
-        t.button("Refresh", () -> buildUI(t)).growX().row();
-        t.add(st).growX().growY();
-        
+    
+    
     }
 }
