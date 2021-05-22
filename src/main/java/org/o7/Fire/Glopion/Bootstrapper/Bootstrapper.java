@@ -176,7 +176,7 @@ public class Bootstrapper extends Mod {
                             Cell<TextButton> c = t.button(o.getKey() + ": " + o.getValue(), () -> {
                                 Core.settings.put("glopion-flavor", o.getKey() + "");
                                 build();
-                            }).growX().disabled(o.getKey().startsWith(" Desktop ") && Vars.mobile);
+                            }).growX().disabled(o.getKey().startsWith("Desktop") && Vars.mobile);
                             if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + ""))
                                 c.color(Color.gold);
                             c.row();
