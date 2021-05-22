@@ -115,8 +115,8 @@ public class Bootstrapper extends Mod {
                 String url;
                 if (release.contains(flavor)) url = release.getProperty(flavor);
                 else{
-                    Log.warn("@ Flavor doesn't exist", release);
-                    runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist\n" + release));
+                    Log.warn("@ Flavor doesn't exist", flavor);
+                    runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
                     return;
                 }
                 if (Main.downloadThing || Core.settings.getBool("glopion-auto-update", true)){
