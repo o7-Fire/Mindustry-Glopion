@@ -133,7 +133,9 @@ public class Bootstrapper extends Mod {
                         boolean[] cancel = {false};
                         float[] progress = {0};
                         int[] length = {0};
-                        download(url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {}, Main::handleException);
+                        download(url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
+                            runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
+                        }, Main::handleException);
                     }
                 }
             }catch(IOException e){
