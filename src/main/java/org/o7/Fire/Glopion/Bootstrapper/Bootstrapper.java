@@ -15,6 +15,7 @@ import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.async.Threads;
 import mindustry.Vars;
+import mindustry.core.Version;
 import mindustry.game.EventType;
 import mindustry.gen.Icon;
 import mindustry.graphics.Pal;
@@ -115,9 +116,9 @@ public class Bootstrapper extends Mod {
             try {
                 release.load(suc.getResultAsStream());
                 String url;
-                if (release.contains(flavor)) url = release.getProperty(flavor);
+                if (release.getProperty(flavor) != null) url = release.getProperty(flavor);
                 else{
-                    Log.warn("@ Flavor doesn't exist", flavor);
+                    Log.warn("@ Flavor doesn't exist @", flavor, release);
                     runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
                     return;
                 }
@@ -125,7 +126,7 @@ public class Bootstrapper extends Mod {
                     Log.infoTag("Glopion-Bootstrapper", "");
                     Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
         
-                    boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + url);
+                    boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor);
                     if (!Vars.headless && b){
                         Main.runOnUI(() -> Bootstrapper.downloadUI(url));
                     }else{
@@ -178,7 +179,9 @@ public class Bootstrapper extends Mod {
                                 build();
                             }).growX().disabled(o.getKey().startsWith("Desktop") && Vars.mobile);
                             if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + ""))
-                                c.color(Color.gold);
+                                c.color(Color.green);
+                            else if (o.getKey().contains(Version.buildString())) c.color(Color.blue);
+                            else c.color(Color.crimson);
                             c.row();
                         }
                     });
