@@ -1,0 +1,9 @@
+
+
+dependencies {
+    implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.16.1'
+    implementation group: 'com.google.googlejavaformat', name: 'google-java-format', version: '1.7'
+    implementation ("com.github.Anuken.Mindustry:core:$mindustryHash")
+}
+
