@@ -17,14 +17,13 @@ public class Main extends Mod {
     public static Class<? extends Mod> unloaded = null;
     public static Mod loaded = null;
     public static boolean downloadThing = false;
-    public static Bootstrapper bootstrapper;
+    public static BootstrapperUI bootstrapper;
     public static Fi jar;
     public static Main main;
     public static String classpath = "org.o7.Fire.Glopion.";
     public static String info = "None";
     static {
-        classpath = classpath + flavor.replace(".", "dot").replace('-', '.');
-        ;
+        classpath = classpath + flavor.split("-")[0];
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
         Log.infoTag("Glopion-Bootstrapper", "Classpath: " + classpath);
@@ -33,7 +32,7 @@ public class Main extends Mod {
     
     public Main() {
         main = this;
-        bootstrapper = new Bootstrapper();
+        bootstrapper = new BootstrapperUI();
         if (unloaded != null){
             try {
                 loaded = unloaded.getDeclaredConstructor().newInstance();
@@ -64,7 +63,7 @@ public class Main extends Mod {
         if (jar.exists()){
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
-                classLoader = Vars.platform.loadJar(jar, "wtf ?");
+                classLoader = Vars.platform.loadJar(jar, Main.class.getClassLoader().getParent() == null ? Main.class.getClassLoader() : Main.class.getClassLoader().getParent());
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
                 info = "Class: " + unloaded.getCanonicalName() + "\n" + "Flavor: " + flavor + "\n" + "Classpath: " + jar.absolutePath() + "\n" + "Size: " + jar.length() + " bytes\n" + "Classloader: " + classLoader.getClass().getSimpleName();
             }catch(Throwable e){

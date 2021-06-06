@@ -67,7 +67,11 @@ allprojects {
         }
     }
     ext {
-
+        try {
+            System.properties.load(new FileReader("gradle.properties"))
+            System.properties.load(new FileReader("local.properties"))
+        }catch(ignored){}
+        //System.out.println(System.getProperty("modsNBE"))
         //automatically detect latest shit and skipping it if doesn't exists
         //export ANDROID_HOME=~/android-sdk
 
@@ -109,16 +113,19 @@ allprojects {
         //From Root to every project
         dependencies{
             //
-            compileOnly ("com.github.Anuken.Arc:arc-core:$arcHash"){
-                because("provided")
+
+            File mindustry = getMindustryFile()
+            if(mindustry.exists()) {
+                compileOnly(files(mindustry))
+                testImplementation(files(mindustry))
+            }else {//if you feel fancy remove this else
+                compileOnly("com.github.Anuken.Mindustry:desktop:$mindustryHash")
+                compileOnly("com.github.Anuken.Arc:arc-core:$arcHash")
+                compileOnly("com.github.Anuken.Arc:backend-sdl:$arcHash")
+                compileOnly("com.github.Anuken.Mindustry:core:$mindustryHash")
             }
-            compileOnly ("com.github.Anuken.Arc:backend-sdl:$arcHash"){
-                because("provided")
-            }
-            compileOnly ("com.github.Anuken.Mindustry:core:$mindustryHash"){
-                because("provided")
-            }
-            compileOnly ("com.github.Anuken.Mindustry:desktop:$mindustryHash")
+            compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
+
         }
 
     }
@@ -254,10 +261,23 @@ static void downloadMindustry(URL u, File mindustry){
     mindustry.getParentFile().mkdirs();
     if(mindustry.exists())return ;
     mindustry.createNewFile();
+
+    FileOutputStream output = new FileOutputStream(mindustry);
     System.out.println("Downloading: " + u.toString());
-    FileOutputStream f = new FileOutputStream(mindustry);
-    arc.util.io.Streams.copy(u.openStream(), f);
-    f.close()
+    InputStream input = u.openStream();
+    int bytesRead;
+    byte[] buffer = new byte[4096];
+    long nextLog = System.currentTimeMillis() + 4000
+    long readed = 0;
+    while((bytesRead = input.read(buffer)) != -1){
+        readed += bytesRead;
+        output.write(buffer, 0, bytesRead);
+        if(System.currentTimeMillis() > nextLog) {
+            System.out.println(readed / 1_000_000)
+            nextLog = System.currentTimeMillis() + 4000
+        }
+    }
+    output.close()
 
 }
 //don't crash
@@ -269,12 +289,25 @@ static void copyToMindustry(File f){
     System.out.println("Copying: " + f.getAbsolutePath() + " to "+ target.getAbsolutePath());
     Files.copy(f.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 }
+
+static URL getMindustryURL(){
+    if(System.getProperty("modsNBE") != null) {
+        String h = System.getProperty("modsNBE")
+        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/"+h+"/Mindustry-BE-Desktop-"+h+".jar")
+    }
+    return new URL("https://github.com/Anuken/Mindustry/releases/download/" + System.getProperty("mindustryHash") + "/Mindustry.jar");
+}
+
+static File getMindustryFile(){
+    URL u = getMindustryURL()
+    File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+    return mindustry.getAbsoluteFile();
+}
+
 //how lazy to download this
 task download(){
     doLast{
-        URL u = new URL("https://github.com/Anuken/Mindustry/releases/download/" + mindustryHash + "/Mindustry.jar");
-        File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
-        downloadMindustry(u, mindustry);
+        downloadMindustry(getMindustryURL(), getMindustryFile());
     }
 }
 //don't want open file manager
@@ -289,10 +322,17 @@ task copyMods(){
 task run(type: JavaExec) {
     dependsOn download
     dependsOn copyMods//make class jar then copy it, why the hell you need to dex it
-    URL u = new URL("https://github.com/Anuken/Mindustry/releases/download/" + mindustryHash + "/Mindustry.jar");
-    File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+    File mindustry = getMindustryFile()
     println(mindustry.getAbsolutePath())
     classpath = files(mindustry.getAbsolutePath())
     classpath += sourceSets.main.runtimeClasspath
     main = "mindustry.desktop.DesktopLauncher"
+}
+task resolveDependencies{
+    doLast{
+        rootProject.allprojects{ project ->
+            Set<Configuration> configurations = project.buildscript.configurations + project.configurations
+            configurations.findAll{c -> c.canBeResolved}.forEach{c -> c.resolve()}
+        }
+    }
 }

@@ -35,7 +35,7 @@ import java.util.TreeMap;
 
 import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Bootstrapper.Main.*;
-public class Bootstrapper extends Mod {
+public class BootstrapperUI extends Mod {
     public static void download(String furl, Fi dest, Intc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
         Threads.daemon(() -> {
             try {
@@ -72,7 +72,7 @@ public class Bootstrapper extends Mod {
     
     //merge this
     public static void downloadUI(String url) {
-        ui.showCustomConfirm(url, Main.jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", () -> Bootstrapper.downloadGUI(url), Main::disable);
+        ui.showCustomConfirm(url, Main.jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", () -> BootstrapperUI.downloadGUI(url), Main::disable);
     }
     
     public static void downloadGUI(String url) {
@@ -141,7 +141,7 @@ public class Bootstrapper extends Mod {
             boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || !jar.exists();
             if (!Vars.headless && b){
                 //sometime jar already exist
-                Main.runOnUI(() -> Bootstrapper.downloadUI(url));
+                Main.runOnUI(() -> BootstrapperUI.downloadUI(url));
             }else{
                 long size = jar.length();
                 boolean[] cancel = {false};

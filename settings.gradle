@@ -26,4 +26,5 @@ if(new File(settingsDir, '../Atom').exists()) {
 }
 include 'core'
 include 'desktop'
+include 'dev'
 

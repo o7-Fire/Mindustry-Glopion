@@ -1,7 +1,6 @@
 
-dependencies {
-    testImplementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
-}
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 task base(type: Jar){
     archiveFileName = "core.jar"//Mindustry-Glopion,jar
