@@ -28,7 +28,7 @@ public class DesktopInputPatched extends DesktopInput {
     @Override
     public void buildPlacementUI(Table table) {
         super.buildPlacementUI(table);
-        table.button(Icon.settings, Styles.colori, () -> GlopionCore.modsMenu.show()).tooltip("@ozone.menu");
+        table.button(Icon.settings, Styles.colori, () -> GlopionCore.glopionHud.show()).tooltip("Glopion");
     }
     
     

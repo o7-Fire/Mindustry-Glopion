@@ -59,12 +59,14 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Sorter;
 import mindustry.world.blocks.sandbox.ItemSource;
 import org.jetbrains.annotations.NotNull;
+import org.o7.Fire.Glopion.GlopionCore;
 
 import java.util.*;
 import java.util.concurrent.Future;
 
 import static mindustry.Vars.player;
 import static mindustry.Vars.ui;
+import static org.o7.Fire.Glopion.Patch.Translation.getRandomHexColor;
 
 public class Interface {
     public static final ObjectMap<String, String> bundle = new ObjectMap<>();
@@ -179,13 +181,15 @@ public class Interface {
         runOnUI(() -> Vars.ui.showErrorMessage(title + "\n" + description));
     }
     
-    public static String getBundle(String key) {
-        if (bundle.containsKey(key)) return bundle.get(key);
+    public static String getBundle(String key, String def) {
+        if (bundle.containsKey(key))
+            return bundle.get(key);
         if (Core.bundle.getOrNull(key) != null) return Core.bundle.get(key);
+        if(def != null)return def;
         try {
-            Class s = Interface.class.getClassLoader().loadClass(key);
+            Class<?> s = Interface.class.getClassLoader().loadClass(key);
             if (Reflect.debug && Reflect.DEBUG_TYPE != Reflect.DebugType.UserPreference)
-                registerWords(s.getName(), s.getCanonicalName());
+                registerWords(s.getName(), "["+s.getSimpleName()+"]-"+s.getCanonicalName());
             else registerWords(s.getName(), s.getSimpleName());
             return bundle.get(key);
         }catch(Throwable ignored){}
@@ -246,7 +250,7 @@ public class Interface {
     }
     
     public synchronized static void registerWords(String key, String value) {
-        //if (BaseSettings.colorPatch) value = getRandomHexColor() + value + "[white]";
+        if (GlopionCore.colorPatch) value = getRandomHexColor() + value + "[white]";
         
         bundle.put(key, value);
     }

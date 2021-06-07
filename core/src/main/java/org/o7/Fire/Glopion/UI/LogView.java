@@ -52,6 +52,11 @@ public class LogView extends ScrollableDialog {
         cont.row();
     }
     
+    @Override
+    protected void setup() {
+    
+    }
+    
     
     private void execute() {
         Log.info(">" + see);

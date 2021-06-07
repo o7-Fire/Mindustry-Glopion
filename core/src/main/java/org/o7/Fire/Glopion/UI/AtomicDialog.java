@@ -11,6 +11,7 @@ import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
+import org.o7.Fire.Glopion.Patch.Translation;
 
 public class AtomicDialog extends BaseDialog {
     private static final AtomicDialog instance = new AtomicDialog() {{addCloseButton();}};
@@ -18,17 +19,23 @@ public class AtomicDialog extends BaseDialog {
     
     public AtomicDialog(String title, DialogStyle style) {
         super(title, style);
+        showSetup();
+        addRefreshAndClose();
+    }
+    public void showSetup(){
         onResize(this::setup);
         shown(this::setup);
     }
-    
+    public void addRefreshAndClose(){
+        addCloseButton();
+        addNavButton("Refresh", Icon.refresh, this::setup);
+    }
     public AtomicDialog(String title) {
         this(title, Core.scene.getStyle(DialogStyle.class));
     }
     
     public AtomicDialog() {
         this("Null");
-        title.setText(this.getClass().getSimpleName());
     }
     
     protected void addRefreshButton() {
@@ -65,6 +72,8 @@ public class AtomicDialog extends BaseDialog {
     }
     
     protected String getTitle() {
+        if(title.getText().toString().equals("Null"))
+            title.setText(Translation.get(this.getClass().getName()));
         return title.getText().toString();
     }
 }

@@ -19,11 +19,18 @@ package org.o7.Fire.Glopion.UI;
 
 import arc.Core;
 import arc.audio.Sound;
+import arc.graphics.Color;
+import arc.scene.style.Drawable;
 import arc.scene.style.TextureRegionDrawable;
+import arc.scene.ui.ImageButton;
+import arc.scene.ui.Label;
+import arc.scene.ui.TextButton;
+import arc.scene.ui.TextField;
 import arc.struct.ObjectMap;
 import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
+import mindustry.ui.Styles;
 import net.jpountz.lz4.LZ4Factory;
 import org.o7.Fire.Glopion.Experimental.Evasion.Identification;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
@@ -41,12 +48,11 @@ public class EnvironmentInformation extends ScrollableDialog {
     
     public EnvironmentInformation() {
         super("Environment Information");
-        Interface.oneTimeInfo("This Information Is Not Shared");
         icon = Icon.info;
-        
+
     }
     
-    protected void create() {
+    protected void setup() {
         ad("Player Name", Vars.player.name);
         ad("UUID", Core.settings.getString("uuid"), s -> {
             if (Vars.platform.getUUID().length() == s.length()) Core.settings.put("uuid", s);
@@ -60,8 +66,8 @@ public class EnvironmentInformation extends ScrollableDialog {
             ad("Compilation Time Total (ms)", ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
             ad("isCompilationTimeMonitoringSupported", ManagementFactory.getCompilationMXBean().isCompilationTimeMonitoringSupported());
         }catch(Throwable ignored){}
-        
         uid();
+       
         
     }
     
@@ -96,7 +102,58 @@ public class EnvironmentInformation extends ScrollableDialog {
             table.button(s.key, s.value, () -> {}).growX().disabled(true);
             table.row();
         }
-        
+        for (Field f : Styles.class.getFields()){
+            try {
+                Object obj = f.get(null);
+                if(obj == null)continue;
+                table.button(f.getName() + "-" + f.getType().getSimpleName(),()->{}).disabled(true).growX().center().row();
+                table.table(t->{
+                    if(f.getType() == Drawable.class){
+                        Drawable style = (Drawable) obj;
+                        t.image(style).growX().growY().row();
+                        t.image(style).growX().growY().disabled(true).row();
+                        t.image(style).growX().growY().color(Color.cyan).row();
+                        t.image(style).growX().growY().color(Color.cyan).disabled(true).row();
+                        
+                    }
+              
+                    if(f.getType() == TextButton.TextButtonStyle.class){
+                        TextButton.TextButtonStyle style = (TextButton.TextButtonStyle) obj;
+                    
+                        t.button("[accent]"+f.getName()+"[white]-.growX()",Icon.book, style,()->{}).growX();
+                        t.button("[accent]"+f.getName()+"[white]-.growX().disabled",Icon.book,style, ()->{}).growX().disabled(true).row();
+                        t.button("[accent]"+f.getName()+"[white]-.growX().colorCyan",Icon.book,style, ()->{}).growX().color(Color.cyan);
+                        t.button("[accent]"+f.getName()+"[white]-.growX().disabled.colorCyan", Icon.book,style,()->{}).growX().disabled(true).color(Color.cyan).row();
+                    }
+                    if(f.getType() == ImageButton.ImageButtonStyle.class){
+                        ImageButton.ImageButtonStyle style = (ImageButton.ImageButtonStyle) obj;
+                        t.button(Icon.info, style, ()-> Interface.showInfo("[accent]"+f.getName()+"[white]-.growX()")).growX();
+                        t.button(Icon.info, style, ()-> Interface.showInfo("[accent]"+f.getName()+"[white]-.growX().disabled")).growX().disabled(true).row();
+                        t.button(Icon.info, style, ()-> Interface.showInfo("[accent]"+f.getName()+"[white]-.growX().colorCyan")).growX().color(Color.cyan);
+                        t.button(Icon.info, style, ()-> Interface.showInfo("[accent]"+f.getName()+"[white]-.growX().disabled.colorCyan")).growX().disabled(true).color(Color.cyan).row();
+                    }
+                    if(f.getType() == Label.LabelStyle.class){
+                        Label.LabelStyle style = (Label.LabelStyle) obj;
+                        t.labelWrap("[accent]"+f.getName()+"[white]-.growX()").growX().get().setStyle(style);
+                        t.labelWrap("[accent]"+f.getName()+"[white]-.growX().disabled").growX().disabled(true).get().setStyle(style);
+                        t.row();
+                        t.labelWrap("[accent]"+f.getName()+"[white]-.growX().colorCyan").growX().color(Color.cyan).get().setStyle(style);
+                        t.labelWrap("[accent]"+f.getName()+"[white]-.growX().disabled.colorCyan").growX().disabled(true).color(Color.cyan).get().setStyle(style);
+                        t.row();
+                    }
+                    if(f.getType() == TextField.TextFieldStyle.class){
+                        TextField.TextFieldStyle style = (TextField.TextFieldStyle) obj;
+                        t.field("[accent]"+f.getName()+"[white]-.growX()", style,s->{}).growX();
+                        t.field("[accent]"+f.getName()+"[white]-.growX().disabled",style, s->{}).growX().disabled(true).row();
+                        t.field("[accent]"+f.getName()+"[white]-.growX().colorCyan",style, s->{}).growX().color(Color.cyan);
+                        t.field("[accent]"+f.getName()+"[white]-.growX().disabled.colorCyan", style,s->{}).growX().disabled(true).color(Color.cyan).row();
+                    }
+                }).growX().color(Color.gold).row();
+               
+            }catch(Exception e){//should not happened etc...
+                WarningHandler.handleProgrammerFault(e);
+            }
+        }
     }
     
     

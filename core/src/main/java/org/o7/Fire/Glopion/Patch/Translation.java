@@ -38,7 +38,6 @@ public class Translation extends ModsModule {
     public static final ArrayList<String> singlet1 = new ArrayList<>(Arrays.asList("String", "Integer", "Float", "Long", "Boolean", "Commands", "Settings"));
     public static final HashMap<String, String> generalSettings = new HashMap<>();
     public static final HashMap<String, String> commands = new HashMap<>();
-    public static final HashMap<String, String> keyBinds = new HashMap<>();
     
     {
         try {
@@ -46,13 +45,17 @@ public class Translation extends ModsModule {
         }catch(Throwable ignored){}
     }
     
+    @Override
+    public String getDescription() {
+        return "Colorize the word, don't actually do translate ";
+    }
     
     public static String getRandomHexColor() {
         return "[" + Random.getRandomHexColor() + "]";
     }
     
     public static String get(String key) {
-        return Interface.getBundle(key);
+        return Interface.getBundle(key, null);
     }
     
     public static String colorized(String s) {
@@ -101,9 +104,8 @@ public class Translation extends ModsModule {
         for (Map.Entry<String, String> s : generalSettings.entrySet()) {
             registerWords("setting." + s.getKey() + ".name", s.getValue());
         }
-        for (Map.Entry<String, String> s : keyBinds.entrySet()) {
-            registerWords("section." + s.getKey() + ".name", s.getValue());
-        }
+
+        
         for (String s : singlet1) registerWords(s, "[" + s + "]");
         for (String s : normalSinglet) registerWords(s);
         

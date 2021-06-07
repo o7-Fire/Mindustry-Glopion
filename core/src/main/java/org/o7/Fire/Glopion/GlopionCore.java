@@ -8,6 +8,7 @@ import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import org.o7.Fire.Glopion.UI.AtomicDialog;
 import org.o7.Fire.Glopion.UI.EnvironmentInformation;
+import org.o7.Fire.Glopion.UI.OzoneMenu;
 
 public class GlopionCore extends Mod {
     public static AtomicDialog modsMenu;
@@ -18,6 +19,8 @@ public class GlopionCore extends Mod {
     public static Class<? extends Mod> mainClass = GlopionCore.class;
     public static boolean blockDebug;
     public static ModuleRegisterer moduleRegisterer;
+    public static OzoneMenu glopionHud;
+    
     static {
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
