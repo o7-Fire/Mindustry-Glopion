@@ -1,13 +1,11 @@
 package org.o7.Fire.Glopion.Module;
 
-import Atom.Utility.Random;
 import arc.files.Fi;
 import arc.graphics.Texture;
-import arc.scene.style.TextureRegionDrawable;
 import arc.util.Strings;
+import mindustry.Vars;
 import mindustry.ctype.Content;
 import mindustry.ctype.ContentType;
-import mindustry.gen.Icon;
 import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
@@ -73,9 +71,11 @@ public abstract class ModsModule extends Mod implements Module {
         return "o7-Fire, Itzbenz, KovenCrayn, Akimovx, Nexity";
     }
     
+    static Texture def = null;
     public Texture getIcon() {
-        TextureRegionDrawable ra = Random.getRandom((Iterable<TextureRegionDrawable>) Icon.icons.values());
-        if (ra == null) return null;
-        return ra.getRegion().texture;
+        if (def != null) return def;
+        Mods.LoadedMod l = Vars.mods.getMod("mindustry-glopion");
+        if (l == null) return null;
+        return def = l.iconTexture;
     }
 }

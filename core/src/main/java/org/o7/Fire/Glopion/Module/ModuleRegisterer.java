@@ -113,17 +113,21 @@ public class ModuleRegisterer implements Module {
     public void postInit() {
         if (postInit) throw new RuntimeException("PostInit Already Loaded");
         postInit = true;
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
         for (Class<? extends Module> c : unloadedModules) {
+            sb.append(c.getSimpleName()).append(".class").append(",");
             try {
                 Module m = modules.get(c);
                 m.postInit();
             }catch(Throwable e){
                 try {modules.get(c).handleError(e);}catch(Throwable ignored){}
-                ;
                 Log.errTag("Glopion-Module-Post-Init", "Failed: " + c.getName());
                 WarningHandler.handleMindustry(e);
             }
         }
+        sb.append("]");
+        Log.debug(sb.toString());
     }
     
     
