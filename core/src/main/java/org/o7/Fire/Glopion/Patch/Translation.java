@@ -41,7 +41,6 @@ public class Translation extends ModsModule {
     public static final HashMap<String, String> keyBinds = new HashMap<>();
     
     {
-        
         try {
             dependency.addAll(InformationCenter.getExtendedClass(Translation.class));
         }catch(Throwable ignored){}
@@ -137,6 +136,7 @@ public class Translation extends ModsModule {
     
     @Override
     public void start() {
+        super.start();
         register();
         for (Map.Entry<Class<? extends ModsModule>, ModsModule> s : ModuleRegisterer.modules.entrySet())
             registerWords(s.getValue().getName());

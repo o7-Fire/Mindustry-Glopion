@@ -64,6 +64,7 @@ public class UIPatch extends ModsModule {
     
     @Override
     public void start() {
+        super.start();
         ozoneStyle = new Dialog.DialogStyle() {
             {
                 stageBackground = Styles.none;

@@ -4,6 +4,7 @@ import Atom.Reflect.Reflect;
 import arc.util.Log;
 import mindustry.mod.Mod;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
+import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import org.o7.Fire.Glopion.UI.AtomicDialog;
 import org.o7.Fire.Glopion.UI.EnvironmentInformation;
@@ -23,12 +24,23 @@ public class GlopionCore extends Mod {
         moduleRegisterer = new ModuleRegisterer();
         moduleRegisterer.core();
         moduleRegisterer.preInit();
+    
+    }
+    
+    public GlopionCore() {
+    
     }
     
     @Override
     public void init() {
+        try {
+            moduleRegisterer.init();
+        }catch(Throwable t){
+            WarningHandler.handleMindustry(t);
+        }
         Log.infoTag("Glopion", "Loaded From " + InformationCenter.getCurrentJar());
         Log.infoTag("Glopion", "Class: " + this.getClass().getCanonicalName());
+        
         
     }
 }

@@ -34,7 +34,7 @@ public class BlockWatcher extends ModsModule {
     }
     
     public void start() {
-    
+        super.start();
     }
     
     public void update() {

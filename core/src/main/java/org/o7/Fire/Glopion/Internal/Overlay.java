@@ -69,6 +69,7 @@ public class Overlay extends ModsModule {
     }
     
     public void start() {
+        super.start();
         Events.run(EventType.Trigger.draw, Overlay::draw);
     }
 }

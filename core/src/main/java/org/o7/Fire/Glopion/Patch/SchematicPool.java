@@ -85,6 +85,6 @@ public class SchematicPool extends ModsModule {
     }
     
     public void start() {
-    
+        super.start();
     }
 }
