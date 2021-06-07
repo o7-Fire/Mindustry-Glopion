@@ -23,7 +23,7 @@ import java.nio.file.StandardOpenOption;
 
 public class Version {
     public static String desktop = "0.1.0";
-    public static String core = "0.3.2";
+    public static String core = "0.4.0";
     
     public static boolean isCore() {
         return desktop.isEmpty();

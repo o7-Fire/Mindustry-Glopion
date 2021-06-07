@@ -78,7 +78,7 @@ public class UIPatch extends ModsModule {
         ModsMenu.add(new BundleViewer());
         ModsMenu.add(new WorldInformation());
         ModsMenu.add(new OzonePlaySettings());
-        ModsMenu.add(new OzoneMenu(Translation.get("ozone.hud"), ozoneStyle));
+        ModsMenu.add(new OzoneMenu(Translation.get("Glopion HUD"), ozoneStyle));
         ModsMenu.add(GlopionCore.worldInformation = new EnvironmentInformation());//mmm
         ModsMenu.add(new LogView());
         ModsMenu.add(new ExperimentDialog());
