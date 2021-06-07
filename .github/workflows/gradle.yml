@@ -44,14 +44,19 @@ jobs:
           | xargs -I '{}' \
         curl -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases/{}
 
-    #cat eqv
+      #cat eqv
     - name: Read changelog
       id: manifest
       uses: juliangruber/read-file-action@v1
       with:
-       path: ./Changelog.md
-     
-    # Create new release draft - which is not publicly visible and requires manual acceptance
+        path: ./Changelog.md
+    - name: Read Version
+      id: version
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: ./Version
+
+      # Create new release draft - which is not publicly visible and requires manual acceptance
     - name: Create Release Draft
       id: create_release
       uses: actions/create-release@v1
@@ -60,7 +65,7 @@ jobs:
       with:
         #write it by yourself, not worth automating it
         tag_name: "Snapshot"
-        release_name: "0.0.0"
+        release_name: "${{ steps.version.outputs.content }}"
         body: "${{ steps.manifest.outputs.content }}"
         draft: true
 

@@ -16,9 +16,14 @@
 
 package org.o7.Fire.Glopion;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+
 public class Version {
-    public static String desktop = "";
-    public static String core = "0.1.0";
+    public static String desktop = "0.1.0";
+    public static String core = "0.3.2";
     
     public static boolean isCore() {
         return desktop.isEmpty();
@@ -27,4 +32,10 @@ public class Version {
     public static String buildString() {
         return desktop.isEmpty() ? core : core + ":" + desktop;
     }
+    
+    public static void main(String[] args) throws Throwable {
+        Files.write(new File("Version").toPath(), buildString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    }
+    
+    
 }
