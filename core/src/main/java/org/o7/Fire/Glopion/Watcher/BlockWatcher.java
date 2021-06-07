@@ -26,14 +26,14 @@ import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Module.ModsModule;
 
-public class BlockTracker extends ModsModule {
+public class BlockWatcher extends ModsModule {
     private static Tile target = null;
     
     public static void stub() {
     
     }
     
-    public void init() {
+    public void start() {
     
     }
     

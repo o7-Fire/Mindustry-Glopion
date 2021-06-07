@@ -1,7 +1,7 @@
 package org.o7.Fire.Glopion.Commands;
 
-import org.o7.Fire.Glopion.Module.Module;
+import org.o7.Fire.Glopion.Module.ModsModule;
 
-public class CommandsHandler implements Module {
+public class CommandsHandler extends ModsModule {
 
 }

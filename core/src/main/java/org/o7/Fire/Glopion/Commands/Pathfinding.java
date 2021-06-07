@@ -50,13 +50,13 @@ import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.gen.WaterMovec;
 import mindustry.world.Tile;
-import org.o7.Fire.Glopion.Module.Module;
+import org.o7.Fire.Glopion.Module.ModsModule;
 import org.o7.Fire.Glopion.Patch.Hack;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-public class Pathfinding implements Module {
+public class Pathfinding extends ModsModule {
     //TODO don't be stupid
     public static ArrayList<PathfindingOverlay> render = new ArrayList<>();
     public static double tolerance = 1.2f;
@@ -137,7 +137,7 @@ public class Pathfinding implements Module {
     }
     
     
-    public void init() {
+    public void start() {
         Events.run(EventType.Trigger.draw, Pathfinding::draw);
     }
     

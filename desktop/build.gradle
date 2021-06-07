@@ -5,6 +5,7 @@ ext{
 }
 dependencies {
     implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
+    testImplementation(rootProject)
     dependsProject.collect{ implementation(aproj(it))}
 }
 

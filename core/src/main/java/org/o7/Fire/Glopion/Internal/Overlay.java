@@ -36,11 +36,11 @@ import arc.graphics.Color;
 import arc.graphics.g2d.Lines;
 import arc.math.geom.Vec2;
 import mindustry.game.EventType;
-import org.o7.Fire.Glopion.Module.Module;
+import org.o7.Fire.Glopion.Module.ModsModule;
 
 import java.util.ArrayList;
 
-public class Overlay implements Module {
+public class Overlay extends ModsModule {
     private static final float f = 2f;
     public static ArrayList<Overlay> overlay = new ArrayList<>();
     public Color color = Color.valueOf(Random.getRandomHexColor());
@@ -68,7 +68,7 @@ public class Overlay implements Module {
         overlay.clear();
     }
     
-    public void init() {
+    public void start() {
         Events.run(EventType.Trigger.draw, Overlay::draw);
     }
 }

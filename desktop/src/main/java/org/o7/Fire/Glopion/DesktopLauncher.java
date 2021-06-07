@@ -1,10 +1,9 @@
-package org.o7.Fire.Glopion.Desktop;
+package org.o7.Fire.Glopion;
 
 import Atom.Reflect.Reflect;
 import arc.util.Log;
-import org.o7.Fire.Glopion.GlopionCore;
 
-public class Desktop extends GlopionCore {
+public class DesktopLauncher extends GlopionCore {
     static {
         if (System.getProperty("glopion-deepPatch") == null){
             Log.infoTag("DeepPatch", "Entering DeepPatch");

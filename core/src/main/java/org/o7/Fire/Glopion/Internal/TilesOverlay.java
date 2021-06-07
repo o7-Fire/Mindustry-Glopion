@@ -79,7 +79,7 @@ public class TilesOverlay extends ModsModule {
     }
     
     @Override
-    public void init() {
+    public void start() {
         Events.run(EventType.Trigger.draw, TilesOverlay::draw);
     }
     

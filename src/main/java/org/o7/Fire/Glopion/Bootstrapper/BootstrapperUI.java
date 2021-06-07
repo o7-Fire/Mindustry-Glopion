@@ -14,6 +14,7 @@ import arc.scene.ui.TextButton;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
+import arc.util.Strings;
 import arc.util.async.Threads;
 import mindustry.Vars;
 import mindustry.core.Version;
@@ -253,7 +254,7 @@ public class BootstrapperUI extends Mod {
                     });
                 }
             }.show();
-            
+    
         }).growX().row();
         t.button("Refresh", () -> {
             buildUI(t);
@@ -261,6 +262,21 @@ public class BootstrapperUI extends Mod {
                 buildUI(t);
                 downloadIfNotExist();
             });
+        }).growX().row();
+        t.button("Error: " + error.size(), () -> {
+            new BaseDialog("Error") {
+                {
+                    addCloseButton();
+                    cont.clear();
+                    if (error.isEmpty()){
+                        cont.add("None").growX().growY();
+                    }else{
+                        for (Throwable t : error) {
+                            cont.add(Strings.neatError(t, false)).growX().growY().row();
+                        }
+                    }
+                }
+            }.show();
         }).growX().row();
         t.button("Purge Local Glopion", () -> {
             jar.delete();

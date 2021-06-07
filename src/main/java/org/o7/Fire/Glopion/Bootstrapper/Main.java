@@ -10,6 +10,8 @@ import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 
+import java.util.ArrayList;
+
 public class Main extends Mod {
     public static String flavor = Core.settings.getString("glopion-flavor", "Release-" + Version.buildString());
     public static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/");
@@ -22,12 +24,19 @@ public class Main extends Mod {
     public static Main main;
     public static String classpath = "org.o7.Fire.Glopion.";
     public static String info = "None";
+    public static final ArrayList<Throwable> error;
+    
     static {
-        classpath = classpath + flavor.split("-")[0];
+        error = new ArrayList<>();
+        classpath = classpath + flavor.split("-")[0] + "Launcher";
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
         Log.infoTag("Glopion-Bootstrapper", "Classpath: " + classpath);
-        load();
+        try {
+            load();
+        }catch(Throwable t){
+            handleException(t);
+        }
     }
     
     public Main() {
@@ -63,7 +72,8 @@ public class Main extends Mod {
         if (jar.exists()){
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
-                classLoader = Vars.platform.loadJar(jar, Main.class.getClassLoader().getParent() == null ? Main.class.getClassLoader() : Main.class.getClassLoader().getParent());
+                ClassLoader parent = Main.class.getClassLoader();
+                classLoader = Vars.platform.loadJar(jar, parent);
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
                 info = "Class: " + unloaded.getCanonicalName() + "\n" + "Flavor: " + flavor + "\n" + "Classpath: " + jar.absolutePath() + "\n" + "Size: " + jar.length() + " bytes\n" + "Classloader: " + classLoader.getClass().getSimpleName();
             }catch(Throwable e){
@@ -77,20 +87,20 @@ public class Main extends Mod {
         
         
     }
-    
     public static void handleException(Throwable e) {
-        e.printStackTrace();
+        //e.printStackTrace();
+        error.add(e);
         Log.errTag("Glopion-Bootstrapper", e.toString());
-        runOnUI(() -> Vars.ui.showErrorMessage("Glopion-Bootstrapper Failed To Load\n" + e));
-        
-        
+        runOnUI(() -> Vars.ui.showException("Glopion-Bootstrapper Failed To Load", e));
+    
+    
     }
     
     public static void runOnUI(Runnable r) {
         if (Vars.ui != null && Vars.ui.loadfrag != null){
             r.run();
         }else{
-            Events.on(EventType.ClientCreateEvent.class, cr -> r.run());
+            Events.on(EventType.ClientLoadEvent.class, cr -> runOnUI(r));
         }
     }
     

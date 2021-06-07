@@ -136,7 +136,7 @@ public class Translation extends ModsModule {
     }
     
     @Override
-    public void init() {
+    public void start() {
         register();
         for (Map.Entry<Class<? extends ModsModule>, ModsModule> s : ModuleRegisterer.modules.entrySet())
             registerWords(s.getValue().getName());

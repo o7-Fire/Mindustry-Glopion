@@ -9,12 +9,11 @@ import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.Patch.UIPatch;
 import org.o7.Fire.Glopion.Module.Patch.VarsPatch;
+import org.o7.Fire.Glopion.Patch.EventHooker;
 import org.o7.Fire.Glopion.Patch.Translation;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -22,7 +21,7 @@ import java.util.function.Consumer;
  */
 public class ModuleRegisterer implements Module {
     public static HashMap<Class<? extends ModsModule>, ModsModule> modules = new HashMap<>();
-    private static ArrayList<Class<? extends ModsModule>> unloadedModules = new ArrayList<>();
+    private static HashSet<Class<? extends ModsModule>> unloadedModules = new HashSet<>();
     private volatile static boolean init, preInit, postInit;
     
     public static <T> void invokeAllAs(Class<T> tClass, Consumer<T> consumer) {
@@ -45,19 +44,25 @@ public class ModuleRegisterer implements Module {
     }
     
     public void core() {
-        unloadedModules.addAll(Arrays.asList(Translation.class, VarsPatch.class, UIPatch.class));
+        unloadedModules.addAll(Arrays.asList(Translation.class, VarsPatch.class, UIPatch.class, EventHooker.class));
+        if (!Vars.mobile){
+            unloadedModules.addAll(InformationCenter.getExtendedClass(ModsModule.class));
+        }
     }
     
     public void preInit() {
         if (preInit) throw new RuntimeException("PreInit Already Loaded");
         preInit = true;
-        ArrayList<Class<? extends ModsModule>> loadedModules = new ArrayList<>();
+        HashSet<Class<? extends ModsModule>> loadedModules = new HashSet<>();
         Fi currentJar = new Fi(InformationCenter.getCurrentJar());
         Fi root = currentJar.parent();
         ModsModule stub = new ModsModule() {};
+        int count = 0;
         while (!unloadedModules.isEmpty()) {
-            Class<? extends ModsModule> unloaded = unloadedModules.remove(0);
+            Class<? extends ModsModule> unloaded = unloadedModules.iterator().next();
+            unloadedModules.remove(unloaded);
             if (modules.containsKey(unloaded)) continue;
+            count++;
             loadedModules.add(unloaded);
             try {
                 boolean enabled = Core.settings.getBool("mod-" + unloaded.getCanonicalName() + "-enabled", true);
@@ -68,10 +73,10 @@ public class ModuleRegisterer implements Module {
                     modules.put(unloaded, module);
                     ArrayList<Class<? extends ModsModule>> depend = module.dependency;
                     for (Class<? extends ModsModule> h : depend) {
-                        meta.dependencies.add(h.getCanonicalName());
+                        meta.dependencies.add(h.getCanonicalName().toLowerCase(Locale.ROOT).replace(" ", "-"));
                         if (modules.containsKey(h)) continue;
-                        loadedModules.add(0, h);
-                        unloadedModules.add(0, h);
+                        loadedModules.add(h);
+                        unloadedModules.add(h);
                     }
                     
                 }else{
@@ -87,17 +92,25 @@ public class ModuleRegisterer implements Module {
                 meta.minGameVersion = module.getMinGameVersion();
                 meta.version = module.getVersion();
                 Mods.LoadedMod loadedMod = new Mods.LoadedMod(currentJar, root, module, module.getClass().getClassLoader(), meta);
-                loadedMod.iconTexture = module.getIcon();
+                module.thisLoaded = loadedMod;
+                try {
+                    module.preInit();
+                }catch(Throwable t){
+                    try {module.handleError(t);}catch(Throwable ignored){}
+                    ;
+                }
                 Vars.mods.list().add(loadedMod);
+        
             }catch(Throwable e){
                 WarningHandler.handleProgrammerFault(e);
             }
         }
+        Log.infoTag("Glopion-Module-Register", "Registered: " + count + " modules");
         unloadedModules = loadedModules;
     }
     
     @Override
-    public void postInit() throws Exception {
+    public void postInit() {
         if (postInit) throw new RuntimeException("PostInit Already Loaded");
         postInit = true;
         for (Class<? extends Module> c : unloadedModules) {
@@ -105,7 +118,9 @@ public class ModuleRegisterer implements Module {
                 Module m = modules.get(c);
                 m.postInit();
             }catch(Throwable e){
-                Log.errTag("Glopion-Module-Init", "Failed: " + c.getName());
+                try {modules.get(c).handleError(e);}catch(Throwable ignored){}
+                ;
+                Log.errTag("Glopion-Module-Post-Init", "Failed: " + c.getName());
                 WarningHandler.handleMindustry(e);
             }
         }

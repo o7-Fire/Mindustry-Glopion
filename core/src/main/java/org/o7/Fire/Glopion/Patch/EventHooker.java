@@ -23,6 +23,7 @@ import mindustry.Vars;
 import mindustry.core.GameState;
 import mindustry.game.EventType;
 import org.o7.Fire.Glopion.Event.EventExtended;
+import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
@@ -34,7 +35,7 @@ import org.o7.Fire.Glopion.Module.WorldModule;
 import java.util.ArrayList;
 import java.util.Map;
 
-//no shit not that hooker rent
+//Note: don't google "Hooker"
 public class EventHooker extends ModsModule {
     public static ArrayList<Runnable> drawc = new ArrayList<>();
     
@@ -57,7 +58,7 @@ public class EventHooker extends ModsModule {
     }
     
     @Override
-    public void init() {
+    public void start() {
         
         Vars.loadLogger();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -70,8 +71,8 @@ public class EventHooker extends ModsModule {
             ModuleRegisterer.invokeAll(Module::update);
         });
         Events.on(EventType.ClientLoadEvent.class, s -> {
-            Core.settings.getBoolOnce("OzoneDisclaimer", () -> {
-                Vars.ui.showCustomConfirm("[royal]Ozone[white]-[red]Warning", "Use this mods at your own risk", "Accept", "Accept", () -> { }, () -> { });
+            Core.settings.getBoolOnce("GlopionDisclaimer", () -> {
+                Vars.ui.showCustomConfirm("[royal]Glopion[white]-[red]Warning", "Use this mods at your own risk", "Accept", "Accept", () -> { }, () -> { });
             });
             Core.settings.getBoolOnce("CrashReport1", () -> Vars.ui.showConfirm("Anonymous Data Reporter", "We collect your anonymous data e.g crash-log, to make your experience much worse", () -> {
             }));
@@ -80,6 +81,7 @@ public class EventHooker extends ModsModule {
                     Vars.ui.showText("[royal]Ozone[white]-[red]Warning", "Foo client with ozone ????, are you a savage");
                 });
             }
+            GlopionCore.moduleRegisterer.postInit();
             //SharedBoot.finishStartup();
             // setOzoneLogger();
         });

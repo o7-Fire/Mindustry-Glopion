@@ -39,10 +39,6 @@ import java.lang.reflect.Field;
 public class VarsPatch extends ModsModule {
     public static Table menu;
     
-    {
-    
-    }
-    
     @Override
     public void preInit() {
         //java 8 only
@@ -58,10 +54,10 @@ public class VarsPatch extends ModsModule {
     
     
     @Override
-    public void init() {
-        Log.infoTag("Ozone", "Patching");
+    public void start() {
+        Log.infoTag("Glopion", "Patching");
         Vars.enableConsole = true;
-        Log.debug("Ozone-Debug: @", "Debugs, peoples, debugs");
+        Log.debug("Glopion-Debug: @", "Debugs, peoples, debugs");
         if (Vars.ui != null){
             try {
                 Vars.ui.chatfrag.addMessage("gay", "no");
@@ -88,7 +84,7 @@ public class VarsPatch extends ModsModule {
             Vars.net = new NetPatched(Vars.net);
             InformationCenter.callable = new Callable(Vars.net);
         }
-        Log.infoTag("Ozone", "Patching Complete");
+        Log.infoTag("Glopion", "Patching Complete");
     }
     
 }

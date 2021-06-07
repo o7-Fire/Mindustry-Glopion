@@ -59,7 +59,6 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Sorter;
 import mindustry.world.blocks.sandbox.ItemSource;
 import org.jetbrains.annotations.NotNull;
-import org.o7.Fire.Glopion.Module.Module;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -67,7 +66,7 @@ import java.util.concurrent.Future;
 import static mindustry.Vars.player;
 import static mindustry.Vars.ui;
 
-public class Interface implements Module {
+public class Interface {
     public static final ObjectMap<String, String> bundle = new ObjectMap<>();
     public static Map<Integer, ArrayList<Building>> buildingCache = Collections.synchronizedMap(new WeakHashMap<>());
     private static long lastToast = 0;
