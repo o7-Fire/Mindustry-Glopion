@@ -109,7 +109,7 @@ public class WarningHandler {
         try {
             if (Reflect.debug){
                 t.printStackTrace();
-                handleStealthMindustry(t, "Ozone-Debug");
+                handleStealthMindustry(t, "Glopion-Debug");
             }
         }catch(Throwable ignored){}
         
@@ -120,7 +120,7 @@ public class WarningHandler {
      */
     public static void handleStealthMindustry(Throwable t, String s) {
         try {
-            Log.errTag(s, t.toString());
+            Log.errTag(s, t.getMessage());
         }catch(Throwable ignored){}
         
     }
