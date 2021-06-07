@@ -21,6 +21,8 @@ import Atom.Utility.Digest;
 import arc.Core;
 import arc.Events;
 import arc.scene.ui.Dialog;
+import arc.scene.ui.layout.Cell;
+import arc.scene.ui.layout.Table;
 import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.gen.Icon;
@@ -40,23 +42,35 @@ import static mindustry.Vars.ui;
 
 public class UIPatch extends ModsModule {
     public static Dialog.DialogStyle ozoneStyle;
-    
+    public static Table settingsTable;
     {
         dependency.add(VarsPatch.class);
         dependency.add(Translation.class);
     }
     
     private void onResize() {
+        
         if (VarsPatch.menu != null){
             if (Vars.testMobile) try {
                 Reflect.getMethod(MenuFragment.class, "buildMobile", ui.menufrag).invoke(ui.menufrag);
             }catch(Throwable ignored){}
             if (Vars.mobile || Vars.testMobile){
                 if (Core.graphics.isPortrait()) VarsPatch.menu.row();
-                VarsPatch.menu.add(new MobileButton(Icon.info, Translation.get("Ozone"), () -> GlopionCore.modsMenu.show()));
+                VarsPatch.menu.add(new MobileButton(Icon.info, Translation.get("Glopion-Menu"), () -> GlopionCore.modsMenu.show()));
             }else{
                 
-                VarsPatch.menu.button(Translation.get("Ozone"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
+                VarsPatch.menu.button(Translation.get("Glopion-Menu"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
+            }
+        }
+        if(settingsTable != null){
+            settingsTable.clear();
+            settingsTable.add("Glopion").growX().center().row();
+            if (Vars.mobile || Vars.testMobile){
+                if (Core.graphics.isPortrait()) settingsTable.row();
+                settingsTable.add(new MobileButton(Icon.info, Translation.get("Glopion-Menu"), () -> GlopionCore.modsMenu.show()));
+            }else{
+    
+                settingsTable.button(Translation.get("Glopion-Menu"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
             }
         }
     }
@@ -78,12 +92,14 @@ public class UIPatch extends ModsModule {
         ModsMenu.add(new BundleViewer());
         ModsMenu.add(new WorldInformation());
         ModsMenu.add(new OzonePlaySettings());
-        ModsMenu.add(new OzoneMenu(Translation.get("Glopion HUD"), ozoneStyle));
         ModsMenu.add(GlopionCore.worldInformation = new EnvironmentInformation());//mmm
         ModsMenu.add(new LogView());
         ModsMenu.add(new ExperimentDialog());
-        
         GlopionCore.modsMenu = new ModsMenu();
+        GlopionCore.glopionHud = new OzoneMenu(Translation.get("Glopion HUD"), ozoneStyle);
+        Cell<Table> h = ui.settings.game.row().table().growX();
+        h.row();
+        settingsTable = h.get();
         //GlopionCore.commFrag.build(Vars.ui.hudGroup);
         ui.logic.buttons.button("Show Hash", Icon.list, () -> {
             new ScrollableDialog("Hash Code") {

@@ -27,6 +27,6 @@ public class MobileInputPatched extends MobileInput {
     @Override
     public void buildPlacementUI(Table table) {
         super.buildPlacementUI(table);
-        table.button(Icon.settings, Styles.colori, () -> GlopionCore.modsMenu.show()).tooltip("Glopion");
+        table.button(Icon.settings, Styles.colori, () -> GlopionCore.glopionHud.show().show()).tooltip("Glopion");
     }
 }

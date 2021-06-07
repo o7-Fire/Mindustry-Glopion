@@ -42,17 +42,23 @@ public abstract class ScrollableDialog extends AtomicDialog {
     
     
     public ScrollableDialog() {
-        super();
+        this("Null");
     }
     
     public ScrollableDialog(String title, DialogStyle style) {
         super(title, style);
         
+    }
+    public void showSetup(){
+        onResize(this::init);
+        shown(this::init);
+    }
+    public void addRefreshAndClose(){
+        addCloseButton();
         addNavButton("Refresh", Icon.refresh, this::init);
     }
-    
     public ScrollableDialog(String title) {
-        super(title);
+        this(title, Core.scene.getStyle(DialogStyle.class));
     }
     
     public void onInit(Runnable r) {
@@ -60,9 +66,7 @@ public abstract class ScrollableDialog extends AtomicDialog {
     }
     
     
-    protected void setup() {
-    
-    }
+    protected abstract void setup();
     
     protected void init() {
         if (scrollPane != null){
