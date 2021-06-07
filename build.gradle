@@ -243,16 +243,12 @@ task makeJar(type: Jar){
 }
 //TODO add more dependsOn
 //if you have multiple version of mods
-task unVersion(type: JavaExec) {
-    classpath = files(new File(rootDir, "desktop/build/libs/desktop.jar").getAbsolutePath())// ?????????
-    main = "org.o7.Fire.Glopion.Version"
-    setWorkingDir(rootDir)
-}
+
 task deploy {
     dependsOn makeJar
     dependsOn ":core:makeJar"
     dependsOn ":desktop:base"
-    dependsOn unVersion
+    dependsOn ":desktop:unVersion"
 }
 
 //need this for jitpack, so i can read mods source code without using browser

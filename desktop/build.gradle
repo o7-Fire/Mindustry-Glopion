@@ -21,7 +21,11 @@ task base( type: Jar , dependsOn: dependsProject.collect{ it+":compileJava"}) {
     }
     from files(dependsProject.collect{ aproj(it).sourceSets.main.output })
 }
-
+task unVersion(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "org.o7.Fire.Glopion.Version"
+    setWorkingDir(rootDir)
+}
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'//deprecated
     from sourceSets.main.allSource
