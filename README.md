@@ -7,7 +7,7 @@
 
 ~~ozone with extra/less step~~
 
-# Work In Progress (brb in 2 years)
+# Work In Progress (brb in 1 years)
 
 use the code `o7-Fire/Mindustry-Glopion` to get glopion for free
 
