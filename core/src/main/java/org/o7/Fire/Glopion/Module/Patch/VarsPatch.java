@@ -55,6 +55,7 @@ public class VarsPatch extends ModsModule {
     
     @Override
     public void start() {
+        super.start();
         Log.infoTag("Glopion", "Patching");
         Vars.enableConsole = true;
         Log.debug("Glopion-Debug: @", "Debugs, peoples, debugs");

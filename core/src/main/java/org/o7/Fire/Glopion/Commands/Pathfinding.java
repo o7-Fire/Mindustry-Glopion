@@ -138,6 +138,7 @@ public class Pathfinding extends ModsModule {
     
     
     public void start() {
+        super.start();
         Events.run(EventType.Trigger.draw, Pathfinding::draw);
     }
     

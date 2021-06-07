@@ -23,7 +23,6 @@ import mindustry.Vars;
 import mindustry.core.GameState;
 import mindustry.game.EventType;
 import org.o7.Fire.Glopion.Event.EventExtended;
-import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
@@ -59,7 +58,7 @@ public class EventHooker extends ModsModule {
     
     @Override
     public void start() {
-        
+        super.start();
         Vars.loadLogger();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Events.fire(EventExtended.Shutdown.class, new EventExtended.Shutdown());
@@ -81,7 +80,7 @@ public class EventHooker extends ModsModule {
                     Vars.ui.showText("[royal]Ozone[white]-[red]Warning", "Foo client with ozone ????, are you a savage");
                 });
             }
-            GlopionCore.moduleRegisterer.postInit();
+            //GlopionCore.moduleRegisterer.postInit();
             //SharedBoot.finishStartup();
             // setOzoneLogger();
         });
