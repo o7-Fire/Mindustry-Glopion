@@ -96,7 +96,7 @@ public class UIPatch extends ModsModule {
         ModsMenu.add(new LogView());
         ModsMenu.add(new ExperimentDialog());
         GlopionCore.modsMenu = new ModsMenu();
-        GlopionCore.glopionHud = new OzoneMenu(Translation.get("Glopion HUD"), ozoneStyle);
+        GlopionCore.glopionHud = new OzoneMenu();
         Cell<Table> h = ui.settings.game.row().table().growX();
         h.row();
         settingsTable = h.get();
