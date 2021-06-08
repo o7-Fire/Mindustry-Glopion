@@ -25,15 +25,16 @@ import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.GlopionCore;
+import org.o7.Fire.Glopion.Module.Patch.UIPatch;
 import org.o7.Fire.Glopion.Patch.Translation;
 
 public class OzoneMenu extends AtomicDialog {
     
     private Table tB;
     
-    public OzoneMenu(String title, DialogStyle style) {
-        super(title, style);
-        addCloseButton();
+    public OzoneMenu() {
+        super("Glopion HUD", UIPatch.ozoneStyle);
+        
     }
     
     public static void showHud() {
@@ -54,12 +55,11 @@ public class OzoneMenu extends AtomicDialog {
     }
     
     public void setup() {
-        
-        
-        cont.top();
+    
         cont.clear();
+        cont.top();
         cont.row();
-        tB = cont.table().growY().growX().get();
+        tB = cont.table().top().growX().get();
         cont.row();
         tB.button(Translation.get("ozone.commandsUI"), Icon.commandRally, () -> {
             Core.app.post(this::hide);
