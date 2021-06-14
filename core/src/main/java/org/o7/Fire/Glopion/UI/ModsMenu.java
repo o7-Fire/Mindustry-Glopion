@@ -17,22 +17,27 @@
 package org.o7.Fire.Glopion.UI;
 
 
+import arc.scene.style.Drawable;
+import arc.scene.ui.Dialog;
 import arc.scene.ui.TextButton;
+import arc.struct.ObjectMap;
 import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.Styles;
 import org.o7.Fire.Glopion.Experimental.Evasion.Identification;
 import org.o7.Fire.Glopion.Internal.Interface;
-import org.o7.Fire.Glopion.Patch.Translation;
+import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 
 import java.util.ArrayList;
 
 public class ModsMenu extends ScrollableDialog {
-    static ArrayList<AtomicDialog> dialogs = new ArrayList<>();
+    static ArrayList<Dialog> dialogs = new ArrayList<>();
+    static ObjectMap<Dialog, Drawable> dialogDrawableHashMap = new ObjectMap<>();
     TextButton.TextButtonStyle textButtonStyle;
+    
     public ModsMenu() {
         super("Mods Menu");
-       textButtonStyle = Styles.clearPartialt;
+        textButtonStyle = Styles.clearPartialt;
         addNavButton("o7-Discord", Icon.discord, () -> {
             Interface.openLink("https://discord.o7fire.tk");
         });
@@ -46,9 +51,6 @@ public class ModsMenu extends ScrollableDialog {
     
     public void setup() {
         table.clear();
-        table.button("@mods", Icon.book, textButtonStyle,Vars.ui.mods::show).growX();// a sacrifice indeed
-        table.row();
-        table.row();
         generic();
         table.button("Reset UID", Icon.refresh, textButtonStyle,() -> Vars.ui.showConfirm("Reset UID", "Reset all uuid and usid", () -> {
             Vars.ui.loadfrag.show("Changing ID");
@@ -56,20 +58,27 @@ public class ModsMenu extends ScrollableDialog {
                 Vars.ui.loadfrag.hide();
                 try {
                     Vars.ui.showInfo("Changed " + Identification.getKeys().size() + " ID");
-                }catch(Throwable ignored){}
+                }catch(Throwable t){
+                    WarningHandler.handleMindustry(t);
+                }
             });
-            
+    
         })).growX().row();
-        
+    
     }
     
     void generic() {
-        for (AtomicDialog o : dialogs)
+        for (Dialog o : dialogs)
             ad(o);
     }
     
-    public void ad(AtomicDialog dialog) {
-        table.button(Translation.colorized(dialog.getTitle()), dialog.icon, textButtonStyle,dialog::show).growX();
+    public void ad(Dialog d) {
+        if (d instanceof AtomicDialog){
+            AtomicDialog dialog = (AtomicDialog) d;
+            table.button(dialog.getTitle(), dialog.icon, textButtonStyle, dialog::show).growX();
+        }else{
+            table.button(d.title.getText().toString(), dialogDrawableHashMap.get(d, Icon.book), d::show).growX();
+        }
         table.row();
     }
 }
