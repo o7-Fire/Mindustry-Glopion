@@ -16,21 +16,39 @@
 
 package org.o7.Fire.Glopion.UI;
 
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.gen.Icon;
-import org.o7.Fire.Glopion.Experimental.Experimental;
+import org.o7.Fire.Glopion.Experimental.*;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class ExperimentDialog extends ScrollableDialog {
     {
         icon = Icon.production;
     }
     
+    protected HashSet<Class<? extends Experimental>> experimental = new HashSet<>();
+    
+    public ExperimentDialog() {
+        experimental.addAll(Arrays.asList(ThreadStackTrace.class, OutOfMemory.class, LockAllContent.class, SwingBox.class, UnlockAllContent.class));
+        if (!Vars.mobile) experimental.addAll(InformationCenter.getExtendedClass(Experimental.class));
+        StringBuilder sb = new StringBuilder();
+        sb.append("Experimental: [");
+        for (Class<?> c : experimental) {
+            sb.append(c.getSimpleName()).append(".class").append(", ");
+        }
+        sb.append("]");
+        Log.debug(sb.toString());
+    }
+    
     @Override
     protected void setup() {
         try {
-            for (Class<? extends Experimental> c : InformationCenter.getExtendedClass(Experimental.class)) {
+            for (Class<? extends Experimental> c : experimental) {
                 table.button(c.getSimpleName(), () -> {
                     try {
                         c.getDeclaredConstructor().newInstance().run();

@@ -19,6 +19,7 @@ package org.o7.Fire.Glopion.Patch;
 import Atom.Reflect.Reflect;
 import Atom.Utility.Random;
 import arc.struct.ObjectMap;
+import arc.util.Strings;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
@@ -54,12 +55,18 @@ public class Translation extends ModsModule {
         return "[" + Random.getRandomHexColor() + "]";
     }
     
+    public static boolean isColorized(String s) {
+        return Strings.stripColors(s).length() != s.length();
+    }
+    
     public static String get(String key) {
+        
         return Interface.getBundle(key, null);
     }
     
     public static String colorized(String s) {
-        if (!GlopionCore.colorPatch) return s;
+        if (!GlopionCore.colorPatchSettings) return s;
+        if (isColorized(s)) return s;
         return getRandomHexColor() + s + "[white]";
     }
     
@@ -67,7 +74,7 @@ public class Translation extends ModsModule {
         String s = Thread.currentThread().getStackTrace()[2].getClassName() + text.toLowerCase().replaceAll(" ", ".");
         registerWords(s, text);
         s = text;
-        if (GlopionCore.colorPatch) s = getRandomHexColor() + s + "[white]";
+        if (GlopionCore.colorPatchSettings) s = getRandomHexColor() + s + "[white]";
         return s;
     }
     
@@ -81,6 +88,8 @@ public class Translation extends ModsModule {
         registerWords("ozone.javaEditor.reformat", "Reformat");
         registerWords("ozone.javaEditor.run", "Run");
         registerWords("ozone.commandsUI", "Commands GUI");
+        registerWords("colorPatchSettings", "Translation Colorized");
+        registerWords("blockDebugSettings", "Enable Block Debug Info");
         commands.put("help", "help desk");
         commands.put("chaos-kick", "vote everyone everytime everywhere -Nexity");
         commands.put("task-move", "move using current unit with pathfinding algorithm");
@@ -125,7 +134,7 @@ public class Translation extends ModsModule {
     public void postInit() throws Throwable {
         ObjectMap<String, String> modified = arc.Core.bundle.getProperties();
         for (ObjectMap.Entry<String, String> s : modified.entries())
-            if (GlopionCore.colorPatch) modified.put(s.key, getRandomHexColor() + s.value + "[white]");
+            if (GlopionCore.colorPatchSettings) modified.put(s.key, getRandomHexColor() + s.value + "[white]");
         
         for (ObjectMap.Entry<String, String> s : Interface.bundle) {
             modified.put(s.key, s.value);

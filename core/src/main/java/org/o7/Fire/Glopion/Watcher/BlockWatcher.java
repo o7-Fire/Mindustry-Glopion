@@ -38,10 +38,10 @@ public class BlockWatcher extends ModsModule {
     }
     
     public void update() {
-        if (GlopionCore.blockDebug && Vars.state.isPlaying()){
+        if (GlopionCore.blockDebugSettings && Vars.state.isPlaying()){
             if (Core.input.keyDown(KeyCode.controlLeft))
                 if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();
-            
+    
             if (target != null){
                 StringBuilder sb = new StringBuilder();
                 if (target.build != null){

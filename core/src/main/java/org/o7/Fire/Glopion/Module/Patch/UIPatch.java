@@ -89,13 +89,17 @@ public class UIPatch extends ModsModule {
         };
         if (GlopionCore.test) return;
         //GlopionCore.commFrag = new CommandsListFrag();
+        AtomicDialog.instance = new AtomicDialog() {{addCloseButton();}};
+        ui.research.title.setText(Translation.get("techtree"));
+        ModsMenu.add(ui.database, Icon.book);
+        ModsMenu.add(ui.research, Icon.tree);
         ModsMenu.add(new BundleViewer());
-        ModsMenu.add(new WorldInformation());
+        ModsMenu.add(GlopionCore.worldInformation = new WorldInformation());
         ModsMenu.add(new OzonePlaySettings());
-        ModsMenu.add(GlopionCore.worldInformation = new EnvironmentInformation());//mmm
+        ModsMenu.add(new EnvironmentInformation());//mmm
         ModsMenu.add(new LogView());
         ModsMenu.add(new ExperimentDialog());
-    
+        ModsMenu.add(new OptionsDialog());
         GlopionCore.modsMenu = new ModsMenu();
         GlopionCore.glopionHud = new OzoneMenu();
         Cell<Table> h = ui.settings.game.row().table().growX();

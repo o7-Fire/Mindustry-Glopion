@@ -1,3 +1,9 @@
 package org.o7.Fire.Glopion;
 
-public class ReleaseLauncher extends GlopionCore {}
+import arc.util.Log;
+
+public class ReleaseLauncher extends GlopionCore {
+    static {
+        Log.debug("Invoked @ static ctr", ReleaseLauncher.class);
+    }
+}

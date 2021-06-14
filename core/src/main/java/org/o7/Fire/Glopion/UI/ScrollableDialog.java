@@ -139,7 +139,7 @@ public abstract class ScrollableDialog extends AtomicDialog {
     protected void ad(Object title, Object value, Consumer<String> cs) {
         value = String.valueOf(value);
         title = String.valueOf(title);
-        if (GlopionCore.colorPatch) title = "[" + Random.getRandomHexColor() + "]" + title;
+        if (GlopionCore.colorPatchSettings) title = "[" + Random.getRandomHexColor() + "]" + title;
         Label l = new Label(title + ":");
         table.add(l).growX();
         String finalValue = String.valueOf(value);

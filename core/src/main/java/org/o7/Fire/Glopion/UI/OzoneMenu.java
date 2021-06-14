@@ -65,8 +65,7 @@ public class OzoneMenu extends AtomicDialog {
             Core.app.post(this::hide);
             //GlopionCore.commFrag.toggle();
         }).growX();
-        ad(GlopionCore.worldInformation, Icon.fileTextFill);
-        tB.row();
+        ad(GlopionCore.worldInformation, Icon.chartBar);
         ad(GlopionCore.modsMenu, Icon.file);
         cont.row();
         

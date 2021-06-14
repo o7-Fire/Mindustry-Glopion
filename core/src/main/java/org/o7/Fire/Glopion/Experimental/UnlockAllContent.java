@@ -31,16 +31,46 @@
 
 package org.o7.Fire.Glopion.Experimental;
 
+import arc.Events;
 import arc.struct.Seq;
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.ctype.Content;
 import mindustry.ctype.UnlockableContent;
+import mindustry.game.EventType;
 
 public class UnlockAllContent implements Experimental {
     @Override
     public void run() {
-        for (Seq<Content> ce : Vars.content.getContentMap())
-            for (Content cc : ce)
-                if (cc instanceof UnlockableContent) ((UnlockableContent) cc).alwaysUnlocked = true;
+        boolean ui = Vars.ui != null && Vars.ui.loadfrag != null;
+        int i = 1;
+        int max = 1;
+        for (Seq<Content> ce : Vars.content.getContentMap()) {
+            for (Content cc : ce) {
+                if (cc instanceof UnlockableContent) max++;
+            }
+        }
+        int finalMax = max;
+        if (ui){
+            Vars.ui.loadfrag.show("Unlocking");
+        
+            int finalI1 = i;
+            Vars.ui.loadfrag.setProgress((() -> (float) finalMax / finalI1));
+        }
+        for (Seq<Content> ce : Vars.content.getContentMap()) {
+            for (Content cc : ce) {
+                if (cc instanceof UnlockableContent){
+                    UnlockableContent content = (UnlockableContent) cc;
+                    content.alwaysUnlocked = true;
+                    content.unlock();
+                    Events.fire(new EventType.ResearchEvent(content));
+                    i++;
+                    int finalI = i;
+                    if (ui) Vars.ui.loadfrag.setProgress((() -> (float) finalMax / finalI));
+                }
+            }
+        }
+        Log.info("Unlocked @ content", i);
+        if (ui) Vars.ui.loadfrag.hide();
     }
 }

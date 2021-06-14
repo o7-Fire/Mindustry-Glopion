@@ -14,7 +14,7 @@ import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.Patch.Translation;
 
 public class AtomicDialog extends BaseDialog {
-    private static final AtomicDialog instance = new AtomicDialog() {{addCloseButton();}};
+    public static AtomicDialog instance;
     public Drawable icon = Icon.commandRallySmall;
     
     public AtomicDialog(String title, DialogStyle style) {

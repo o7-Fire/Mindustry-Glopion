@@ -38,12 +38,13 @@ public class WorldInformation extends ScrollableDialog {
     
     public volatile static Future task;
     
-    public WorldInformation() {
-        super("World Information");
-        
-    }
     
     public void setup() {
+        if (Vars.world == null){
+            table.add("No World").growX();
+            return;
+        }
+        
         ad("Word Name", Vars.state.map.name());
         ad("Players Count", Groups.player.size());
         ad("Drawc Count", Groups.draw.size());
@@ -55,7 +56,7 @@ public class WorldInformation extends ScrollableDialog {
         ad("World width", Vars.world.width());
         ad("World square", Vars.world.width() * Vars.world.height());
         table.row();
-        if (task == null || task.isDone()) task = Pool.submit(() -> {
+        if (task == null || task.isDone()) task = Pool.async(() -> {
             Time te = new Time();
             Log.debug("World calculation began");
             //@NotNull ITransaction st = Sentry.startTransaction(Vars.world.width() + "x" + Vars.world.height(), "world-calculation");
@@ -72,11 +73,12 @@ public class WorldInformation extends ScrollableDialog {
                 });
                 ArrayList<Future<ObjectMap<String, Integer>>> futures = new ArrayList<>();
                 Vars.ui.loadfrag.setProgress(() -> (float) a.get() / total);
+                //row per core
                 for (int i = 0; i < height; i++) {
                     int finalI = i;
                     a.set(i * height);
                     Vars.ui.loadfrag.setText("World indexing: " + a + "/" + total);
-                    futures.add(Pool.submit(() -> {//hail concurrency
+                    futures.add(Pool.async(() -> {//hail concurrency
                         ObjectMap<String, Integer> count = new ObjectMap<>();
                         //Overcautious people be like
                         try {
