@@ -113,7 +113,9 @@ allprojects {
         //From Root to every project
         dependencies{
             //
-
+            if(System.getProperty("modsNBE")  != null && !System.getProperty("modsNBE").isEmpty()) {
+                downloadMindustry(getMindustryURL(), getMindustryFile());
+            }
             File mindustry = getMindustryFile()
             if(mindustry.exists()) {
                 compileOnly(files(mindustry))
