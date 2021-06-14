@@ -44,14 +44,19 @@ public class WorldInformation extends ScrollableDialog {
             table.add("No World").growX();
             return;
         }
-        
+    
         ad("Word Name", Vars.state.map.name());
+        ad("Entity Count", Groups.all.size());
         ad("Players Count", Groups.player.size());
-        ad("Drawc Count", Groups.draw.size());
-        ad("Build Count", Groups.build.size());
-        ad("Unit Count", Groups.unit.size());
-        ad("[orange]Fire[white] Count", Groups.fire.size());
         ad("Bullet Count", Groups.bullet.size());
+        ad("Unit Count", Groups.unit.size());
+        ad("Building Count", Groups.build.size());
+        ad("Sync Count", Groups.sync.size());
+        ad("Drawing Count", Groups.draw.size());
+        ad("[orange]Fire[white] Count", Groups.fire.size());
+        ad("Puddle Count", Groups.puddle.size());
+        ad("Weather Count", Groups.weather.size());
+    
         ad("World height", Vars.world.height());
         ad("World width", Vars.world.width());
         ad("World square", Vars.world.width() * Vars.world.height());
