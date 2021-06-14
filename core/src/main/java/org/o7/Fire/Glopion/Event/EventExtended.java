@@ -55,13 +55,11 @@ public class EventExtended {
     }
     
     public static class Log {
-        public String raw, result;
-        public arc.util.Log.LogLevel level;
-        
-        public Log(String raw, String result, arc.util.Log.LogLevel level) {
-            this.raw = raw;
+        public String result;
+    
+    
+        public Log(String result) {
             this.result = result;
-            this.level = level;
         }
     }
 }

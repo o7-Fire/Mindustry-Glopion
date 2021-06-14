@@ -43,6 +43,7 @@ public abstract class ModsModule extends Mod implements Module {
         return c.cast(ModuleRegisterer.modules.get(c));
     }
     
+    
     public boolean dependencySatisfied() {
         boolean noGood = false;
         for (Class<? extends ModsModule> mod : dependency) {

@@ -16,20 +16,21 @@
 
 package org.o7.Fire.Glopion.UI;
 
-import arc.Events;
 import arc.input.KeyCode;
-import arc.util.Log;
 import mindustry.Vars;
 import mindustry.gen.Icon;
-import org.o7.Fire.Glopion.Event.EventExtended;
+import org.o7.Fire.Glopion.Patch.AtomicLogger;
 
 public class LogView extends ScrollableDialog {
     
-    volatile String see = "";
+    String see = "";
     
     {
         icon = Icon.fileTextFill;
     }
+    
+    String lastLog = "";
+    int last = 0;
     
     public LogView() {
         this.keyDown((key) -> {
@@ -37,30 +38,42 @@ public class LogView extends ScrollableDialog {
                 execute();
             }
         });
-        cont.table(t -> {
-            t.field("", s -> {
+        
+    }
+    
+    ;
+    
+    @Override
+    protected void setup() {
+        table.table(t -> {
+            t.field(see, s -> {
                 see = s;
             }).growX().tooltip("Javascript console");
             t.button(Icon.add, this::execute);
         }).growX();
         
-        cont.row();
-        StringBuilder sb = cont.add("Log\n").growX().growY().get().getText();
-        Events.on(EventExtended.Log.class, s -> {
-            sb.append(s.result).append("[white]\n");
-        });
-        cont.row();
+        table.row();
+        //StringBuilder sb = table.add("Log\n").growX().growY().get().getText();
+        table.label(this::getLog).growX().growY();
+        table.row();
     }
     
-    @Override
-    protected void setup() {
-    
+    private String getLog() {
+        if (last != AtomicLogger.logBuffer.size){
+            StringBuilder sb = new StringBuilder();
+            for (int i = AtomicLogger.logBuffer.size - 1; i >= 0; i--) {
+                sb.append(AtomicLogger.logBuffer.get(i)).append("[white]\n");
+            }
+            last = AtomicLogger.logBuffer.size;
+            lastLog = sb.toString();
+        }
+        return lastLog;
     }
-    
     
     private void execute() {
-        Log.info(">" + see);
-        Log.info(Vars.mods.getScripts().runConsole(see));
+        AtomicLogger.logBuffer.add(Vars.mods.getScripts().runConsole(see));
+        AtomicLogger.logBuffer.add(">" + see);
+        
     }
     
 }

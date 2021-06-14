@@ -13,6 +13,7 @@ import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Internal.TilesOverlay;
 import org.o7.Fire.Glopion.Module.Patch.UIPatch;
 import org.o7.Fire.Glopion.Module.Patch.VarsPatch;
+import org.o7.Fire.Glopion.Patch.AtomicLogger;
 import org.o7.Fire.Glopion.Patch.EventHooker;
 import org.o7.Fire.Glopion.Patch.SchematicPool;
 import org.o7.Fire.Glopion.Patch.Translation;
@@ -50,7 +51,7 @@ public class ModuleRegisterer implements Module {
     }
     
     public void core() {
-        unloadedModules.addAll(Arrays.asList(SchematicPool.class, VarsPatch.class, Overlay.class, EventHooker.class, Pathfinding.class, BlockWatcher.class, CommandsHandler.class, Translation.class, UIPatch.class, TilesOverlay.class, ModuleIcon.class));
+        unloadedModules.addAll(Arrays.asList(AtomicLogger.class, SchematicPool.class, VarsPatch.class, Overlay.class, EventHooker.class, Pathfinding.class, BlockWatcher.class, CommandsHandler.class, Translation.class, UIPatch.class, TilesOverlay.class, ModuleIcon.class));
         if (!Vars.mobile){
             unloadedModules.addAll(InformationCenter.getExtendedClass(ModsModule.class));
         }
@@ -70,7 +71,7 @@ public class ModuleRegisterer implements Module {
         while (!unloadedModules.isEmpty()) {
             Class<? extends ModsModule> unloaded = unloadedModules.iterator().next();
             unloadedModules.remove(unloaded);
-            if (unloaded.getCanonicalName() == null) continue;//cryptic class
+            if (unloaded.getCanonicalName() == null) continue;//cryptic class/anon class
             if (modules.containsKey(unloaded)) continue;
             count++;
         
