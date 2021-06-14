@@ -1,9 +1,11 @@
 package org.o7.Fire.Glopion.Module;
 
 import arc.Core;
+import arc.Events;
 import arc.files.Fi;
 import arc.util.Log;
 import mindustry.Vars;
+import mindustry.game.EventType;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Commands.CommandsHandler;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
@@ -187,6 +189,7 @@ public class ModuleRegisterer implements Module {
             remaining.add(remaining.size(), unloaded);
         }
         Log.debug("Glopion-Module-Registerer: took " + iteration + " to start");
+        Events.on(EventType.ClientLoadEvent.class, s -> postInit());
     }
     
     @Override
@@ -194,9 +197,10 @@ public class ModuleRegisterer implements Module {
         if (postInit) throw new RuntimeException("PostInit Already Loaded");
         postInit = true;
         StringBuilder sb = new StringBuilder();
-        sb.append("[");
+        sb.append("ModsModule: [");
         for (Class<? extends Module> c : unloadedModules) {
             sb.append(c.getSimpleName()).append(".class").append(", ");
+            /*
             try {
                 Module m = modules.get(c);
                 m.postInit();
@@ -205,6 +209,8 @@ public class ModuleRegisterer implements Module {
                 WarningHandler.handleMindustry(e);
                 Log.errTag("Glopion-Module-Post-Init", "Failed: " + c.getCanonicalName());
             }
+            
+             */
         }
         sb.append("]");
         Log.debug(sb.toString());

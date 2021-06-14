@@ -47,7 +47,6 @@ public class EnvironmentInformation extends ScrollableDialog {
     boolean b;
     
     public EnvironmentInformation() {
-        super("Environment Information");
         icon = Icon.info;
 
     }

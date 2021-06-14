@@ -27,6 +27,7 @@ import mindustry.ui.Styles;
 import org.o7.Fire.Glopion.Experimental.Evasion.Identification;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Patch.Translation;
 
 import java.util.ArrayList;
 
@@ -41,18 +42,22 @@ public class ModsMenu extends ScrollableDialog {
         addNavButton("o7-Discord", Icon.discord, () -> {
             Interface.openLink("https://discord.o7fire.tk");
         });
-        
+    
     }
     
-    public static void add(AtomicDialog dialog) {
+    public static void add(Dialog dialog) {
         dialogs.add(dialog);
     }
     
+    public static void add(Dialog dialog, Drawable d) {
+        add(dialog);
+        dialogDrawableHashMap.put(dialog, d);
+    }
     
     public void setup() {
         table.clear();
         generic();
-        table.button("Reset UID", Icon.refresh, textButtonStyle,() -> Vars.ui.showConfirm("Reset UID", "Reset all uuid and usid", () -> {
+        table.button("Reset UID", Icon.refresh, textButtonStyle, () -> Vars.ui.showConfirm("Reset UID", "Reset all uuid and usid", () -> {
             Vars.ui.loadfrag.show("Changing ID");
             Identification.changeID(() -> {
                 Vars.ui.loadfrag.hide();
@@ -77,7 +82,10 @@ public class ModsMenu extends ScrollableDialog {
             AtomicDialog dialog = (AtomicDialog) d;
             table.button(dialog.getTitle(), dialog.icon, textButtonStyle, dialog::show).growX();
         }else{
-            table.button(d.title.getText().toString(), dialogDrawableHashMap.get(d, Icon.book), d::show).growX();
+            String title = d.title.getText().toString();
+            if (title.isEmpty()) title = Translation.get(d.getClass().getCanonicalName());
+            title = Translation.colorized(title);
+            table.button(title, dialogDrawableHashMap.get(d, Icon.book), d::show).growX();
         }
         table.row();
     }

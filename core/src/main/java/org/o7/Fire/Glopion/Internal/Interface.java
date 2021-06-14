@@ -250,7 +250,7 @@ public class Interface {
     }
     
     public synchronized static void registerWords(String key, String value) {
-        if (GlopionCore.colorPatch) value = getRandomHexColor() + value + "[white]";
+        if (GlopionCore.colorPatchSettings) value = getRandomHexColor() + value + "[white]";
         
         bundle.put(key, value);
     }

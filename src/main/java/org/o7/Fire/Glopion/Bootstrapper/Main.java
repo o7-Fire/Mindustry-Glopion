@@ -88,7 +88,7 @@ public class Main extends Mod {
         
     }
     public static void handleException(Throwable e) {
-        //e.printStackTrace();
+        e.printStackTrace();
         error.add(e);
         Log.errTag("Glopion-Bootstrapper", e.toString());
         runOnUI(() -> Vars.ui.showException("Glopion-Bootstrapper Failed To Load", e));
