@@ -13,7 +13,9 @@ task base(type: Jar){
 
 }
 
-
+tasks.withType(JavaCompile) {
+    options.compilerArgs.addAll(['--release', '8'])//android 4.4 like java 8
+}
 
 task baseJar{
     dependsOn base//typical jar

@@ -129,7 +129,21 @@ allprojects {
             compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
 
         }
+        tasks.withType(JavaCompile){
+            options.encoding = "UTF-8"
+            options.compilerArgs += ["-Xlint:deprecation"]
 
+            options.forkOptions.jvmArgs.addAll([
+                    '--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
+                    '--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED'
+            ])
+        }
+        tasks.withType(Javadoc){
+            options{
+                addStringOption('Xdoclint:none', '-quiet')
+                addStringOption('-release', '16')
+            }
+        }
     }
 }
 subprojects {
@@ -214,11 +228,7 @@ task baseJar{
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-    options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
-    if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
-        options.compilerArgs.addAll(['--release', '8'])//android 4.4 like java 8
-    }
+    options.compilerArgs.addAll(['--release', '8'])//android 4.4 like java 8
 }
 //here we combine typical jar and dex jar to make
 //typical-dex.jar
