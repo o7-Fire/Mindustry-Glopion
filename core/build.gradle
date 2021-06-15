@@ -1,6 +1,6 @@
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_1_8
 
 task base(type: Jar){
     archiveFileName = "core.jar"//Mindustry-Glopion,jar
@@ -9,9 +9,8 @@ task base(type: Jar){
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
     }
     with jar
-    manifest {
-        attributes 'Main-Class': modsNJavaMain//what
-    }
+    manifest.attributes('Main-Class': modsNJavaMain)//what
+
 }
 
 
