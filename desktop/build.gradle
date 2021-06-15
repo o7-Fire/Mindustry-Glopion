@@ -1,6 +1,9 @@
 
 sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_11
+tasks.withType(JavaCompile) {
+    options.compilerArgs.addAll(['--release', '11'])//android 4.4 like java 8
+}
 ext{
     dependsProject = [':core']
 }
