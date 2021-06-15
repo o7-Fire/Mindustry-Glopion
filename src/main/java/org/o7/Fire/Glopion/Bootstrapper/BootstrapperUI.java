@@ -178,8 +178,9 @@ public class BootstrapperUI extends Mod {
         t.check("Force Update", Core.settings.getBool("glopion-auto-update", true), b -> Core.settings.put("glopion-auto-update", b)).row();
         t.button("Glopion Flavor [accent]" + Core.settings.getString("glopion-flavor", flavor), () -> {
             new BaseDialog("Glopion Flavor") {
+                boolean showIncompatible = false;
                 {
-                    addCloseButton();
+                  
                     build();
                 }
             
@@ -190,8 +191,23 @@ public class BootstrapperUI extends Mod {
                 }
             
                 void build() {
+                    buttons.clear();
+                    addCloseButton();
+                    if(showIncompatible){
+                        this.buttons.button("Hide Incompatible", Icon.book, () -> {
+                            showIncompatible = false;
+                            build();
+                        }).size(210.0F, 64.0F);
+                    }else {
+                        this.buttons.button("Show Incompatible", Icon.bookOpen, () -> {
+                            showIncompatible = true;
+                            build();
+                        }).size(210.0F, 64.0F);
+                    }
                     cont.clear();
+                   
                     Table table = new Table(t -> {
+                        boolean none = true;
                         TreeMap<String, String> map = new TreeMap<>();
                         for (Map.Entry<Object, Object> o : release.entrySet()) {
                             if ((o.getKey() + "").startsWith("Note"))
@@ -199,6 +215,8 @@ public class BootstrapperUI extends Mod {
                             else map.put(o.getKey() + "", o.getValue() + "");
                         }
                         for (Map.Entry<String, String> o : map.entrySet()) {
+                            boolean compatible = o.getKey().contains(Version.buildString());
+                            if (!compatible && !showIncompatible) continue;
                             Cell<TextButton> c = t.button(o.getKey() + ": " + o.getValue(), () -> {
                                 Core.settings.put("glopion-flavor", o.getKey() + "");
                                 build();
@@ -206,10 +224,13 @@ public class BootstrapperUI extends Mod {
                             if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + "")){
                                 c.color(Color.green);
                                 c.disabled(true);
-                            }else if (o.getKey().contains(Version.buildString())) c.color(Color.sky);
+                            }else if (compatible) c.color(Color.sky);
                             else c.color(Color.coral);
                             c.row();
+                            none = false;
                         }
+                        if(none)
+                            t.add("No Compatible Flavor").growX().growY().center().color(Color.orange);
                     });
                     ScrollPane scrollPane = new ScrollPane(table);
                     cont.add(scrollPane).growX().growY();
