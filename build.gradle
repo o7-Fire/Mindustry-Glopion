@@ -93,7 +93,7 @@ allprojects {
             sdkJar = new File(sdkRoot, "nope").getAbsolutePath()
         if(!new File(sdkD8).exists())
             sdkD8 = new File(sdkRoot, "nope").getAbsolutePath()
-
+        mindustryExecutable = getMindustryFile()
         //imagine writing json
         modhjson = ""
         modhjson += 'name: "' + modsNname + '"\n'
@@ -150,7 +150,9 @@ subprojects {
 
     dependencies{
         implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
-
+        testImplementation(files(mindustryExecutable))
+        testImplementation(rootProject)
+        compileOnly(files(mindustryExecutable))
         compileOnly(rootProject)
     }
 

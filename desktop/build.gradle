@@ -82,7 +82,7 @@ dependencies {
     compileOnly( 'org.apache.httpcomponents:httpclient:4.5.5'){
         because("runtime")
     }
-    testImplementation(rootProject)
+
     dependsProject.collect{ implementation(aproj(it))}
 
 }
