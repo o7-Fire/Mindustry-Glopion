@@ -116,9 +116,10 @@ allprojects {
             if(System.getProperty("modsNBE")  != null && !System.getProperty("modsNBE").isEmpty()) {
                 downloadMindustry(getMindustryURL(), getMindustryFile());
             }
-            File mindustry = getMindustryFile()
+            File mindustry = file(mindustryExecutable)
             if(mindustry.exists()) {
                 compileOnly(files(mindustry))
+                //testCompileOnly(files(mindustry))
                 testImplementation(files(mindustry))
             }else {//if you feel fancy remove this else
                 compileOnly("com.github.Anuken.Mindustry:desktop:$mindustryHash")
@@ -150,7 +151,6 @@ subprojects {
 
     dependencies{
         implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
-        testImplementation(files(mindustryExecutable))
         testImplementation(rootProject)
         compileOnly(files(mindustryExecutable))
         compileOnly(rootProject)
