@@ -32,6 +32,7 @@ public class GlopionCore extends Mod {
         Log.debug("Invoked @ static ctr", GlopionCore.class);
         moduleRegisterer = new ModuleRegisterer();
         moduleRegisterer.core();
+        
         if (Core.settings != null) OptionsDialog.load(k -> String.valueOf(Core.settings.get(k, null)));
         Pool.parallelAsync = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
             Thread t = Executors.defaultThreadFactory().newThread(r);
