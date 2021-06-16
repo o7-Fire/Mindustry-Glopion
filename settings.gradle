@@ -18,10 +18,11 @@ def use = { ... names ->
 }
 
 
-if(new File(settingsDir, '../Atom').exists()) {
+if(new File(settingsDir, '../Atom').exists()) {//to trick intellij so magic work in that folder
     use(
             ":Atom",
-            ":Atom:Atomic"
+            ":Atom:Atomic",
+            ":Atom:Desktop"
     )
 }
 include 'core'

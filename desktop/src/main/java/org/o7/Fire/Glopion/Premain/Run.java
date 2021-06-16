@@ -7,6 +7,10 @@ import Atom.Utility.Cache;
 import java.net.URL;
 
 public class Run {
+    //run configuration
+    //Classpath: Mindustry-Glopion.desktop.test
+    //Class org.o7.Fire.Glopion.Premain.Run
+    //JVM: 16
     public static void main(String[] args) throws Throwable {
         AtomicBootstrap bootstrap = new AtomicBootstrap();
         bootstrap.atomClassLoader = new AtomClassLoader(new URL[]{}) {
@@ -19,7 +23,7 @@ public class Run {
             System.setProperty("glopion-deepPatch", "1");
             System.setProperty("dev", "1");
         }
-        bootstrap.loadMain("Premain.MindustryLauncher", args);
+        bootstrap.loadMain(Run.class.getPackageName()+".MindustryLauncher", args);
     }
     
     public static class Server {

@@ -73,7 +73,7 @@ public class Main extends Mod {
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
                 ClassLoader parent = Main.class.getClassLoader();
-                while (parent.getParent() != null) parent = parent.getParent();
+                Log.info(parent.getClass().getSimpleName());
                 classLoader = Vars.platform.loadJar(jar, parent);
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
                 info = "Class: " + unloaded.getCanonicalName() + "\n" + "Flavor: " + flavor + "\n" + "Classpath: " + jar.absolutePath() + "\n" + "Size: " + jar.length() + " bytes\n" + "Classloader: " + classLoader.getClass().getSimpleName();

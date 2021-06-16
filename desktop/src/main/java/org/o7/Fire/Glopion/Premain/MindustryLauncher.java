@@ -8,7 +8,10 @@ public class MindustryLauncher {
         if (System.getProperty("dev") != null){
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
             Reflect.debug = true;
+            
         }
+        if(Reflect.debug)
+            System.out.println(MindustryLauncher.class.getClassLoader());
         DesktopLauncher.main(args);
     }
 }
