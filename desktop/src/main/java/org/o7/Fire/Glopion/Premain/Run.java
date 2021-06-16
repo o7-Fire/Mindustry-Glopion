@@ -1,4 +1,4 @@
-package Premain;
+package org.o7.Fire.Glopion.Premain;
 
 import Atom.Bootstrap.AtomicBootstrap;
 import Atom.Classloader.AtomClassLoader;

@@ -1,4 +1,4 @@
-package Premain;
+package org.o7.Fire.Glopion.Premain;
 
 import Atom.Reflect.Reflect;
 import mindustry.desktop.DesktopLauncher;

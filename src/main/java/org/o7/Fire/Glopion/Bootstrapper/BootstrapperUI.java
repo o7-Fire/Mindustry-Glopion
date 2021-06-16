@@ -37,6 +37,13 @@ import java.util.TreeMap;
 import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Bootstrapper.Main.*;
 public class BootstrapperUI extends Mod {
+    
+    public static void download(String url, Fi dest, Runnable done, Cons<Throwable> err){
+        boolean[] cancel = {false};
+        float[] progress = {0};
+        int[] length = {0};
+        download(url,dest,i -> length[0] = i, v -> progress[0] = v, () -> cancel[0],done,err);
+    }
     public static void download(String furl, Fi dest, Intc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
         Threads.daemon(() -> {
             try {
@@ -71,12 +78,12 @@ public class BootstrapperUI extends Mod {
     
     Properties release = new Properties();
     
-    //merge this
-    public static void downloadUI(String url) {
-        ui.showCustomConfirm(url, Main.jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", () -> BootstrapperUI.downloadGUI(url), Main::disable);
+
+    public static void downloadConfirm(String url, Fi jar, Runnable done) {
+        ui.showCustomConfirm(url, jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", () -> BootstrapperUI.downloadGUI(url, jar, done), Main::disable);
     }
     
-    public static void downloadGUI(String url) {
+    public static void downloadGUI(String url, Fi jar, Runnable done) {
         
         try {
             boolean[] cancel = {false};
@@ -85,12 +92,8 @@ public class BootstrapperUI extends Mod {
             
             
             BaseDialog dialog = new BaseDialog("Downloading");
-            download(url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
-                if (Main.jar.exists()){
-                    Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
-                }else{
-                    ui.showErrorMessage(Main.jar.absolutePath() + " still doesn't exist ??? how");
-                }
+            download(url, jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], ()->{
+                done.run();
                 dialog.hide();
             }, e -> {
                 dialog.hide();
@@ -136,19 +139,24 @@ public class BootstrapperUI extends Mod {
         if (url == null) return;
         String path = flavor.replace('-', '/') + ".jar";
         jar = Core.files.cache(path);
-        if (!jar.exists() || Core.settings.getBool("glopion-auto-update", true)){
+        if (!jar.exists() || Core.settings.getBool("glopion-auto-update", false)){
             Log.infoTag("Glopion-Bootstrapper", "");
             Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
             boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || !jar.exists();
             if (!Vars.headless && b){
                 //sometime jar already exist
-                Main.runOnUI(() -> BootstrapperUI.downloadUI(url));
+                Main.runOnUI(() -> BootstrapperUI.downloadConfirm(url, jar,() -> {
+                    if (Main.jar.exists()){
+                        Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+                    }else{
+                        ui.showErrorMessage(jar.absolutePath() + " still doesn't exist ??? how");
+                    }
+                  
+                }));
             }else{
                 long size = jar.length();
-                boolean[] cancel = {false};
-                float[] progress = {0};
-                int[] length = {0};
-                download(url, Main.jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
+             
+                download(url, Main.jar,  () -> {
                     if (downloadThing || size != jar.length())
                         runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
                 }, Main::handleException);
@@ -175,7 +183,7 @@ public class BootstrapperUI extends Mod {
     public void buildUI(Table t) {
         t.reset();
         t.add("Glopion Bootstrapper Settings").growX().center().row();
-        t.check("Force Update", Core.settings.getBool("glopion-auto-update", true), b -> Core.settings.put("glopion-auto-update", b)).row();
+        t.check("Force Update", Core.settings.getBool("glopion-auto-update", false), b -> Core.settings.put("glopion-auto-update", b)).row();
         t.button("Glopion Flavor [accent]" + Core.settings.getString("glopion-flavor", flavor), () -> {
             new BaseDialog("Glopion Flavor") {
                 boolean showIncompatible = false;
