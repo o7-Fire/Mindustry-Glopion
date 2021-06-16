@@ -4,7 +4,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_16
 tasks.withType(JavaCompile) {
     options.compilerArgs.addAll(['--release', '11'])//android 4.4 like java 8
 }
