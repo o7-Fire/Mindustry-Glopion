@@ -1,3 +1,7 @@
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_11
@@ -6,14 +10,85 @@ tasks.withType(JavaCompile) {
 }
 ext{
     dependsProject = [':core']
+
+
 }
+static String getHttp(String jarUrl, Dependency dependency){
+    try {
+        URL jarfile = new URL(jarUrl)
+        InputStream inStream = jarfile.openStream();
+        if (inStream != null) {
+            String qualified = String.format("%s:%s:%s", dependency.group, dependency.name, dependency.version)
+
+            return qualified + " " + jarUrl
+        }
+    }catch(Exception e){
+
+    }
+    return null;
+}
+task writeDependency(){
+  doLast{
+      File txt = new File(projectDir, "src/main/resources/dependencies")
+      txt.parentFile.mkdirs()
+      txt = txt.getAbsoluteFile()
+      println txt
+      txt.delete()
+      Properties depends = new Properties();
+      ArrayList<Future<String>> task = new ArrayList<>();
+      ExecutorService service = Executors.newCachedThreadPool();
+      configurations.compileOnly.allDependencies.each { dependency ->
+          if(!dependency.reason.equals("runtime"))
+              for (ArtifactRepository repository : project.repositories.asList()) {
+                  try {
+                      String url = repository.properties.get('url')
+                      String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
+                              dependency.group.replace('.', '/'), dependency.name, dependency.version,
+                              dependency.name, dependency.version)
+                      Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
+                          @Override
+                          String call() throws Exception {
+                              return getHttp(jarUrl, dependency);
+                          }
+                      });
+                      task.add(f);
+                  }catch(Exception e){}
+              }
+          }
+      println task.size() + " searching"
+      for(Future<String> f : task) {
+          //println f.get()
+          String kyys = f.get()
+          if(kyys == null)continue;
+
+          String[] kyss = kyys.split(" ")
+          String qualified = kyss[0], jarUrl = kyss[1]
+
+          println(qualified + " -> " + jarUrl);
+          if(depends.getProperty(qualified))
+              jarUrl = depends.getProperty(qualified) + " " + jarUrl;
+          depends.setProperty(qualified, jarUrl)
+      }
+      Calendar c = Calendar.getInstance();
+      String date = String.format(Locale.UK, "%tl:%tM:%tS %tp %tB %te, %tY", c, c, c, c, c, c, c)
+      depends.store(new FileWriter(txt), "this tbh \n"+date)
+
+      }
+
+  }
+
 dependencies {
     implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
+    compileOnly( 'org.apache.httpcomponents:httpclient:4.5.5'){
+        because("runtime")
+    }
     testImplementation(rootProject)
     dependsProject.collect{ implementation(aproj(it))}
+
 }
 
 task base( type: Jar , dependsOn: dependsProject.collect{ it+":compileJava"}) {
+    dependsOn(writeDependency)
     archiveFileName = "desktop.jar"
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest.attributes('Main-Class': modsNJavaMain)//what
