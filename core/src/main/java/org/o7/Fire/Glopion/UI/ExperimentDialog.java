@@ -22,8 +22,10 @@ import mindustry.gen.Icon;
 import org.o7.Fire.Glopion.Experimental.*;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Patch.Translation;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class ExperimentDialog extends ScrollableDialog {
@@ -32,9 +34,9 @@ public class ExperimentDialog extends ScrollableDialog {
     }
     
     protected HashSet<Class<? extends Experimental>> experimental = new HashSet<>();
-    
+    protected HashMap<Class<? extends Experimental>, Experimental> cache = new HashMap<>();
     public ExperimentDialog() {
-        experimental.addAll(Arrays.asList(ThreadStackTrace.class, OutOfMemory.class, LockAllContent.class, SwingBox.class, UnlockAllContent.class));
+        experimental.addAll(Arrays.asList(RelayChatToWebhook.class, LogToDiscordWebhook.class, ThreadStackTrace.class, OutOfMemory.class, LockAllContent.class, SwingBox.class, UnlockAllContent.class));
         if (!Vars.mobile) experimental.addAll(InformationCenter.getExtendedClass(Experimental.class));
         StringBuilder sb = new StringBuilder();
         sb.append("Experimental: [");
@@ -49,9 +51,16 @@ public class ExperimentDialog extends ScrollableDialog {
     protected void setup() {
         try {
             for (Class<? extends Experimental> c : experimental) {
-                table.button(c.getSimpleName(), () -> {
+                table.button(Translation.get(c.getName()), () -> {
                     try {
-                        c.getDeclaredConstructor().newInstance().run();
+                        if(cache.containsKey(c)){
+                            cache.get(c).run();
+                        }
+                        
+                        Experimental e = c.getDeclaredConstructor().newInstance();
+                        e.run();
+                        if(e.reusable())
+                            cache.put(c,e);
                     }catch(Throwable t){
                         Vars.ui.showException(t);
                         WarningHandler.handleMindustry(t);

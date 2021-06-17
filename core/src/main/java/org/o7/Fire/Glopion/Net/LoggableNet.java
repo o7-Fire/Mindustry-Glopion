@@ -31,6 +31,12 @@ public class LoggableNet extends Net {
         
     }
     
+   
+    @Override
+    public void pingHostThread(String address, int port, Cons<Host> valid, Cons<Exception> failed) {
+        net.pingHostThread(address, port, valid, failed);
+    }
+    
     @Override
     public void handleException(Throwable e) {
         net.handleException(e);

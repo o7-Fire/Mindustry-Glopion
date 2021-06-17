@@ -31,6 +31,8 @@
 
 package org.o7.Fire.Glopion.Event;
 
+import arc.util.Strings;
+
 public class EventExtended {
     public enum Connect {
         Disconnected, Connected
@@ -57,6 +59,10 @@ public class EventExtended {
     public static class Log {
         public String result;
     
+        @Override
+        public String toString() {
+            return Strings.stripColors(Strings.stripGlyphs(result));
+        }
     
         public Log(String result) {
             this.result = result;
