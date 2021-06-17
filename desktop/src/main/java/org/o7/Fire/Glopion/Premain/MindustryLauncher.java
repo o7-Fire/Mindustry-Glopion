@@ -3,6 +3,8 @@ package org.o7.Fire.Glopion.Premain;
 import Atom.Reflect.Reflect;
 import arc.Events;
 import arc.files.Fi;
+import arc.func.Cons;
+import arc.struct.Seq;
 import arc.util.Log;
 import mindustry.ClientLauncher;
 import mindustry.Vars;
@@ -10,10 +12,14 @@ import mindustry.core.Platform;
 import mindustry.desktop.DesktopLauncher;
 import mindustry.game.EventType;
 import mindustry.mod.ModClassLoader;
+import mindustry.mod.Scripts;
+import mindustry.net.Net;
+import mindustry.type.Publishable;
 import net.jpountz.util.Native;
+import rhino.Context;
 
 public class MindustryLauncher {
-    static DIWHYClassloader diwhyClassloader = (DIWHYClassloader) MindustryLauncher.class.getClassLoader();
+  
     public static void main(String[] args) {
         if (System.getProperty("dev") != null){
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
@@ -22,8 +28,8 @@ public class MindustryLauncher {
         }
       
         if(Reflect.debug){
-            System.out.println(MindustryLauncher.class.getClassLoader().getClass().getCanonicalName());
-            System.out.println(ModClassLoader.class.getClassLoader().getClass().getCanonicalName());
+            System.out.println("Mindustry Jar Classloader: "+MindustryLauncher.class.getClassLoader().getClass().getCanonicalName());
+            System.out.println("Current Jar Classloader: " + ModClassLoader.class.getClassLoader().getClass().getCanonicalName());
             registerPatcher();
         }
         try {
@@ -52,19 +58,122 @@ public class MindustryLauncher {
         });
     }
     /**  patch after Vars.platform = this {@link ClientLauncher#setup()} to gain classloader control over mods
-     * i use Intellij breakpoint evaluate
+     * i use Intellij breakpoint evaluate or just do some dark magic
      * */
     public static void patchClassloader(){
         Platform inert = Vars.platform;
+       
         Vars.platform = new Platform() {
             @Override
             public ClassLoader loadJar(Fi jar, ClassLoader parent) throws Exception {
-                if(jar.name().contains("Glopion")){
+                if(jar.absolutePath().contains("Glopion")){
                     Log.info("Found The Glopion, try using system classloader");
-                    diwhyClassloader.addURL(jar.file().toURI().toURL());
-                    return diwhyClassloader;
-                }else return inert.loadJar(jar,parent);
+                    return MindustryLauncher.class.getClassLoader();//we do some little trolling
+                }else{
+                    return inert.loadJar(jar, parent);
+                }
+            }
+    
+            @Override
+            public void updateLobby() {
+                inert.updateLobby();
+            }
+    
+            @Override
+            public void inviteFriends() {
+                inert.inviteFriends();
+            }
+    
+            @Override
+            public void publish(Publishable pub) {
+                inert.publish(pub);
+            }
+    
+            @Override
+            public void viewListing(Publishable pub) {
+                inert.viewListing(pub);
+            }
+    
+            @Override
+            public void viewListingID(String mapid) {
+                inert.viewListingID(mapid);
+            }
+    
+            @Override
+            public Seq<Fi> getWorkshopContent(Class<? extends Publishable> type) {
+                return inert.getWorkshopContent(type);
+            }
+    
+            @Override
+            public void openWorkshop() {
+                inert.openWorkshop();
+            }
+    
+            @Override
+            public Net.NetProvider getNet() {
+                return inert.getNet();
+            }
+    
+            @Override
+            public Scripts createScripts() {
+                return inert.createScripts();
+            }
+    
+            @Override
+            public Context getScriptContext() {
+                return inert.getScriptContext();
+            }
+    
+            @Override
+            public void updateRPC() {
+                inert.updateRPC();
+            }
+    
+            @Override
+            public String getUUID() {
+                return inert.getUUID();
+            }
+    
+            @Override
+            public void shareFile(Fi file) {
+                inert.shareFile(file);
+            }
+    
+            @Override
+            public void export(String name, String extension, FileWriter writer) {
+                inert.export(name, extension, writer);
+            }
+    
+            @Override
+            public void showFileChooser(boolean open, String title, String extension, Cons<Fi> cons) {
+                inert.showFileChooser(open, title, extension, cons);
+            }
+    
+            @Override
+            public void showFileChooser(boolean open, String extension, Cons<Fi> cons) {
+                inert.showFileChooser(open, extension, cons);
+            }
+    
+            @Override
+            public void showMultiFileChooser(Cons<Fi> cons, String... extensions) {
+                inert.showMultiFileChooser(cons, extensions);
+            }
+    
+            @Override
+            public void hide() {
+                inert.hide();
+            }
+    
+            @Override
+            public void beginForceLandscape() {
+                inert.beginForceLandscape();
+            }
+    
+            @Override
+            public void endForceLandscape() {
+                inert.endForceLandscape();
             }
         };
+        
     }
 }

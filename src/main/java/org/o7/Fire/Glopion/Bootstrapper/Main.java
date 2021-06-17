@@ -10,7 +10,10 @@ import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class Main extends Mod {
     public static String flavor = Core.settings.getString("glopion-flavor", "Release-" + Version.buildString());
@@ -75,8 +78,24 @@ public class Main extends Mod {
                 ClassLoader parent = Main.class.getClassLoader();
                 Log.info(parent.getClass().getSimpleName());
                 classLoader = Vars.platform.loadJar(jar, parent);
+                InputStream is = classLoader.getResourceAsStream("dependencies");
+                if(is != null){
+                    Log.info("found dependencies list");
+                    checkDependency(is);
+                }
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
-                info = "Class: " + unloaded.getCanonicalName() + "\n" + "Flavor: " + flavor + "\n" + "Classpath: " + jar.absolutePath() + "\n" + "Size: " + jar.length() + " bytes\n" + "Classloader: " + classLoader.getClass().getSimpleName();
+                StringBuilder sb = new StringBuilder().append("Class: ").append(unloaded.getCanonicalName()).append("\n");
+                sb.append("Flavor: ").append(flavor).append("\n");
+                sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
+                sb.append("Size: ").append(jar.length()).append(" bytes\n");
+                sb.append("Classloader: ").append(classLoader.getClass().getSimpleName());
+                if(is != null){
+                    sb.append("Dependency: ").append("\n");
+                    for(Object o : dependencies.keySet()){
+                        sb.append(" ").append(o).append("\n");
+                    }
+                }
+                info = sb.toString();
             }catch(Throwable e){
                 handleException(e);
                 return;
@@ -88,6 +107,12 @@ public class Main extends Mod {
         
         
     }
+    public static Properties dependencies = new Properties();
+    private static void checkDependency(InputStream is) throws IOException {
+        dependencies.load(is);
+        
+    }
+    
     public static void handleException(Throwable e) {
         e.printStackTrace();
         error.add(e);

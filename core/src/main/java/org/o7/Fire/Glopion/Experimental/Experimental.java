@@ -35,4 +35,7 @@ package org.o7.Fire.Glopion.Experimental;
 public interface Experimental {
     
     void run();
+    default boolean reusable(){
+        return true;
+    }
 }
