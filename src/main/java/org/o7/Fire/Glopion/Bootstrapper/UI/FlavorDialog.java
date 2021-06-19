@@ -27,7 +27,7 @@ public class FlavorDialog extends BaseDialog {
         bootstrapper = main;
         shown(this::build);
     }
-    boolean showIncompatible = false, sameType = true, sameVersion = true, compatibleBootstrapperVersion = true;
+    boolean showIncompatible = false, sameModifier = true, sameVersion = true, compatibleBootstrapperVersion = true;
     @Override
     public void hide() {
         super.hide();
@@ -53,8 +53,8 @@ public class FlavorDialog extends BaseDialog {
             sameVersion = b;
             build();
         }).growX().row();
-        cont.check("Same Mindustry Type",sameType, b-> {
-            sameType = b;
+        cont.check("Same Mindustry Modifier",sameModifier, b-> {
+            sameModifier = b;
             build();
         }).growX().row();
         cont.check("Compatible With Bootstrapper Version",compatibleBootstrapperVersion, b-> {
@@ -71,7 +71,7 @@ public class FlavorDialog extends BaseDialog {
             }
             for (Map.Entry<String, String> o : map.entrySet()) {
                 Seq<String> key = Seq.with(o .getKey().split("-"));
-                long bootstrapMin = 0;
+                long bootstrapMin = Long.MAX_VALUE-1;
                 int bootstrapIndex = key.indexOf("Bootstrap");
                 if(bootstrapIndex != -1){
                     try {
@@ -81,11 +81,11 @@ public class FlavorDialog extends BaseDialog {
                     }
                 }
                 boolean mindustryVersionCompatible =  key.contains(Version.buildString());
-                boolean mindustryTypeCompatible = key.contains(Version.type);
+                boolean mindustryModifierCompatible = key.contains(Version.modifier);
                 boolean bootstrapperCompatible = bootstrapMin < SharedBootstrapper.version;
-                if (!bootstrapperCompatible && !compatibleBootstrapperVersion) continue;
-                if (!mindustryTypeCompatible && !sameType) continue;
-                if (!mindustryVersionCompatible && !sameVersion) continue;
+                if (!bootstrapperCompatible && compatibleBootstrapperVersion) continue;
+                if (!mindustryModifierCompatible && sameModifier) continue;
+                if (!mindustryVersionCompatible && sameVersion) continue;
                 Cell<TextButton> c = t.button(o.getKey() + ": " + o.getValue(), () -> {
                     Core.settings.put("glopion-flavor", o.getKey() + "");
                     build();
@@ -94,7 +94,7 @@ public class FlavorDialog extends BaseDialog {
                     c.color(Color.green);
                     c.disabled(true);
                     
-                } else if(!bootstrapperCompatible || !mindustryTypeCompatible)c.color(Color.scarlet);
+                } else if(!bootstrapperCompatible || !mindustryModifierCompatible)c.color(Color.scarlet);
                 else if(!mindustryVersionCompatible)c.color(Color.pink);
                 else c.color(Color.sky);
                 c.row();

@@ -93,7 +93,7 @@ dependencies {
     }
     testImplementation("com.github.o7-Fire.Atomic-Library:Atomic:$atomHash")
     testImplementation("com.github.o7-Fire.Atomic-Library:Desktop:$atomHash")
-    compileOnly(aproj(":core")){
+    implementation(aproj(":core")){
         exclude group:"com.github.o7-Fire.Atomic-Library", module:"Atomic"
     }
 
@@ -109,7 +109,7 @@ task base(type: Jar , dependsOn: ":core:compileJava") {
         configurations.runtimeClasspath.filter{it.exists()}.collect {it.isDirectory() ? it : zipTree(it)}
     }
 
-    from files(aproj(":core").sourceSets.main.output)
+    from files(aproj(":core").sourceSets.main.output)//Include core project class, gradle is shit
 
 }
 task unVersion(type: JavaExec) {
