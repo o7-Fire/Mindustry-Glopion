@@ -17,7 +17,7 @@ import java.io.Writer;
 
 public class AtomicLogger extends ModsModule {
     public static Writer writer;
-    public static Seq<String> logBuffer = new Seq<>();
+    public static final Seq<String> logBuffer = new Seq<>();
     public static String[] tags = {"[green][D][]", "[royal][I][]", "[yellow][W][]", "[scarlet][E][]", ""};
     public static String[] color = {"[green]", "[royal]", "[yellow]", "[scarlet]", "[white]"};
     public static String[] stags = {"&lc&fb[D]", "&lb&fb[I]", "&ly&fb[W]", "&lr&fb[E]", ""};

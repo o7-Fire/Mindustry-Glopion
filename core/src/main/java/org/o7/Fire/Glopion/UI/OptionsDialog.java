@@ -9,11 +9,11 @@ import arc.struct.ObjectMap;
 import arc.util.Log;
 import mindustry.Vars;
 import mindustry.gen.Icon;
-import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Patch.Translation;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -21,18 +21,16 @@ public class OptionsDialog extends ScrollableDialog {
     public static final HashSet<Class<?>> classSettings = new HashSet<>();
     public static Cons2<String, String> saveSettings = (k, v) -> Core.settings.put(k, v);
     
-    static {
-        classSettings.add(GlopionCore.class);
-    }
+
     
     protected final ObjectMap<String, String> temp = new ObjectMap<>();
     
     public static ArrayList<Field> getSettingsField() {
         ArrayList<Field> fields = new ArrayList<>();
         for (Class<?> c : classSettings) {
-            for (Field f : c.getFields()) {
+            for (Field f : c.getDeclaredFields()) {
                 if (f.getType().isPrimitive() || f.getType() == String.class){
-                    if (f.getName().endsWith("Settings")){
+                    if (f.getName().endsWith("Settings") && Modifier.isPublic(f.getModifiers()) && !Modifier.isFinal(f.getModifiers())){
                         fields.add(f);
                     }
                 }

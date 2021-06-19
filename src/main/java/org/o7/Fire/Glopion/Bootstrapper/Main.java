@@ -27,10 +27,11 @@ public class Main extends Mod {
     public static Main main;
     public static String classpath = "org.o7.Fire.Glopion.";
     public static String info = "None";
-    public static final ArrayList<Throwable> error;
+    public static final ArrayList<Throwable> error = new ArrayList<>();
     
-    static {
-        error = new ArrayList<>();
+
+    
+    public Main() {
         classpath = classpath + flavor.split("-")[0] + "Launcher";
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
@@ -40,9 +41,6 @@ public class Main extends Mod {
         }catch(Throwable t){
             handleException(t);
         }
-    }
-    
-    public Main() {
         main = this;
         bootstrapper = new BootstrapperUI();
         if (unloaded != null){
