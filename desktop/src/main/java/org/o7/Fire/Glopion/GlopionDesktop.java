@@ -9,7 +9,7 @@ public class GlopionDesktop extends GlopionCore {
     static {
         Log.debug("Invoked @ static ctr", GlopionDesktop.class);
     }
-    
+    //oh
     @Override
     public void preInit() throws Throwable {
         Log.debug("Invoked @ preInit", GlopionDesktop.class.getCanonicalName());
