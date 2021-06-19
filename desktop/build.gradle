@@ -19,9 +19,10 @@ static String getHttp(String jarUrl, Dependency dependency){
             return qualified + " " + jarUrl
         }
     }catch(FileNotFoundException e){
-
+        System.err.println(e.toString());
+        System.err.println(jarUrl);
     }catch(Exception e){
-       System.err.println(e.toString());
+        System.err.println(e.toString());
         System.err.println(jarUrl);
     }
     return null;
