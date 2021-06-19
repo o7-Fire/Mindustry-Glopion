@@ -21,7 +21,8 @@ static String getHttp(String jarUrl, Dependency dependency){
     }catch(FileNotFoundException e){
 
     }catch(Exception e){
-        e.printStackTrace()
+       System.err.println(e.toString());
+        System.err.println(jarUrl);
     }
     return null;
 }
@@ -109,7 +110,7 @@ task base(type: Jar , dependsOn: ":core:compileJava") {
 
 }
 task unVersion(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.main.compileClasspath
     main = "org.o7.Fire.Glopion.Version"
     setWorkingDir(rootDir)
 }
