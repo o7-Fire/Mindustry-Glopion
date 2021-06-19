@@ -184,7 +184,7 @@ public class BootstrapperUI extends Mod {
     
     public void buildUI() {
         t.reset();
-        t.add("Glopion Bootstrapper Settings").growX().center().row();
+        t.add("Glopion Bootstrapper Settings ["+SharedBootstrapper.version+"]").growX().center().row();
         t.check("Force Update", Core.settings.getBool("glopion-auto-update", false), b -> Core.settings.put("glopion-auto-update", b)).row();
         t.button("Glopion Flavor [accent]" + Core.settings.getString("glopion-flavor", flavor), flavorDialog::show).disabled(s -> release.isEmpty()).growX().row();
         t.button("Provider URL", providerURLDialog::show).growX().row();

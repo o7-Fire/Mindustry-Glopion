@@ -10,7 +10,6 @@ import arc.struct.Seq;
 import arc.util.Log;
 import mindustry.Vars;
 import mindustry.core.Version;
-import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.Bootstrapper.BootstrapperUI;
 import org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper;
@@ -27,7 +26,7 @@ public class FlavorDialog extends BaseDialog {
         bootstrapper = main;
         shown(this::build);
     }
-    boolean showIncompatible = false, sameModifier = true, sameVersion = true, compatibleBootstrapperVersion = true;
+    boolean sameModifier = true, sameVersion = true, compatibleBootstrapperVersion = true;
     @Override
     public void hide() {
         super.hide();
@@ -37,17 +36,6 @@ public class FlavorDialog extends BaseDialog {
     void build() {
         buttons.clear();
         addCloseButton();
-        if(showIncompatible){
-            this.buttons.button("Hide Incompatible", Icon.book, () -> {
-                showIncompatible = false;
-                build();
-            }).size(210.0F, 64.0F);
-        }else {
-            this.buttons.button("Show Incompatible", Icon.bookOpen, () -> {
-                showIncompatible = true;
-                build();
-            }).size(210.0F, 64.0F);
-        }
         cont.clear();
         cont.check("Same Mindustry Version",sameVersion, b-> {
             sameVersion = b;
