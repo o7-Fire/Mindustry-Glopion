@@ -150,7 +150,7 @@ allprojects {
 subprojects {
 
     dependencies{
-
+        testImplementation(files(mindustryExecutable))
         testImplementation(rootProject)
         compileOnly(files(mindustryExecutable))
         compileOnly(rootProject)
@@ -340,7 +340,7 @@ task run(type: JavaExec) {
     File mindustry = getMindustryFile()
     println(mindustry.getAbsolutePath())
     classpath = files(mindustry.getAbsolutePath())
-    classpath += sourceSets.main.runtimeClasspath
+    //classpath += sourceSets.main.runtimeClasspath//will append classpath to java
     main = "mindustry.desktop.DesktopLauncher"
 }
 task resolveDependencies{
