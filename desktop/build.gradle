@@ -45,6 +45,8 @@ task writeDependency(){
               for (ArtifactRepository repository : project.repositories.asList()) {
                   try {
                       String url = repository.properties.get('url')
+                      if(!url.endsWith("/"))
+                          url = url+"/"
                       String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
                               dependency.group.replace('.', '/'), dependency.name, dependency.version,
                               dependency.name, dependency.version)
