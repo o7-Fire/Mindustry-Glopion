@@ -14,6 +14,7 @@ import mindustry.mod.Mods;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -121,12 +122,20 @@ public class Main extends Mod {
                 InputStream is = classLoader.getResourceAsStream("dependencies");
                 if(is != null){
                     Log.info("found dependencies list");
+                    if(Vars.mobile)
+                        Log.err("IN MOBILE");
                     checkDependency(is);
                 }
                 
                 if(!Vars.mobile && somethingMissing()){
                     downloadLibrary();
                 }else{
+                    if(downloadFile.size() != 0){
+                        Seq<URL> urls = new Seq<>();
+                        for(File s : downloadFile.values())
+                            urls.add(s.toURI().toURL());
+                        classLoader = new URLClassLoader(urls.toArray(), classLoader);
+                    }
                     unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
                 }
                 StringBuilder sb = new StringBuilder().append("Class: ").append(unloaded).append("\n");

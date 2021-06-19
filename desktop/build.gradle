@@ -19,8 +19,8 @@ static String getHttp(String jarUrl, Dependency dependency){
             return qualified + " " + jarUrl
         }
     }catch(FileNotFoundException e){
-        System.err.println(e.toString());
-        System.err.println(jarUrl);
+        //System.err.println(e.toString());
+        //System.err.println(jarUrl);
     }catch(Exception e){
         System.err.println(e.toString());
         System.err.println(jarUrl);
@@ -64,7 +64,7 @@ task writeDependency(){
       }
       println task.size() + " searching"
       for(Future<String> f : task) {
-          println f.get()
+          //println f.get()
           String kyys = f.get()
           if(kyys == null)continue;
 

@@ -12,6 +12,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 //Java 8+ only
 public class SharedBootstrapper {
+    public static final long version = 11;
     @NotNull
     public static File parent = null;
     public static Properties dependencies = new Properties();
@@ -19,6 +20,9 @@ public class SharedBootstrapper {
     public static HashMap<String, File> downloadFile = new HashMap<>();
     public static void checkDependency(InputStream is) throws IOException {
         if(parent == null)throw new NullPointerException("Cache File is Null");
+        downloadFile.clear();
+        downloadList.clear();
+        dependencies.clear();
         dependencies.load(is);
         if(dependencies.size() == 0)return;
         SharedBootstrapper.parent.mkdirs();
