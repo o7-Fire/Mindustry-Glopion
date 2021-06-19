@@ -150,7 +150,7 @@ allprojects {
 subprojects {
 
     dependencies{
-        implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
+
         testImplementation(rootProject)
         compileOnly(files(mindustryExecutable))
         compileOnly(rootProject)
