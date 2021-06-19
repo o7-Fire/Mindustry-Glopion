@@ -70,7 +70,11 @@ public class Main extends Mod {
     }
   
     private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator){
-        if(!iterator.hasNext())return;
+        if(!iterator.hasNext()){
+            if(!Vars.headless)
+                Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+            return;
+        }
         Map.Entry<String, File> s = iterator.next();
         if(s.getValue().exists()){
             Core.app.post(()->downloadLibrary0(iterator));
@@ -131,10 +135,12 @@ public class Main extends Mod {
                     downloadLibrary();
                 }else{
                     if(downloadFile.size() != 0){
-                        Seq<URL> urls = new Seq<>();
+                        URL[] urls = new URL[downloadFile.values().size() + 1];
+                        int i = 0;
                         for(File s : downloadFile.values())
-                            urls.add(s.toURI().toURL());
-                        classLoader = new URLClassLoader(urls.toArray(), classLoader);
+                            urls[i++] = (s.toURI().toURL());
+                        urls[i] = jar.file().toURI().toURL();
+                        classLoader = new URLClassLoader(urls, parent);
                     }
                     unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
                 }
@@ -143,10 +149,10 @@ public class Main extends Mod {
                 sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
                 sb.append("Size: ").append(jar.length()).append(" bytes\n");
                 sb.append("Classloader: ").append(classLoader.getClass()).append("\n");
-                if(is != null){
+                if(dependencies.size() != 0){
                     sb.append("Dependency: ").append("\n");
                     for(Object o : dependencies.keySet()){
-                        sb.append(" -").append(o).append("\n");
+                        sb.append(" -").append(o).append("=").append(downloadFile.get(String.valueOf(o))).append("\n");
                     }
                 }
                 info = sb.toString();

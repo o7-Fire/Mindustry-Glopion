@@ -31,7 +31,6 @@ public class GlopionCore extends Mod implements Module {
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);
-        
     }
     
     public GlopionCore() {
