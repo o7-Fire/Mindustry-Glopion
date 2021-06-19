@@ -7,6 +7,7 @@ import arc.util.Log;
 import mindustry.mod.Mod;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import org.o7.Fire.Glopion.UI.AtomicDialog;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
@@ -15,7 +16,7 @@ import org.o7.Fire.Glopion.UI.WorldInformation;
 
 import java.util.concurrent.Executors;
 
-public class GlopionCore extends Mod {
+public class GlopionCore extends Mod implements Module {
     public static AtomicDialog modsMenu;
     public static boolean test;
     //public static CommandsListFrag commFrag;
@@ -30,20 +31,33 @@ public class GlopionCore extends Mod {
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);
+        
+    }
+    
+    public GlopionCore() {
+        Log.debug("Invoked @ ctr", GlopionCore.class);
+        try {
+            preInit();
+        }catch(Throwable throwable){
+            WarningHandler.handleMindustry(throwable);
+        }
+        
+       
+    }
+    
+    @Override
+    public void preInit() throws Throwable {
+        Log.debug("Invoked @ preInit", GlopionCore.class.getCanonicalName());
         moduleRegisterer = new ModuleRegisterer();
         moduleRegisterer.core();
-        
-        if (Core.settings != null) OptionsDialog.load(k -> String.valueOf(Core.settings.get(k, null)));
+        OptionsDialog.classSettings.add(GlopionCore.class);
+        if (Core.settings != null) OptionsDialog.load(k -> Core.settings.getString(k, null));
         Pool.parallelAsync = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
             Thread t = Executors.defaultThreadFactory().newThread(r);
             t.setName(t.getName() + "-Atomic-Executor");
             t.setDaemon(true);
             return t;
         });
-    }
-    
-    public GlopionCore() {
-        Log.debug("Invoked @ ctr", GlopionCore.class);
         moduleRegisterer.preInit();
     }
     

@@ -16,6 +16,8 @@
 
 package org.o7.Fire.Glopion.UI;
 
+import Atom.Utility.Pool;
+import arc.Core;
 import arc.input.KeyCode;
 import mindustry.Vars;
 import mindustry.gen.Icon;
@@ -38,7 +40,7 @@ public class LogView extends ScrollableDialog {
                 execute();
             }
         });
-        
+        addNavButton("Execute",Icon.rightOpen,this::execute);
     }
     
     ;
@@ -49,7 +51,6 @@ public class LogView extends ScrollableDialog {
             t.field(see, s -> {
                 see = s;
             }).growX().tooltip("Javascript console");
-            t.button(Icon.add, this::execute);
         }).growX();
         
         table.row();
@@ -69,11 +70,15 @@ public class LogView extends ScrollableDialog {
         }
         return lastLog;
     }
-    
+    /** ???? */
     private void execute() {
-        AtomicLogger.logBuffer.add(Vars.mods.getScripts().runConsole(see));
-        AtomicLogger.logBuffer.add(">" + see);
-        
+        Pool.daemon(()->{
+            Core.app.post(()->{
+                String eval = Vars.mods.getScripts().runConsole(see);
+                AtomicLogger.logBuffer.add(eval);
+                AtomicLogger.logBuffer.add(">" + see);
+            });
+        }).start();
     }
     
 }
