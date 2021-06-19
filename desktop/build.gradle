@@ -9,36 +9,37 @@ tasks.withType(JavaCompile) {
     options.compilerArgs.addAll(['--release', '11'])//android 4.4 like java 8
 }
 
-static String getHttp(String jarUrl, Dependency dependency){
+static String getHttp(String jarUrl, Dependency dependency) {
     try {
         URL jarfile = new URL(jarUrl)
-        InputStream inStream = jarfile.openStream();
+        InputStream inStream = jarfile.openStream()
         if (inStream != null) {
             String qualified = String.format("%s:%s:%s", dependency.group, dependency.name, dependency.version)
 
             return qualified + " " + jarUrl
         }
-    }catch(FileNotFoundException e){
+    } catch (FileNotFoundException e) {
         //System.err.println(e.toString());
         //System.err.println(jarUrl);
-    }catch(Exception e){
-        System.err.println(e.toString());
-        System.err.println(jarUrl);
+    } catch (Exception e) {
+        System.err.println(e.toString())
+        System.err.println(jarUrl)
     }
-    return null;
+    return null
 }
-task writeDependency(){
+
+task writeDependency() {
     inputs.file(getBuildFile())
     File txt = new File(projectDir, "src/main/resources/dependencies")
     txt.parentFile.mkdirs()
     txt = txt.getAbsoluteFile()
     txt.createNewFile()
-
+    doLast {
         println txt
         txt.delete()
-        Properties depends = new Properties();
-        ArrayList<Future<String>> task = new ArrayList<>();
-        ExecutorService service = Executors.newCachedThreadPool();
+        Properties depends = new Properties()
+        ArrayList<Future<String>> task = new ArrayList<>()
+        ExecutorService service = Executors.newCachedThreadPool()
         configurations.compileOnly.allDependencies.each { dependency ->
 
             if (dependency.reason == "runtime") {
@@ -54,10 +55,10 @@ task writeDependency(){
                         Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
                             @Override
                             String call() throws Exception {
-                                return getHttp(jarUrl, dependency);
+                                return getHttp(jarUrl, dependency)
                             }
-                        });
-                        task.add(f);
+                        })
+                        task.add(f)
                     } catch (Exception e) {
                     }
                 }
@@ -67,47 +68,47 @@ task writeDependency(){
         for (Future<String> f : task) {
             //println f.get()
             String kyys = f.get()
-            if (kyys == null) continue;
+            if (kyys == null) continue
 
             String[] kyss = kyys.split(" ")
             String qualified = kyss[0], jarUrl = kyss[1]
 
-            println(qualified + " -> " + jarUrl);
+            println(qualified + " -> " + jarUrl)
             if (depends.getProperty(qualified))
-                jarUrl = depends.getProperty(qualified) + " " + jarUrl;
+                jarUrl = depends.getProperty(qualified) + " " + jarUrl
             depends.setProperty(qualified, jarUrl)
         }
-        Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance()
         String date = String.format(Locale.UK, "%tl:%tM:%tS %tp %tB %te, %tY", c, c, c, c, c, c, c)
         depends.store(new FileWriter(txt), "this tbh \n" + date)
 
 
-
-  }
+    }
+}
 
 dependencies {
-    compileOnly( "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"){
+    compileOnly("com.github.o7-Fire.Atomic-Library:Desktop:$atomHash") {
         because("runtime")
     }
-    compileOnly( "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"){
+    compileOnly("com.github.o7-Fire.Atomic-Library:Atomic:$atomHash") {
         because("runtime")
     }
     testImplementation("com.github.o7-Fire.Atomic-Library:Atomic:$atomHash")
     testImplementation("com.github.o7-Fire.Atomic-Library:Desktop:$atomHash")
-    implementation(aproj(":core")){
-        exclude group:"com.github.o7-Fire.Atomic-Library", module:"Atomic"
+    implementation(aproj(":core")) {
+        exclude group: "com.github.o7-Fire.Atomic-Library", module: "Atomic"
     }
 
 }
 
-task base(type: Jar , dependsOn: ":core:compileJava") {
+task base(type: Jar, dependsOn: ":core:compileJava") {
     dependsOn(writeDependency)
     archiveFileName = "desktop.jar"
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest.attributes('Main-Class': modsNJavaMain)//what
     with jar
     from {
-        configurations.runtimeClasspath.filter{it.exists()}.collect {it.isDirectory() ? it : zipTree(it)}
+        configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
     from files(aproj(":core").sourceSets.main.output)//Include core project class, gradle is shit
