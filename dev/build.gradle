@@ -1,13 +1,12 @@
-
-
 dependencies {
+    implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
     implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
     implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.16.1'
     implementation group: 'com.google.googlejavaformat', name: 'google-java-format', version: '1.7'
     File mindustry = file(mindustryExecutable)
-    if(mindustry.exists()) {
+    if (mindustry.exists()) {
         implementation(files(mindustry))
-    }else {//if you feel fancy remove this else
+    } else {//if you feel fancy remove this else
         implementation("com.github.Anuken.Mindustry:desktop:$mindustryHash")
         implementation("com.github.Anuken.Arc:arc-core:$arcHash")
         implementation("com.github.Anuken.Arc:backend-sdl:$arcHash")

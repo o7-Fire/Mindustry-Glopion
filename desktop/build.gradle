@@ -28,7 +28,9 @@ static String getHttp(String jarUrl, Dependency dependency){
     return null;
 }
 task writeDependency(){
-  doLast{
+    inputs.file(getBuildFile())
+    outputs.file(new File(projectDir, "src/main/resources/dependencies"))
+    doLast{
       File txt = new File(projectDir, "src/main/resources/dependencies")
       txt.parentFile.mkdirs()
       txt = txt.getAbsoluteFile()
@@ -38,7 +40,9 @@ task writeDependency(){
       ArrayList<Future<String>> task = new ArrayList<>();
       ExecutorService service = Executors.newCachedThreadPool();
       configurations.compileOnly.allDependencies.each { dependency ->
-          if(!dependency.reason.equals("runtime"))
+          if(dependency.reason != "runtime"){
+              return;
+          }
               for (ArtifactRepository repository : project.repositories.asList()) {
                   try {
                       String url = repository.properties.get('url')
@@ -78,9 +82,14 @@ task writeDependency(){
   }
 
 dependencies {
-    implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
-
-
+    compileOnly( "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"){
+        because("runtime")
+    }
+    compileOnly( "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"){
+        because("runtime")
+    }
+    testImplementation("com.github.o7-Fire.Atomic-Library:Atomic:$atomHash")
+    testImplementation("com.github.o7-Fire.Atomic-Library:Desktop:$atomHash")
     dependsProject.collect{ implementation(aproj(it))}
 
 }
