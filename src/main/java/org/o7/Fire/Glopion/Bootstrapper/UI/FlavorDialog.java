@@ -52,15 +52,15 @@ public class FlavorDialog extends BaseDialog {
         cont.check("Same Mindustry Version",sameVersion, b-> {
             sameVersion = b;
             build();
-        });
+        }).growX().row();
         cont.check("Same Mindustry Type",sameType, b-> {
             sameType = b;
             build();
-        });
+        }).growX().row();
         cont.check("Compatible With Bootstrapper Version",compatibleBootstrapperVersion, b-> {
             compatibleBootstrapperVersion = b;
             build();
-        });
+        }).growX().row();
         Table table = new Table(t -> {
             boolean none = true;
             TreeMap<String, String> map = new TreeMap<>();
