@@ -142,7 +142,7 @@ public class Main extends Mod {
                 sb.append("Flavor: ").append(flavor).append("\n");
                 sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
                 sb.append("Size: ").append(jar.length()).append(" bytes\n");
-                sb.append("Classloader: ").append(classLoader.getClass().getCanonicalName()).append("\n");
+                sb.append("Classloader: ").append(classLoader.getClass()).append("\n");
                 if(is != null){
                     sb.append("Dependency: ").append("\n");
                     for(Object o : dependencies.keySet()){

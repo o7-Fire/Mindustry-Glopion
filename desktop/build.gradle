@@ -29,58 +29,59 @@ static String getHttp(String jarUrl, Dependency dependency){
 }
 task writeDependency(){
     inputs.file(getBuildFile())
-    doLast{
-      File txt = new File(projectDir, "src/main/resources/dependencies")
-      txt.parentFile.mkdirs()
-      txt = txt.getAbsoluteFile()
-      println txt
-      txt.delete()
-      Properties depends = new Properties();
-      ArrayList<Future<String>> task = new ArrayList<>();
-      ExecutorService service = Executors.newCachedThreadPool();
-      configurations.compileOnly.allDependencies.each { dependency ->
+    File txt = new File(projectDir, "src/main/resources/dependencies")
+    txt.parentFile.mkdirs()
+    txt = txt.getAbsoluteFile()
+    txt.createNewFile()
 
-          if (dependency.reason == "runtime") {
+        println txt
+        txt.delete()
+        Properties depends = new Properties();
+        ArrayList<Future<String>> task = new ArrayList<>();
+        ExecutorService service = Executors.newCachedThreadPool();
+        configurations.compileOnly.allDependencies.each { dependency ->
 
-              for (ArtifactRepository repository : project.repositories.asList()) {
-                  try {
-                      String url = repository.properties.get('url')
-                      if(!url.endsWith("/"))
-                          url = url+"/"
-                      String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
-                              dependency.group.replace('.', '/'), dependency.name, dependency.version,
-                              dependency.name, dependency.version)
-                      Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
-                          @Override
-                          String call() throws Exception {
-                              return getHttp(jarUrl, dependency);
-                          }
-                      });
-                      task.add(f);
-                  } catch (Exception e) {
-                  }
-              }
-          }
-      }
-      println task.size() + " searching"
-      for(Future<String> f : task) {
-          //println f.get()
-          String kyys = f.get()
-          if(kyys == null)continue;
+            if (dependency.reason == "runtime") {
 
-          String[] kyss = kyys.split(" ")
-          String qualified = kyss[0], jarUrl = kyss[1]
+                for (ArtifactRepository repository : project.repositories.asList()) {
+                    try {
+                        String url = repository.properties.get('url')
+                        if (!url.endsWith("/"))
+                            url = url + "/"
+                        String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
+                                dependency.group.replace('.', '/'), dependency.name, dependency.version,
+                                dependency.name, dependency.version)
+                        Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
+                            @Override
+                            String call() throws Exception {
+                                return getHttp(jarUrl, dependency);
+                            }
+                        });
+                        task.add(f);
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }
+        println task.size() + " searching"
+        for (Future<String> f : task) {
+            //println f.get()
+            String kyys = f.get()
+            if (kyys == null) continue;
 
-          println(qualified + " -> " + jarUrl);
-          if(depends.getProperty(qualified))
-              jarUrl = depends.getProperty(qualified) + " " + jarUrl;
-          depends.setProperty(qualified, jarUrl)
-      }
-      Calendar c = Calendar.getInstance();
-      String date = String.format(Locale.UK, "%tl:%tM:%tS %tp %tB %te, %tY", c, c, c, c, c, c, c)
-      depends.store(new FileWriter(txt), "this tbh \n"+date)
+            String[] kyss = kyys.split(" ")
+            String qualified = kyss[0], jarUrl = kyss[1]
 
-      }
+            println(qualified + " -> " + jarUrl);
+            if (depends.getProperty(qualified))
+                jarUrl = depends.getProperty(qualified) + " " + jarUrl;
+            depends.setProperty(qualified, jarUrl)
+        }
+        Calendar c = Calendar.getInstance();
+        String date = String.format(Locale.UK, "%tl:%tM:%tS %tp %tB %te, %tY", c, c, c, c, c, c, c)
+        depends.store(new FileWriter(txt), "this tbh \n" + date)
+
+
 
   }
 
