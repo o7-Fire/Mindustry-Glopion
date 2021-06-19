@@ -1,7 +1,9 @@
 
 sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_1_8
-
+dependencies {
+    implementation( "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash")
+}
 task base(type: Jar){
     archiveFileName = "core.jar"//Mindustry-Glopion,jar
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
