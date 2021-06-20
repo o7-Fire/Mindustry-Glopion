@@ -1,6 +1,6 @@
 dependencies {
-    implementation "com.github.o7-Fire.Atomic-Library:Atomic:$atomHash"
-    implementation "com.github.o7-Fire.Atomic-Library:Desktop:$atomHash"
+    implementation(atomModule(":Atomic"))
+    implementation(atomModule(":Atomic"))
     implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.16.1'
     implementation group: 'com.google.googlejavaformat', name: 'google-java-format', version: '1.7'
     File mindustry = file(mindustryExecutable)
