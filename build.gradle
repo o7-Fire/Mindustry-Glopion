@@ -58,7 +58,13 @@ allprojects {
     }
     group = 'com.o7.Fire.Glopion'
     version = '0.1.0'
-
+    ext.atomModule = { String module ->
+        if(new File(rootDir, '../Atom').exists()){
+            return project(":Atom"+module)
+        } else {
+            return "com.github.o7-Fire.Atomic-Library$module:$atomHash"
+        }
+    }
     ext.aproj = { String module ->
         if(findProject(module) != null){
             return project(module)

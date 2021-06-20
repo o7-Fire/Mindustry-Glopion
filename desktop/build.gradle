@@ -93,8 +93,9 @@ dependencies {
     compileOnly("com.github.o7-Fire.Atomic-Library:Atomic:$atomHash") {
         because("runtime")
     }
-    testImplementation("com.github.o7-Fire.Atomic-Library:Atomic:$atomHash")
-    testImplementation("com.github.o7-Fire.Atomic-Library:Desktop:$atomHash")
+    testImplementation(atomModule(":Atomic"))
+    testImplementation(atomModule(":Desktop"))
+    testImplementation(aproj(":core"))
     implementation(aproj(":core")) {
         exclude group: "com.github.o7-Fire.Atomic-Library", module: "Atomic"
     }
