@@ -59,7 +59,9 @@ allprojects {
     group = 'com.o7.Fire.Glopion'
     version = '0.1.0'
     ext.atomModule = { String module ->
-        if(new File(rootDir, '../Atom').exists()){
+        boolean b = new File(rootDir, '../Atom').exists()
+        b = false
+        if(b){
             return project(":Atom"+module)
         } else {
             return "com.github.o7-Fire.Atomic-Library$module:$atomHash"
@@ -68,9 +70,7 @@ allprojects {
     ext.aproj = { String module ->
         if(findProject(module) != null){
             return project(module)
-        }else{
-            return project(":"+ modsNname + module)
-        }
+        }else{return project(":"+ modsNname + module)}
     }
     ext {
         try {
@@ -312,8 +312,8 @@ static void copyToMindustry(File f){
 }
 
 static URL getMindustryURL(){
-    if(System.getProperty("modsNBE") != null) {
-        String h = System.getProperty("modsNBE")
+    if(System.getProperty("modsNBE", null) != null) {
+        String h = System.getProperty("modsNBE");
         return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/"+h+"/Mindustry-BE-Desktop-"+h+".jar")
     }
     return new URL("https://github.com/Anuken/Mindustry/releases/download/" + System.getProperty("mindustryHash") + "/Mindustry.jar");

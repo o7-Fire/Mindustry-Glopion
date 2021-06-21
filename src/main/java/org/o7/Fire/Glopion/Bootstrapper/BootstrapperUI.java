@@ -41,10 +41,8 @@ public class BootstrapperUI extends Mod {
     public Table t = null;
     
     public static void download(String url, Fi dest, Runnable done, Cons<Throwable> err) {
-        boolean[] cancel = {false};
-        float[] progress = {0};
-        int[] length = {0};
-        download(url, dest, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], done, err);
+
+        download(url, dest, i -> {} , v ->  {}, () -> false, done, err);
     }
     
     public static void download(String furl, Fi dest, Intc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
@@ -63,7 +61,9 @@ public class BootstrapperUI extends Mod {
                 int x;
                 while ((x = in.read(data, 0, data.length)) >= 0 && !canceled.get()) {
                     counter += x;
-                    progressor.get((float) counter / (float) size);
+                    float total = (float) counter / (float) size;
+                    if(Core.app != null)
+                    Core.app.post(()->progressor.get(total));
                     out.write(data, 0, x);
                 }
                 out.close();

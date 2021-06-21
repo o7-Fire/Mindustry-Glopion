@@ -87,12 +87,20 @@ task writeDependency() {
 }
 
 dependencies {
-    compileOnly("com.github.o7-Fire.Atomic-Library:Desktop:$atomHash") {
+    compileOnly(atomModule(":Atomic")) {
         because("runtime")
     }
-    compileOnly("com.github.o7-Fire.Atomic-Library:Atomic:$atomHash") {
+    compileOnly(atomModule(":Desktop")) {
         because("runtime")
     }
+    compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {
+        because("runtime")
+    }
+    compileOnly (group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
+        because("runtime")
+    }
+    testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
+    testImplementation group: 'org.jblas', name: 'jblas', version: '1.2.5'
     testImplementation(atomModule(":Atomic"))
     testImplementation(atomModule(":Desktop"))
     testImplementation(aproj(":core"))
