@@ -164,7 +164,7 @@ subprojects {
 
 }
 ext{
-
+    println System.getenv("ANDROID_HOME") == null ? "Android SDK doesn't exist" : "Android SDK exist"
     //rewrite mod.hjson everytime gradle rollin
     //println System.getenv("ANDROID_HOME")
     try {
