@@ -38,20 +38,21 @@ public class BlockWatcher extends ModsModule {
     }
     
     public void update() {
-        if (GlopionCore.blockDebugSettings && Vars.state.isPlaying()){
-            if (Core.input.keyDown(KeyCode.controlLeft))
-                if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();
-    
-            if (target != null){
-                StringBuilder sb = new StringBuilder();
-                if (target.build != null){
-                    sb.append(FieldTool.getFieldDetails(target.build).replace("\n", "[white]\n"));
-                    //if (target.build instanceof LogicBlock.LogicBuild) sb.append("CodeHash=").append(((LogicBlock.LogicBuild) target.build).code.hashCode()).append("[white]\n");
-                }else sb.append(FieldTool.getFieldDetails(target).replace("\n", "[white]\n"));
-                sb.append("SafetyIndex:").append(Pathfinding.isSafe(target)).append("[white]\n");
-                Vars.ui.hudfrag.setHudText(sb.toString());
+        if (Vars.state.isPlaying()){
+            if (GlopionCore.blockDebugSettings){
+                if (Core.input.keyDown(KeyCode.controlLeft)) if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();
+        
+                if (target != null){
+                    StringBuilder sb = new StringBuilder();
+                    if (target.build != null){
+                        sb.append(FieldTool.getFieldDetails(target.build).replace("\n", "[white]\n"));
+                        //if (target.build instanceof LogicBlock.LogicBuild) sb.append("CodeHash=").append(((LogicBlock.LogicBuild) target.build).code.hashCode()).append("[white]\n");
+                    }else sb.append(FieldTool.getFieldDetails(target).replace("\n", "[white]\n"));
+                    sb.append("SafetyIndex:").append(Pathfinding.isSafe(target)).append("[white]\n");
+                    Vars.ui.hudfrag.setHudText(sb.toString());
+                }
+        
             }
-            
         }
     }
 }
