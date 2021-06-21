@@ -1,8 +1,15 @@
 package org.o7.Fire.Glopion.Desktop.Control;
 
 import Atom.Utility.Random;
+import mindustry.Vars;
+import org.o7.Fire.Glopion.Module.ModsModule;
 
-public class ControlInterpreter {
+public class ControlInterpreter extends ModsModule {
+    @Override
+    public void update() {
+        if(Vars.state.isPlaying()) random(MachineControl.mainPlayer);
+    }
+    
     public static void random(MachineControl control){
         interpret(Random.getRandom(Control.values()),control,Random.getFloat());
     }
