@@ -10,4 +10,6 @@ public interface WorldModule {
     default void onWorldLoad() {}
     
     default void onWoldUnload() {}
+    
+    default void onDisconnect() {}
 }

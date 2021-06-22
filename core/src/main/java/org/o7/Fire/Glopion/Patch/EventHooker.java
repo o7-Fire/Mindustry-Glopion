@@ -32,7 +32,6 @@ import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import org.o7.Fire.Glopion.Module.WorldModule;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 //Note: don't google "Hooker"
 public class EventHooker extends ModsModule {
@@ -40,9 +39,9 @@ public class EventHooker extends ModsModule {
     
     
     public static void resets() {
-        for (Map.Entry<Class<? extends ModsModule>, ModsModule> m : ModuleRegisterer.modules.entrySet()) {
+        for (Module m : ModuleRegisterer.modulesSet) {
             try {
-                m.getValue().reset();
+                m.reset();
             }catch(Throwable t){
                 WarningHandler.handleMindustry(t);
                 Interface.showError(t);
@@ -62,6 +61,7 @@ public class EventHooker extends ModsModule {
         Vars.loadLogger();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Events.fire(EventExtended.Shutdown.class, new EventExtended.Shutdown());
+            ModuleRegisterer.invokeAll(Module::onShutdown);
         }));
         Events.on(EventType.ConfigEvent.class, s -> {
             ModuleRegisterer.invokeAllAs(WorldModule.class, worldModule -> worldModule.onTileConfig(s.player, s.tile, s.value));
@@ -75,14 +75,14 @@ public class EventHooker extends ModsModule {
             });
             Core.settings.getBoolOnce("CrashReport1", () -> Vars.ui.showConfirm("Anonymous Data Reporter", "We collect your anonymous data e.g crash-log, to make your experience much worse", () -> {
             }));
-            if (System.getProperty("Ozone-Foo") != null){
-                Core.settings.getBoolOnce("OzoneFoo", () -> {
-                    Vars.ui.showText("[royal]Ozone[white]-[red]Warning", "Foo client with ozone ????, are you a savage");
+            if (System.getProperty("Glopion-Foo") != null){
+                Core.settings.getBoolOnce("GlopionFoo", () -> {
+                    Vars.ui.showText("[royal]Glopion[white]-[red]Warning", "Foo client with ozone ????, are you a savage");
                 });
             }
             //GlopionCore.moduleRegisterer.postInit();
             //SharedBoot.finishStartup();
-            // setOzoneLogger();
+            // setGlopionLogger();
         });
         Events.run(EventType.Trigger.draw, () -> {
             for (Runnable r : drawc) {
@@ -99,7 +99,8 @@ public class EventHooker extends ModsModule {
             ModuleRegisterer.invokeAllAs(WorldModule.class, WorldModule::onWoldUnload);
         });
         Events.run(EventExtended.Connect.Disconnected, () -> {
-        
+            ModuleRegisterer.invokeAllAs(WorldModule.class, WorldModule::onDisconnect);
+            resets();
         });
         Events.on(EventType.StateChangeEvent.class, s -> {
             if (s.from.equals(GameState.State.playing) && s.to.equals(GameState.State.menu))

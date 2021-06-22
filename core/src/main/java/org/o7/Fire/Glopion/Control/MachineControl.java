@@ -1,23 +1,20 @@
-package org.o7.Fire.Glopion.Desktop.Control;
+package org.o7.Fire.Glopion.Control;
 
-import arc.Events;
-import mindustry.Vars;
-import mindustry.game.EventType;
 import mindustry.gen.Player;
+import mindustry.gen.Unit;
 
 public class MachineControl {
     public static MachineControl mainPlayer = null;
-    static {
-        Events.on(EventType.ClientLoadEvent.class,s->{
-            if(Vars.player != null)
-            mainPlayer = new MachineControl(Vars.player);
-        });
-    }
+   
     protected Player player;
+    Unit u;
     public MachineControl(Player p){
         player = p;
+        u = player.unit();
     }
-    
+    public void velocity(float x, float y){
+        player.unit().vel().set(x,y);
+    }
    public void move(float x, float y){
         player.unit().move(x,y);
    }
@@ -25,4 +22,8 @@ public class MachineControl {
    public void rotate(float v){
         player.unit().rotation(v);
    }
+    
+    public void shoot(float value) {
+        player.shooting = value > 0.5f;
+    }
 }
