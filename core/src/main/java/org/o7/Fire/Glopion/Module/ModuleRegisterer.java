@@ -29,6 +29,7 @@ import java.util.function.Consumer;
  * Handle all module creation and initialization, only invoked once
  */
 public class ModuleRegisterer implements Module {
+    public static HashSet<Module> modulesSet = new HashSet<>();
     public static HashMap<Class<? extends ModsModule>, ModsModule> modules = new HashMap<>();
     private static HashSet<Class<? extends ModsModule>> unloadedModules = new HashSet<>();
     private volatile static boolean init, preInit, postInit;
@@ -41,15 +42,22 @@ public class ModuleRegisterer implements Module {
         });
     }
     
-    public static void invokeAll(Consumer<ModsModule> m) {
-        for (ModsModule value : modules.values()) {
-            m.accept(value);
+    public static void invokeAll(Consumer<Module> m) {
+        for (Module value : modulesSet) {
+            try {
+                m.accept(value);
+            }catch(Throwable t){
+                WarningHandler.handleProgrammerFault(t);
+            }
         }
     }
     
     public static ModsModule registerModule(Class<? extends ModsModule> c) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        if (modules.containsKey(c)) return modules.get(c);
-        return c.getDeclaredConstructor().newInstance();
+        if (modules.containsKey(c))
+            return modules.get(c);
+        ModsModule m = c.getDeclaredConstructor().newInstance();
+        modulesSet.add(m);
+        return m;
     }
     
     public void core() {

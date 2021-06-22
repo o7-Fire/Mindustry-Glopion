@@ -6,7 +6,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Java {
     public static URL stableGlopion;
@@ -27,7 +29,7 @@ public class Java {
         }
         boolean training = false;
         if(args.length != 0) {
-            if (Arrays.asList(args).contains("train")){
+            if (Arrays.asList(args).contains("training")){
                 training = true;
                 System.out.println("Training");
             }else {
@@ -61,11 +63,18 @@ public class Java {
         classPath.append(File.pathSeparator).append(mindustry.getAbsolutePath());
         for(File f : SharedBootstrapper.getFiles())
             classPath.append(File.pathSeparator).append(f.getAbsolutePath());
-        
+        List<String> list = new ArrayList<>();
+        File javaBin = new File(System.getProperty("java.home")+"/bin/java");
+        String java = "java";
+        if(javaBin.exists())
+            java = javaBin.getAbsolutePath();
+        list.addAll(Arrays.asList(java, "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Headless"));
+        list.addAll(Arrays.asList(args));
         if(training){
             StartServer.run();
-            System.exit(new ProcessBuilder("java", "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Headless", "training").inheritIO().start().waitFor());
+            
         }
+        System.exit(new ProcessBuilder(list.toArray(new String[0])).inheritIO().start().waitFor());
     }
     
     

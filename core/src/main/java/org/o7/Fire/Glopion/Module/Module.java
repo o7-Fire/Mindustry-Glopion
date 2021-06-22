@@ -77,6 +77,9 @@ public interface Module extends Loadable, Disposable {
     
     }
     
+    default void onShutdown(){
+    
+    }
     
     @Override
     default void dispose() {

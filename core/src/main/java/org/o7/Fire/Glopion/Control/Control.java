@@ -1,4 +1,4 @@
-package org.o7.Fire.Glopion.Desktop.Control;
+package org.o7.Fire.Glopion.Control;
 
 //Human and machine friendly
 //index for machine
