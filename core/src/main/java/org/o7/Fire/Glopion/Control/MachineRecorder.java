@@ -3,6 +3,7 @@ package org.o7.Fire.Glopion.Control;
 import Atom.File.FileUtility;
 import Atom.Struct.PoolObject;
 import Atom.Utility.Pool;
+import Atom.Utility.Random;
 import Atom.Utility.Utility;
 import arc.struct.Seq;
 import arc.util.Log;
@@ -29,20 +30,32 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class MachineRecorder implements Module, WorldModule, Serializable {
-    protected static final long delay = 280;//human visual response time
-    protected static final long delaySave = 4 * 1000;
+    public static final VectorOutput measure = new VectorOutput(new int[0]) {
+        @Override
+        public void write(int b) throws IOException {
+            index++;
+        }
+    };
+    public static final Writes measureWriter = new Writes(measure);
+    protected static final long delay = 250;//human visual response time
+    protected static final long delaySave = 12 * 1000;
     protected static final int temporaryArraySize = (int) (delaySave / delay);
     public static int maxView = 12;
     public static HashMap<Integer, String> color = new HashMap<>();
     public static PoolObject<Seq<Entityc>> poolEntity = new SeqPool<>();
     public static int precision = 100;
+    public static StateCalculatorReader machineReader = new StateCalculatorReader();
+    public static Writes writes = new Writes(machineReader);
+    public static int environmentInformationSize = 200;
     protected static File workingDir = new File("cache/" + Utility.getDate() + "-Player-Recorder");
     protected static Gson gson = new GsonBuilder().create();
 
     static {
         Log.info("Recorder Path: @", workingDir.getAbsolutePath());
     }
-    
+
+    protected transient final VectorOutput vectorWriter = new VectorOutput(new int[0]);
+    protected transient final Writes vectorWrites = new Writes(vectorWriter);
     protected transient Player player;
     protected int[][] input, output;
     protected int inputSize, outputSize;
@@ -50,21 +63,28 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     protected transient long nextCapture = System.currentTimeMillis() + delaySave;
     protected transient boolean sensoryCapture = true, stop = false;
     
+    public MachineRecorder() {
+    
+    }
+    
     public MachineRecorder(Player p) {
         player = p;
+        nextCapture  = System.currentTimeMillis() + delaySave + Random.getInt(10000);
         resetArray();
     }
-    public static void visualizeColorized(int[] vector, StringBuilder sb){
-            for (int y : vector) {
-                if (!color.containsKey(y)) color.put(y, Translation.getRandomHexColor());
-                sb.append(color.get(y)).append("■");
-            }
+    
+    public static void visualizeColorized(int[] vector, StringBuilder sb) {
+        for (int y : vector) {
+            if (!color.containsKey(y)) color.put(y, Translation.getRandomHexColor());
+            sb.append(color.get(y)).append("■");
+        }
         sb.append("[white]\n");
     }
+
     public static StringBuilder visualizeColorized(int[][] matrix) {
         StringBuilder sb = new StringBuilder();
         for (int[] x : matrix) {
-           visualizeColorized(x,sb);
+            visualizeColorized(x, sb);
         }
         return sb;
     }
@@ -74,29 +94,30 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         h = " " + h.substring(1, h.length() - 2);
         return h;
     }
-    public static int toInt(double f){
-        return (int) (f * 100);
+    
+    public static int toInt(double f) {
+        return (int) (f * precision);
     }
-    public static int toInt(float f){
-        return (int) (f*100);
+    
+    public static int toInt(float f) {
+        return (int) (f * precision);
     }
-    public static int toInt(boolean o){
+    
+    public static int toInt(boolean o) {
         return o ? 1 : 0;
     }
-    public static int hashState(int[] h, int state){
+    
+    public static int hashState(int[] h, int state) {
         for (int element : h)
             state = 3 * state + element;
-    
+        
         return state;
     }
-
-    public static StateCalculatorReader machineReader = new StateCalculatorReader();
-    public static Writes writes = new Writes(machineReader);
-    public static int tileState(Tile t){
-        if(t == null)return 0;
+    
+    public static int tileState(Tile t) {
+        if (t == null) return 0;
         int state = 0;
-        state = hashState(new int[]{
-                t.getTeamID(),//
+        state = hashState(new int[]{t.getTeamID(),//
                 toInt(t.getFlammability()),//
                 toInt(t.breakable()),//
                 toInt(t.passable()), //
@@ -105,7 +126,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
                 toInt(t.solid()), //
                 toInt(t.staticDarkness())//
         }, 0);
-
+        
         if (t.build != null){
             machineReader.state = state;
             t.build.writeAll(writes);
@@ -113,23 +134,24 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         }
         
         if (!(t.overlay() instanceof AirBlock)){
-            state = hashState(new int[]{t.overlayID()},state);
-        }else {
-            state = hashState(new int[]{t.floorID()},state);
+            state = hashState(new int[]{t.overlayID()}, state);
+        }else{
+            state = hashState(new int[]{t.floorID()}, state);
         }
         return state;
     }
+    
     public static int renderTile(Tile t) {
         if (t == null) return 0;
         Seq<Entityc> seq1 = poolEntity.obtain();
         if (seq1.isEmpty()) Groups.bullet.intersect(t.worldx(), t.worldy(), 2, 2, seq1::add);
         if (seq1.isEmpty()) Groups.unit.intersect(t.worldx(), t.worldy(), 1, 1, seq1::add);
         int render = 0;
-        if (!seq1.isEmpty()) {
+        if (!seq1.isEmpty()){
             Entityc entity = seq1.remove(0);
             machineReader.state = 0;
             entity.write(writes);
-            render =  machineReader.state;
+            render = machineReader.state;
         }
         
         poolEntity.free(seq1);
@@ -151,7 +173,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public static String visualize(Object[][] matrix) {
         return " " + Arrays.deepToString(matrix).replace("],", System.lineSeparator()).substring(1);
     }
-
+    
     public static int[][] worldDataToVisual(Tile[][] rawMatrix) {
         int[][] matrix = new int[rawMatrix.length][rawMatrix.length];
         int xPointer = 0, yPointer = 0;
@@ -164,14 +186,14 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         }
         return matrix;
     }
-    
+
     @Override
     public String toString() {
         return gson.toJson(this);
     }
     
     public File getCurrentFile() {
-        return new File(workingDir, "Record-" + fileIndex + "-" + player.id + "-"+ Strings.stripColors(Vars.state.map.name()) + "-" + (Vars.state.rules.pvp ? "PvP" : (Vars.state.rules.attackMode ? "Attack" : "Survival")) +".json");
+        return new File(workingDir, "Record-" + fileIndex + "-" + player.id + "-" + Strings.stripColors(Vars.state.map.name().replace("-", "")) + "-" + (Vars.state.rules.pvp ? "PvP" : (Vars.state.rules.attackMode ? "Attack" : "Survival")) + ".json");
     }
     
     public void resetArray() {
@@ -182,17 +204,9 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         input = new int[temporaryArraySize][inputSize];
         output = new int[temporaryArraySize][outputSize];
     }
-    public static final VectorOutput measure = new VectorOutput(new int[0]) {
-        @Override
-        public void write(int b) throws IOException {
-            index++;
-        }
-    };
     
-    public static final Writes measureWriter = new Writes(measure);
-    public static int environmentInformationSize = 200;
-    public int getEnvironmentInformationSize(){
-        if(environmentInformationSize != 0)return environmentInformationSize;
+    public int getEnvironmentInformationSize() {
+        if (environmentInformationSize != 0) return environmentInformationSize;
         int size = 0;
         size = size + Vars.content.items().size;
         size++;//tile this
@@ -214,17 +228,17 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         measure.reset();
          */
         //item core
-     
+        
         return size;
     }
-    public int[] getEnvironmentInformation(){
+
+    public int[] getEnvironmentInformation() {
         int[] vector = new int[getEnvironmentInformationSize()];
         getEnvironmentInformation(vector);
         return vector;
     }
-    final VectorOutput vectorWriter = new VectorOutput(new int[0]);
-    final Writes vectorWrites = new Writes(vectorWriter);
-    public void getEnvironmentInformation(int[] vector){
+    
+    public void getEnvironmentInformation(int[] vector) {
         vectorWriter.reset(vector);
         int index = vectorWriter.index;
         for (Item item : Vars.content.items()) {
@@ -256,10 +270,10 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public int[] getCompiledEnvironmentInformation(Tile[][] worldView) {
         int size = getEnvironmentInformationSize();
         for (Tile[] tiles : worldView) {
-           size = size + tiles.length;
+            size = size + tiles.length;
         }
         int[] vector = new int[size];
-        int index = getEnvironmentInformationSize()-1;
+        int index = getEnvironmentInformationSize() - 1;
         for (Tile[] tiles : worldView) {
             for (Tile t : tiles) {
                 vector[index] = renderTile(t);
@@ -337,9 +351,26 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         
     }
     
+    public int[][] getInput() {
+        return input;
+    }
+    
+    public int[][] getOutput() {
+        return output;
+    }
+    
+    public int getInputSize() {
+        return inputSize;
+    }
+    
+    public int getOutputSize() {
+        return outputSize;
+    }
+    
     @Override
     public void update() {
-        if (!Vars.state.isPlaying()) return;
+        if (!Vars.state.isPlaying()) stop = true;
+        if (Groups.player.getByID(player.id) == null) onPlayerLeave(player);
         
         if (timePass() || stop){
             if (!stop){
@@ -377,5 +408,5 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         }
     }
     
- 
+    
 }
