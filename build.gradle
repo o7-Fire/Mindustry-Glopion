@@ -201,7 +201,11 @@ task base(type: Jar){
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
     }
     with jar//what is this
-    manifest.attributes('Main-Class': modsNJavaMain)//what
+    manifest {
+        attributes(
+                'Main-Class': modsNJavaMain
+        )
+    }
 
 
     from(rootDir){
@@ -216,9 +220,9 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 //not jar task
 //just handle making dexed jar after making typical jar
-task baseJar{
+task baseJar(type: Jar){
     dependsOn base//typical jar
-    manifest.attributes('Main-Class': modsNJavaMain)//what
+
     //collect dependencies needed for desugaring
     if(new File(sdkD8).exists()) {
         def files = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(sdkJar)])//all dependency go
@@ -245,7 +249,11 @@ tasks.withType(JavaCompile) {
 //if android sdk exist
 task makeJar(type: Jar){
     dependsOn baseJar//dex jar
-    manifest.attributes('Main-Class': modsNJavaMain)//what
+    manifest {
+        attributes(
+                'Main-Class': modsNJavaMain
+        )
+    }
     if(new File(sdkD8).exists()) {//some people don't have android SDK
         archiveFileName = modsNname + "-Dexed.jar"
 
