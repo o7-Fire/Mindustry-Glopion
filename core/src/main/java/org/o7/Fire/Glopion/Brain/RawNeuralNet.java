@@ -55,6 +55,8 @@ public interface RawNeuralNet extends Serializable {
 	
 	int getRaw(int index);
 	
+	void reset();
+	
 	default int error(int[] input, int[] expected) {
 		int[] output = process(input);
 		return NeuralFunction.loss(output, expected);

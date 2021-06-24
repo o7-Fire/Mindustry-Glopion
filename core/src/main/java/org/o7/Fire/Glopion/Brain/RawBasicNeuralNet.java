@@ -1,13 +1,20 @@
 package org.o7.Fire.Glopion.Brain;
 
+import Atom.Struct.PoolObject;
+import arc.util.pooling.Pool;
+
 import java.util.Arrays;
 
-public class RawBasicNeuralNet implements RawNeuralNet {
+public class RawBasicNeuralNet implements RawNeuralNet, Pool.Poolable, PoolObject.Object {
 	public int[] raw;
 	public int[] output;
-	public NeuralFunction function;
+	public NeuralFunction function = NeuralFunction.Identity;
 	
-
+	public RawBasicNeuralNet(int[] structure, int inputSize){
+		this.output = structure;
+		raw = new int[RawNeuralNet.needRaw(inputSize, structure)];
+		NeuralFunction.assignRandom(raw);
+	}
 	
 	public RawBasicNeuralNet(int[] raw, int[] structure) {
 		this.raw = raw;
@@ -37,6 +44,12 @@ public class RawBasicNeuralNet implements RawNeuralNet {
 	@Override
 	public int getRaw(int index) {
 		return raw[index];
+	}
+	
+	@Override
+	public void reset() {
+		NeuralFunction.assignRandom(raw);
+		hashCode = 0;
 	}
 	
 	protected int hashCode = 0;

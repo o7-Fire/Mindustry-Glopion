@@ -138,7 +138,7 @@ allprojects {
         }
         tasks.withType(JavaCompile){
             options.encoding = "UTF-8"
-            options.compilerArgs += ["-Xlint:deprecation"]
+            options.compilerArgs += ["-Xlint:deprecation", "-g"]
 
             options.forkOptions.jvmArgs.addAll([
                     '--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',

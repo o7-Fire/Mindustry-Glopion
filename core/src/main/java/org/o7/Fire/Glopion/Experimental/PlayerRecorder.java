@@ -14,15 +14,18 @@ public class PlayerRecorder implements Experimental {
             Interface.showInfo("No Player");
             return;
         }
+        int i = 0;
         for(Player p : Groups.player){
             MachineRecorder machineRecorder = new MachineRecorder(p);
             boolean b = ModuleRegisterer.add(machineRecorder);
             if(b){
                 Log.info("recording @", p.name);
+                i++;
             }else {
                 Log.info("recording in progress for @", p.name);
             }
             
         }
+        Interface.showInfo("Recording " + i + " players");
     }
 }

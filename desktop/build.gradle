@@ -93,12 +93,13 @@ dependencies {
     compileOnly(atomModule(":Desktop")) {
         because("runtime")
     }
-    compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {
-        because("runtime")
-    }
+    compileOnly (group: 'com.aparapi', name: 'aparapi', version: '2.0.0') {because("runtime")}
+
+    //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}
     compileOnly (group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
         because("runtime")
     }
+    testImplementation group: 'com.aparapi', name: 'aparapi', version: '2.0.0'
     testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
     testImplementation group: 'org.jblas', name: 'jblas', version: '1.2.5'
     testImplementation(atomModule(":Atomic"))
