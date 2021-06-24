@@ -2,10 +2,10 @@ package org.o7.Fire.Glopion.Control;
 
 import java.io.IOException;
 
-public class StateReader extends StateCalculatorReader {
+public class VectorOutput extends StateCalculatorReader {
     public int[] vector;
     public int index = 0;
-    public StateReader(int[] vector){
+    public VectorOutput(int[] vector){
         this.vector = vector;
     }
     @Override

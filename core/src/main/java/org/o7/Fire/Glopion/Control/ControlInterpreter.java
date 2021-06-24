@@ -7,8 +7,6 @@ import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Module.ModsModule;
 import org.o7.Fire.Glopion.Module.WorldModule;
 
-import java.util.Arrays;
-
 public class ControlInterpreter extends ModsModule implements WorldModule {
     long nextAction = System.currentTimeMillis() + 1000;
     public static MachineRecorder mainPlayerRecorder;
@@ -19,8 +17,9 @@ public class ControlInterpreter extends ModsModule implements WorldModule {
             if(GlopionCore.machineVisualizeRenderSettings && mainPlayerRecorder != null){
                 Tile[][] tiles = mainPlayerRecorder.getWorldData(MachineRecorder.maxView);
                 int[][] visual = MachineRecorder.worldDataToVisual(tiles);
-                Vars.ui.hudfrag.setHudText(MachineRecorder.visualizeColorized(visual).append("\n").append(Arrays.toString(mainPlayerRecorder.getEnvironmentInformation())).toString());
+                Vars.ui.hudfrag.setHudText(MachineRecorder.visualizeColorized(visual).toString());
             }
+            mainPlayerRecorder.getEnvironmentInformation();
             nextAction = System.currentTimeMillis() + 32;
         }
     }

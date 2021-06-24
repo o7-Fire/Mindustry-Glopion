@@ -6,6 +6,7 @@ import Atom.Utility.Pool;
 import Atom.Utility.Utility;
 import arc.struct.Seq;
 import arc.util.Log;
+import arc.util.Strings;
 import arc.util.io.Writes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -170,7 +171,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     
     public File getCurrentFile() {
-        return new File(workingDir, "Record-" + fileIndex + "-" + player.id + ".json");
+        return new File(workingDir, "Record-" + fileIndex + "-" + player.id + "-"+ Strings.stripColors(Vars.state.map.name()) + "-" + (Vars.state.rules.pvp ? "PvP" : (Vars.state.rules.attackMode ? "Attack" : "Survival")) +".json");
     }
     
     public void resetArray() {
@@ -181,21 +182,23 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         input = new int[temporaryArraySize][inputSize];
         output = new int[temporaryArraySize][outputSize];
     }
-    public static StateReader measure = new StateReader(new int[0]) {
+    public static final VectorOutput measure = new VectorOutput(new int[0]) {
         @Override
         public void write(int b) throws IOException {
             index++;
         }
-    
-        
     };
     
-    public static Writes measureWriter = new Writes(measure);
-    public static int environmentInformationSize = 0;
+    public static final Writes measureWriter = new Writes(measure);
+    public static int environmentInformationSize = 200;
     public int getEnvironmentInformationSize(){
         if(environmentInformationSize != 0)return environmentInformationSize;
         int size = 0;
-
+        size = size + Vars.content.items().size;
+        size++;//tile this
+        size++;//distance to core
+        size++;//velocity x
+        size++;//velocity y
         //player
         player.writeSync(measureWriter);
         size = size + measure.index;
@@ -211,11 +214,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         measure.reset();
          */
         //item core
-        size = size + Vars.content.items().size;
-        size++;//tile this
-        size++;//distance to core
-        size++;//velocity x
-        size++;//velocity y
+     
         return size;
     }
     public int[] getEnvironmentInformation(){
@@ -223,20 +222,16 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         getEnvironmentInformation(vector);
         return vector;
     }
-    final StateReader stateReader = new StateReader(new int[0]);
-    final Writes stateWriter = new Writes(stateReader);
+    final VectorOutput vectorWriter = new VectorOutput(new int[0]);
+    final Writes vectorWrites = new Writes(vectorWriter);
     public void getEnvironmentInformation(int[] vector){
-        stateReader.reset(vector);
-        player.writeSync(writes);//Player
-        player.unit().writeSync(writes);//Player Unit
-        //if(player.tileOn().build != null) player.tileOn().build.writeAll(writes);//Player tileon build
-        int index = stateReader.index;
+        vectorWriter.reset(vector);
+        int index = vectorWriter.index;
         for (Item item : Vars.content.items()) {
             vector[index] = player.closestCore().items().get(item);
             index++;
         }
-        
-        /*
+         /*
         vector[index++] = (int) (player.unit().rotation()*10);
         vector[index++] = toInt(player.shooting);
         vector[index++] = player.team().id;
@@ -248,6 +243,10 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         vector[index++] = tileState(player.tileOn());
         vector[index++] = toInt(player.unit().vel().getX());
         vector[index++] = toInt(player.unit().vel().getY());
+        vectorWriter.index = index;
+        player.writeSync(vectorWrites);//Player
+        player.unit().writeSync(vectorWrites);//Player Unit
+        //if(player.tileOn().build != null) player.tileOn().build.writeAll(writes);//Player tile on build
     }
     
     public int[] getCompiledEnvironmentInformation() {
@@ -261,13 +260,13 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         }
         int[] vector = new int[size];
         int index = getEnvironmentInformationSize()-1;
-        getEnvironmentInformation(vector);
         for (Tile[] tiles : worldView) {
             for (Tile t : tiles) {
                 vector[index] = renderTile(t);
                 index++;
             }
         }
+        getEnvironmentInformation(vector);
         return vector;
     }
     
@@ -297,7 +296,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     
     public int[] captureSensory() {
-        return worldDataToVisualVector(getWorldData(maxView));
+        return getCompiledEnvironmentInformation();
     }
     
     public int[] captureAction() {
