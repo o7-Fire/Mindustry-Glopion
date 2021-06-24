@@ -61,9 +61,9 @@ public class FlavorDialog extends BaseDialog {
             
             }
             for (Map.Entry<Object, Object> oo : bootstrapper.release.entrySet()) {
-                Map.Entry<String, String> o = Map.entry(String.valueOf(oo.getKey()),String.valueOf(oo.getValue()));
-                if ((o.getKey() + "").startsWith("Note"))continue;
-                Seq<String> key = Seq.with(o .getKey().split("-"));
+              String oKey = String.valueOf(oo.getKey()), oValue = String.valueOf(oo.getValue());
+                if ((oKey + "").startsWith("Note"))continue;
+                Seq<String> key = Seq.with(oKey.split("-"));
                 long bootstrapMin = Long.MAX_VALUE-1;
                 int bootstrapIndex = key.indexOf("Bootstrap");
                 if(bootstrapIndex != -1){
@@ -79,10 +79,10 @@ public class FlavorDialog extends BaseDialog {
                 if (!bootstrapperCompatible && compatibleBootstrapperVersion) continue;
                 if (!mindustryModifierCompatible && sameModifier) continue;
                 if (!mindustryVersionCompatible && sameVersion) continue;
-                Cell<TextButton> c = t.button(o.getKey() + ": " + o.getValue(), () -> {
-                    Core.settings.put("glopion-flavor", o.getKey() + "");
-                    Fi jar = getFlavorJar(o.getKey());
-                    if(!jar.exists()) BootstrapperUI.downloadConfirm(o.getValue(), jar, ()->{
+                Cell<TextButton> c = t.button(oKey + ": " + oValue, () -> {
+                    Core.settings.put("glopion-flavor", oKey + "");
+                    Fi jar = getFlavorJar(oKey);
+                    if(!jar.exists()) BootstrapperUI.downloadConfirm(oValue, jar, ()->{
                         if (jar.exists()){
                             Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
                         }else{
@@ -91,7 +91,7 @@ public class FlavorDialog extends BaseDialog {
                     });
                     build();
                 }).growX().disabled(key.contains("Desktop") && Vars.mobile);
-                if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + "")){
+                if (Core.settings.get("glopion-flavor", flavor).equals(oKey + "")){
                     c.color(Color.green);
                     c.disabled(true);
                     
