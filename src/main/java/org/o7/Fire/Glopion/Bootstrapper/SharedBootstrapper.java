@@ -17,7 +17,7 @@ public class SharedBootstrapper {
     public static final long version = 11;
     
     @NotNull
-    public static File parent = null;
+    public static File parent = new File("cache/");
     public static Properties dependencies = new Properties();
     public static HashMap<String, List<URL>> downloadList = new HashMap<>();
     public static HashMap<String, File> downloadFile = new HashMap<>();
