@@ -26,10 +26,8 @@ import org.o7.Fire.Glopion.Event.EventExtended;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
-import org.o7.Fire.Glopion.Module.ModsModule;
+import org.o7.Fire.Glopion.Module.*;
 import org.o7.Fire.Glopion.Module.Module;
-import org.o7.Fire.Glopion.Module.ModuleRegisterer;
-import org.o7.Fire.Glopion.Module.WorldModule;
 
 import java.util.ArrayList;
 
@@ -64,7 +62,7 @@ public class EventHooker extends ModsModule {
             ModuleRegisterer.invokeAll(Module::onShutdown);
         }));
         Events.on(EventType.ConfigEvent.class, s -> {
-            ModuleRegisterer.invokeAllAs(WorldModule.class, worldModule -> worldModule.onTileConfig(s.player, s.tile, s.value));
+            ModuleRegisterer.invokeAll(WorldModule.class, worldModule -> worldModule.onTileConfig(s.player, s.tile, s.value));
         });
         Events.run(EventType.Trigger.update, () -> {
             ModuleRegisterer.invokeAll(Module::update);
@@ -92,14 +90,14 @@ public class EventHooker extends ModsModule {
         Events.run(EventExtended.Game.Start, () -> {
             Log.debug("Server: " + InformationCenter.getCurrentServerIP() + ":" + InformationCenter.getCurrentServerPort());
             resets();
-            ModuleRegisterer.invokeAllAs(WorldModule.class, WorldModule::onWorldLoad);
+            ModuleRegisterer.invokeAll(WorldModule.class, WorldModule::onWorldLoad);
         });
         Events.run(EventExtended.Game.Stop, () -> {
             resets();
-            ModuleRegisterer.invokeAllAs(WorldModule.class, WorldModule::onWoldUnload);
+            ModuleRegisterer.invokeAll(WorldModule.class, WorldModule::onWoldUnload);
         });
         Events.run(EventExtended.Connect.Disconnected, () -> {
-            ModuleRegisterer.invokeAllAs(WorldModule.class, WorldModule::onDisconnect);
+            ModuleRegisterer.invokeAll(WorldModule.class, WorldModule::onDisconnect);
             resets();
         });
         Events.on(EventType.StateChangeEvent.class, s -> {
@@ -109,7 +107,10 @@ public class EventHooker extends ModsModule {
                 Events.fire(EventExtended.Game.Start);
             
         });
-        
+        Events.on(EventType.UnitControlEvent.class,s->{
+            if(s.unit == null)return;
+            ModuleRegisterer.invokeAll(UnitModule.class, u -> u.onUnitControlEvent(s.player,s.unit));
+        });
         Events.on(EventType.ClientPreConnectEvent.class, s -> {
             Events.fire(EventExtended.Connect.Connected);
         });
@@ -152,6 +153,9 @@ public class EventHooker extends ModsModule {
         });
         Events.on(EventType.PlayerLeave.class, s -> {
             if (s.player == null) return;//boring
+            ModuleRegisterer.invokeAll(WorldModule.class, world->{
+                world.onPlayerLeave(s.player);
+            });
         });
         Events.on(EventType.ConfigEvent.class, s -> {
             if (s.player != null) ;

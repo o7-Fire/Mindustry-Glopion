@@ -12,4 +12,6 @@ public interface WorldModule {
     default void onWoldUnload() {}
     
     default void onDisconnect() {}
+    
+    default void onPlayerLeave(Player player){}
 }

@@ -9,9 +9,10 @@ import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
+import org.o7.Fire.Glopion.Patch.Translation;
 import org.o7.Fire.Glopion.UI.AtomicDialog;
+import org.o7.Fire.Glopion.UI.HudMenu;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
-import org.o7.Fire.Glopion.UI.OzoneMenu;
 import org.o7.Fire.Glopion.UI.WorldInformation;
 
 import java.util.concurrent.Executors;
@@ -25,7 +26,9 @@ public class GlopionCore extends Mod implements Module {
     public static Class<? extends Mod> mainClass = GlopionCore.class;
     public static boolean blockDebugSettings;
     public static ModuleRegisterer moduleRegisterer;
-    public static OzoneMenu glopionHud;
+    public static HudMenu glopionHud;
+    public static AtomicDialog machineInformation;
+    public static boolean machineVisualizeRenderSettings;
     
     static {
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
@@ -51,6 +54,7 @@ public class GlopionCore extends Mod implements Module {
         moduleRegisterer.core();
         OptionsDialog.classSettings.add(GlopionCore.class);
         if (Core.settings != null) OptionsDialog.load(k -> Core.settings.getString(k, null));
+        Translation.add("machineVisualizeRenderSettings","Machine Recorder Visualization");
         Pool.parallelAsync = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
             Thread t = Executors.defaultThreadFactory().newThread(r);
             t.setName(t.getName() + "-Atomic-Executor");
