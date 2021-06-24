@@ -10,20 +10,22 @@ import arc.util.io.Writes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import mindustry.Vars;
-import mindustry.gen.*;
+import mindustry.gen.Entityc;
+import mindustry.gen.Groups;
+import mindustry.gen.Player;
 import mindustry.type.Item;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.AirBlock;
-import org.jetbrains.annotations.NotNull;
 import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import org.o7.Fire.Glopion.Module.WorldModule;
 import org.o7.Fire.Glopion.Patch.Translation;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class MachineRecorder implements Module, WorldModule, Serializable {
     protected static final long delay = 280;//human visual response time
@@ -86,85 +88,8 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     
         return state;
     }
-    private static class StateReader implements DataOutput {
-        public int state = 0;
-        
-        @Override
-        public void write(int b) throws IOException {
-            state = 3 * state + b;
-        }
-    
-        @Override
-        public void write(@NotNull byte[] b) throws IOException {
-            for (byte b1 : b)
-                write(b1);
-        }
-    
-        @Override
-        public void write(@NotNull byte[] b, int off, int len) throws IOException {
-            
-            Objects.checkFromIndexSize(off, len, b.length);
-            for (int i = 0 ; i < len ; i++) {
-                write(b[off + i]);
-            }
-        }
-    
-        @Override
-        public void writeBoolean(boolean v) throws IOException {
-            write(v ? 1 : 0);
-        }
-    
-        @Override
-        public void writeByte(int v) throws IOException {
-            write(v);
-        }
-    
-        @Override
-        public void writeShort(int v) throws IOException {
-            write(v);
-        }
-    
-        @Override
-        public void writeChar(int v) throws IOException {
-            write(v);
-        }
-    
-        @Override
-        public void writeInt(int v) throws IOException {
-            write(v);
-        }
-    
-        @Override
-        public void writeLong(long v) throws IOException {
-            write((int) v);
-        }
-    
-        @Override
-        public void writeFloat(float v) throws IOException {
-            write(toInt(v));
-        }
-    
-        @Override
-        public void writeDouble(double v) throws IOException {
-            write(toInt(v));
-        }
-    
-        @Override
-        public void writeBytes(@NotNull String s) throws IOException {
-            write(s.getBytes(Vars.charset));
-        }
-    
-        @Override
-        public void writeChars(@NotNull String s) throws IOException {
-            write(s.getBytes(Vars.charset));
-        }
-    
-        @Override
-        public void writeUTF(@NotNull String s) throws IOException {
-            write(s.getBytes(Vars.charset));
-        }
-    }
-    public static StateReader machineReader = new StateReader();
+
+    public static StateCalculatorReader machineReader = new StateCalculatorReader();
     public static Writes writes = new Writes(machineReader);
     public static int tileState(Tile t){
         if(t == null)return 0;
@@ -256,17 +181,39 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         input = new int[temporaryArraySize][inputSize];
         output = new int[temporaryArraySize][outputSize];
     }
-    public static int getEnvironmentInformationSize(){
+    public static StateReader measure = new StateReader(new int[0]) {
+        @Override
+        public void write(int b) throws IOException {
+            index++;
+        }
+    
+        
+    };
+    
+    public static Writes measureWriter = new Writes(measure);
+    public static int environmentInformationSize = 0;
+    public int getEnvironmentInformationSize(){
+        if(environmentInformationSize != 0)return environmentInformationSize;
         int size = 0;
+
+        //player
+        player.writeSync(measureWriter);
+        size = size + measure.index;
+        measure.reset();
+        //player unit
+        player.unit().writeSync(measureWriter);
+        size = size + measure.index;
+        measure.reset();
+        //player tile
+        /*
+        player.tileOn().build.writeAll(measureWriter);
+        size = size + measure.index;
+        measure.reset();
+         */
+        //item core
         size = size + Vars.content.items().size;
-        size++;//player unit rotation
-        size++;//shooting
-        size++;//team
-        size++;//boosting
+        size++;//tile this
         size++;//distance to core
-        size++;//builder
-        size++;//unit type id
-        size++;//tile on
         size++;//velocity x
         size++;//velocity y
         return size;
@@ -276,20 +223,28 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         getEnvironmentInformation(vector);
         return vector;
     }
-    
+    final StateReader stateReader = new StateReader(new int[0]);
+    final Writes stateWriter = new Writes(stateReader);
     public void getEnvironmentInformation(int[] vector){
-        int index = 0;
+        stateReader.reset(vector);
+        player.writeSync(writes);//Player
+        player.unit().writeSync(writes);//Player Unit
+        //if(player.tileOn().build != null) player.tileOn().build.writeAll(writes);//Player tileon build
+        int index = stateReader.index;
         for (Item item : Vars.content.items()) {
             vector[index] = player.closestCore().items().get(item);
             index++;
         }
+        
+        /*
         vector[index++] = (int) (player.unit().rotation()*10);
         vector[index++] = toInt(player.shooting);
         vector[index++] = player.team().id;
         vector[index++] = toInt(player.boosting);
+        */
         vector[index++] = (int) player.closestCore().tile().dst(player.tileOn());
-        vector[index++] = toInt(player.isBuilder());
-        vector[index++] = player.unit().type == null ? 0 : player.unit().type.id;
+        //vector[index++] = toInt(player.isBuilder());
+        //vector[index++] = player.unit().type == null ? 0 : player.unit().type.id;
         vector[index++] = tileState(player.tileOn());
         vector[index++] = toInt(player.unit().vel().getX());
         vector[index++] = toInt(player.unit().vel().getY());
@@ -423,16 +378,5 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         }
     }
     
-    private static class ArrayPool extends PoolObject<int[]> {
-        int size;
-        
-        public ArrayPool(int size) {
-            this.size = size;
-        }
-        
-        @Override
-        protected int[] newObject() {
-            return new int[size];
-        }
-    }
+ 
 }
