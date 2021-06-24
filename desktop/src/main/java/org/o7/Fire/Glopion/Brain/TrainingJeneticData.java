@@ -1,6 +1,7 @@
 package org.o7.Fire.Glopion.Brain;
 
 import Atom.Utility.Pool;
+import Atom.Utility.Random;
 import com.google.gson.Gson;
 import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;
@@ -110,7 +111,8 @@ public class TrainingJeneticData {
     public static void distributeDataset(){
         int size = record.size() / 4;
         for (int i = 0; i < size; i++) {
-            recordTest.add(record.remove(0));
+           
+            recordTest.add(record.remove(Random.getInt(0,record.size()-1)));
         }
         System.out.println(size + " Dataset for final test");
         System.out.println(record.size() + " Dataset for training");
