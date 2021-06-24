@@ -34,7 +34,7 @@ public class ModuleRegisterer implements Module {
     private static HashSet<Class<? extends ModsModule>> unloadedModules = new HashSet<>();
     private volatile static boolean init, preInit, postInit;
     
-    public static <T> void invokeAllAs(Class<T> tClass, Consumer<T> consumer) {
+    public static <T> void invokeAll(Class<T> tClass, Consumer<T> consumer) {
         invokeAll(module -> {
             if (tClass.isInstance(module)){
                 consumer.accept((T) module);
@@ -58,6 +58,10 @@ public class ModuleRegisterer implements Module {
         ModsModule m = c.getDeclaredConstructor().newInstance();
         modulesSet.add(m);
         return m;
+    }
+    
+    public static boolean add(Module module) {
+        return modulesSet.add(module);
     }
     
     public void core() {

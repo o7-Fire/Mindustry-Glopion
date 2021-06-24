@@ -18,7 +18,6 @@ package org.o7.Fire.Glopion.UI;
 
 
 import Atom.Reflect.Reflect;
-import arc.Core;
 import arc.scene.style.Drawable;
 import arc.scene.ui.layout.Table;
 import mindustry.Vars;
@@ -28,11 +27,11 @@ import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Module.Patch.UIPatch;
 import org.o7.Fire.Glopion.Patch.Translation;
 
-public class OzoneMenu extends AtomicDialog {
+public class HudMenu extends AtomicDialog {
     
     private Table tB;
     
-    public OzoneMenu() {
+    public HudMenu() {
         super("Glopion HUD", UIPatch.ozoneStyle);
         
     }
@@ -61,10 +60,14 @@ public class OzoneMenu extends AtomicDialog {
         cont.row();
         tB = cont.table().top().growX().get();
         cont.row();
+        /*
         tB.button(Translation.get("ozone.commandsUI"), Icon.commandRally, () -> {
             Core.app.post(this::hide);
             //GlopionCore.commFrag.toggle();
         }).growX();
+        
+         */
+        //ad(GlopionCore.machineInformation, Icon.tree);
         ad(GlopionCore.worldInformation, Icon.chartBar);
         ad(GlopionCore.modsMenu, Icon.file);
         cont.row();

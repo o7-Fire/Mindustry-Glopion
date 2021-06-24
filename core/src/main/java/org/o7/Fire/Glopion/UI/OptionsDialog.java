@@ -20,9 +20,6 @@ import java.util.HashSet;
 public class OptionsDialog extends ScrollableDialog {
     public static final HashSet<Class<?>> classSettings = new HashSet<>();
     public static Cons2<String, String> saveSettings = (k, v) -> Core.settings.put(k, v);
-    
-
-    
     protected final ObjectMap<String, String> temp = new ObjectMap<>();
     
     public static ArrayList<Field> getSettingsField() {

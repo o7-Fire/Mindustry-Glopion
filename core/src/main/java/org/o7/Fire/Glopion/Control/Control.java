@@ -4,19 +4,15 @@ package org.o7.Fire.Glopion.Control;
 //index for machine
 //Name for human
 //No real operation here
+/** implement {@link mindustry.net.Administration.ActionType} */
 public enum Control {
-    NoOp,
     MoveVertical,
     MoveHorizontal,
     Rotate,
-    Shoot,
-    Mine,
-    Respawn,
-    ControlEntity,
-    ControlBuilding,
-    TapTile,
-    RotateBlock,
-    Command;
+    Shooting,
+    Mining,
+    Boosting,
+    Building;
     public void doSomething(MachineControl control, float value){
         ControlInterpreter.interpret(this,control,value);
     }

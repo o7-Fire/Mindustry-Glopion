@@ -21,6 +21,8 @@ public class Headless {
         if(arg.contains("training")){
             System.out.println("training ?");
             
+        }else if(arg.contains("logging")){
+            System.out.println("logging");
         }
     }
 }
