@@ -1,6 +1,7 @@
 package org.o7.Fire.Glopion.Bootstrapper.UI;
 
 import arc.Core;
+import arc.files.Fi;
 import arc.graphics.Color;
 import arc.scene.ui.ScrollPane;
 import arc.scene.ui.TextButton;
@@ -15,9 +16,10 @@ import org.o7.Fire.Glopion.Bootstrapper.BootstrapperUI;
 import org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper;
 
 import java.util.Map;
-import java.util.TreeMap;
 
+import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Bootstrapper.Main.flavor;
+import static org.o7.Fire.Glopion.Bootstrapper.Main.getFlavorJar;
 
 public class FlavorDialog extends BaseDialog {
     BootstrapperUI bootstrapper;
@@ -34,6 +36,7 @@ public class FlavorDialog extends BaseDialog {
     }
     
     void build() {
+      
         buttons.clear();
         addCloseButton();
         cont.clear();
@@ -51,13 +54,15 @@ public class FlavorDialog extends BaseDialog {
         }).growX().row();
         Table table = new Table(t -> {
             boolean none = true;
-            TreeMap<String, String> map = new TreeMap<>();
+          
             for (Map.Entry<Object, Object> o : bootstrapper.release.entrySet()) {
                 if ((o.getKey() + "").startsWith("Note"))
                     t.add(o.getKey() + ": " + o.getValue()).growX().row();
-                else map.put(o.getKey() + "", o.getValue() + "");
+            
             }
-            for (Map.Entry<String, String> o : map.entrySet()) {
+            for (Map.Entry<Object, Object> oo : bootstrapper.release.entrySet()) {
+                Map.Entry<String, String> o = Map.entry(String.valueOf(oo.getKey()),String.valueOf(oo.getValue()));
+                if ((o.getKey() + "").startsWith("Note"))continue;
                 Seq<String> key = Seq.with(o .getKey().split("-"));
                 long bootstrapMin = Long.MAX_VALUE-1;
                 int bootstrapIndex = key.indexOf("Bootstrap");
@@ -76,6 +81,14 @@ public class FlavorDialog extends BaseDialog {
                 if (!mindustryVersionCompatible && sameVersion) continue;
                 Cell<TextButton> c = t.button(o.getKey() + ": " + o.getValue(), () -> {
                     Core.settings.put("glopion-flavor", o.getKey() + "");
+                    Fi jar = getFlavorJar(o.getKey());
+                    if(!jar.exists()) BootstrapperUI.downloadConfirm(o.getValue(), jar, ()->{
+                        if (jar.exists()){
+                            Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+                        }else{
+                            ui.showErrorMessage(jar.absolutePath() + " still doesn't exist ??? how");
+                        }
+                    });
                     build();
                 }).growX().disabled(key.contains("Desktop") && Vars.mobile);
                 if (Core.settings.get("glopion-flavor", flavor).equals(o.getKey() + "")){

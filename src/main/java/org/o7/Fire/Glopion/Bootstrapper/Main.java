@@ -65,7 +65,7 @@ public class Main extends Mod {
         if (mod != null){
             Core.settings.put("mod-" + mod.name + "-enabled", false);
             mod.state = Mods.ModState.disabled;
-            runOnUI(() -> Vars.ui.showInfoFade("Disabling Bootstrapper"));
+            runOnUI(() -> Vars.ui.showInfo("Bootstrapper Disabled"));
         }
     }
   
@@ -106,6 +106,10 @@ public class Main extends Mod {
             Main.runOnUI(() -> Vars.ui.showCustomConfirm("Downloading Library", sb.toString(), "Download", "No", () -> Core.app.post(() -> downloadLibrary0(iterator)), () -> {}));
         }
     }
+    public static Fi getFlavorJar(String flavor){
+        String path = flavor.replace('-', '/') + ".jar";
+        return Core.files.cache(path);
+    }
     public static void load() {
         if (System.getProperty("glopion.loaded", "0").equals("1")){
             Log.errTag("Glopion-Bootstrapper", "Trying to load multiple times !!!");
@@ -113,8 +117,8 @@ public class Main extends Mod {
         }
         System.setProperty("glopion.loaded", "1");
         
-        String path = flavor.replace('-', '/') + ".jar";
-        jar = Core.files.cache(path);
+      
+        jar = getFlavorJar(flavor);
         SharedBootstrapper.parent = Core.files.cache("libs").file();
        
         if (jar.exists()){
