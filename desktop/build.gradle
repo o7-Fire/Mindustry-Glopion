@@ -29,7 +29,6 @@ static String getHttp(String jarUrl, Dependency dependency) {
 }
 
 task writeDependency() {
-    inputs.file(getBuildFile())
     File txt = new File(projectDir, "src/main/resources/dependencies")
     txt.parentFile.mkdirs()
     txt = txt.getAbsoluteFile()
