@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Premain;
 
 import Atom.Reflect.Reflect;
 import mindustry.mod.ModClassLoader;
+import org.o7.Fire.Glopion.Brain.TrainingJeneticData;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +21,11 @@ public class Headless {
         List<String> arg = Arrays.asList(args);
         if(arg.contains("training")){
             System.out.println("training ?");
-            
+            try {
+                TrainingJeneticData.main(args);
+            }catch(Throwable throwable){
+                throwable.printStackTrace();
+            }
         }else if(arg.contains("logging")){
             System.out.println("logging");
         }
