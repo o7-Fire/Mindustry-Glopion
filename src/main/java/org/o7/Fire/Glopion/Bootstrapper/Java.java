@@ -41,17 +41,19 @@ public class Java {
         System.out.println(classPath);
         File glopion = new File("cache",stableGlopion.getFile().substring(1)).getAbsoluteFile();
         File mindustry;
+        ArrayList<Thread> downloading = new ArrayList<>();
         if(args.length != 0)
             mindustry = new File(args[0]).getAbsoluteFile();
         else {
             System.out.println("Downloading mindustry");
             mindustry = new File("cache", SharedBootstrapper.getMindustryURL().getFile().substring(1)).getAbsoluteFile();
-            SharedBootstrapper.download(SharedBootstrapper.getMindustryURL(), mindustry);
+            downloading.add(SharedBootstrapper.download(SharedBootstrapper.getMindustryURL(), mindustry));
         }
         if(!glopion.exists()){
             System.out.println("Downloading: " + stableGlopion);
-            SharedBootstrapper.download(stableGlopion, glopion);
+            downloading.add(SharedBootstrapper.download(stableGlopion, glopion));
         }
+     
         URLClassLoader resource = new URLClassLoader(new URL[]{glopion.toURI().toURL()});
         try {
             SharedBootstrapper.checkDependency(resource.getResourceAsStream("dependencies"));
@@ -59,6 +61,7 @@ public class Java {
             e.printStackTrace();
         }
         SharedBootstrapper.downloadAll();
+        SharedBootstrapper.waitForThreads(downloading);
         classPath.append(File.pathSeparator).append(glopion.getAbsolutePath());
         classPath.append(File.pathSeparator).append(mindustry.getAbsolutePath());
         for(File f : SharedBootstrapper.getFiles())

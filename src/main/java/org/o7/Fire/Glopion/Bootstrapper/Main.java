@@ -70,27 +70,30 @@ public class Main extends Mod {
     }
   
     private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator){
-        if(!iterator.hasNext()){
-            if(!Vars.headless)
-                Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
-            return;
+        if (iterator.hasNext() && !Vars.headless)
+            Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+        while (iterator.hasNext()){
+            Map.Entry<String, File> s = iterator.next();
+            if(s.getValue().exists()){
+                Core.app.post(()->downloadLibrary0(iterator));
+                return;
+            }
+            Seq<URL> seq = Seq.with(downloadList.get(s.getKey()));
+            Log.info("Downloading: " + s.getKey());
+            if(Vars.headless){
+                BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
+                    //Core.app.post(() -> downloadLibrary0(iterator));
+                }, Throwable::printStackTrace);
+            }else{
+                BootstrapperUI.downloadGUI(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
+                    //Core.app.post(() -> downloadLibrary0(iterator));
+                });
+            }
         }
-        Map.Entry<String, File> s = iterator.next();
-        if(s.getValue().exists()){
-            Core.app.post(()->downloadLibrary0(iterator));
-            return;
-        }
-        Seq<URL> seq = Seq.with(downloadList.get(s.getKey()));
-        Log.info("Downloading: " + s.getKey());
-        if(Vars.headless){
-            BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
-                Core.app.post(() -> downloadLibrary0(iterator));
-            }, Throwable::printStackTrace);
-        }else{
-            BootstrapperUI.downloadGUI(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
-                Core.app.post(() -> downloadLibrary0(iterator));
-            });
-        }
+ 
+       
+        
+    
     }
     public static void downloadLibrary(){
         StringBuilder sb = new StringBuilder("Following library need to be downloaded\n[");
