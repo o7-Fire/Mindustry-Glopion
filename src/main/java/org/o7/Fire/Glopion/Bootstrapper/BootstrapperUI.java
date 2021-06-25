@@ -25,10 +25,12 @@ import org.o7.Fire.Glopion.Bootstrapper.UI.ProviderURLDialog;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Bootstrapper.Main.*;
@@ -44,7 +46,19 @@ public class BootstrapperUI extends Mod {
 
         download(url, dest, i -> {} , v ->  {}, () -> false, done, err);
     }
-    
+    public static ExecutorService executorService = null;
+    static {
+        try{
+            executorService = Executors.newCachedThreadPool((r) -> {
+                Thread thread = new Thread(r, "AsyncExecutor-Thread");
+                thread.setDaemon(true);
+                thread.setUncaughtExceptionHandler((t, e) -> {
+                    e.printStackTrace();
+                });
+                return thread;
+            });
+        }catch(Throwable ignored){}
+    }
     public static void download(String furl, Fi dest, Intc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
         Threads.daemon(() -> {
             try {
@@ -52,7 +66,7 @@ public class BootstrapperUI extends Mod {
                 dest.delete();
                 HttpURLConnection con = (HttpURLConnection) new URL(furl).openConnection();
                 BufferedInputStream in = new BufferedInputStream(con.getInputStream());
-                OutputStream out = dest.write(false, 4096);
+                RandomAccessFile out = new RandomAccessFile(dest.file(),"rw");
                 
                 byte[] data = new byte[4096];
                 long size = con.getContentLength();
@@ -62,8 +76,8 @@ public class BootstrapperUI extends Mod {
                 while ((x = in.read(data, 0, data.length)) >= 0 && !canceled.get()) {
                     counter += x;
                     float total = (float) counter / (float) size;
-                    if(Core.app != null)
-                    Core.app.post(()->progressor.get(total));
+                    if(executorService != null)
+                        executorService.submit(()->progressor.get(total));
                     out.write(data, 0, x);
                 }
                 out.close();
@@ -76,6 +90,7 @@ public class BootstrapperUI extends Mod {
             }catch(Throwable e){
                 error.get(e);
             }
+            
         });
     }
     

@@ -2,14 +2,10 @@ package org.o7.Fire.Glopion.Bootstrapper;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 
 //Java 8+ only
@@ -86,40 +82,64 @@ public class SharedBootstrapper {
         }
         return false;
     }
-    
-    public static void download(URL url, File download) throws IOException {
-        FileOutputStream fos = null;
-        try {
-            download.getAbsoluteFile().getParentFile().mkdirs();
-            ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-            fos = new FileOutputStream(download);
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-        }finally{
+    public static void waitForThreads(List<Thread> threads){
+        while (!threads.isEmpty()){
             try {
-                fos.close();
-            }catch(Throwable ignored){
-                
+                Thread t = threads.remove(0);
+                System.out.println("Waiting: " + t.getName());
+                t.join();
+            }catch(Throwable e){
+                e.printStackTrace();
             }
         }
+    }
+    public static Thread download(URL url, File download) {
+        Thread t = new Thread( ()->{
+           Closeable closeable = null;
+            try {
+               
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                BufferedInputStream in = new BufferedInputStream(con.getInputStream());
+                download.getAbsoluteFile().getParentFile().mkdirs();
+                RandomAccessFile randomAccessFile = new RandomAccessFile(download, "rw");
+                closeable = randomAccessFile;
+                byte[] data = new byte[4096];
+                int x;
+                while((x = in.read(data, 0, data.length)) >= 0) {
+                    randomAccessFile.write(data, 0, x);
+                }
+                randomAccessFile.close();
+            }catch(IOException e){
+                e.printStackTrace();
+            }finally{
+                try {
+                    if(closeable != null)
+                    closeable.close();
+                }catch(Throwable ignored){
+            
+                }
+            }
+        }, url.toString());
+        t.start();
+        return t;
+   
     }
     public static Collection<File> getFiles(){
         return downloadFile.values();
     }
     public static void downloadAll() {
+        ArrayList<Thread> threads = new ArrayList<>();
         for (Map.Entry<String, File> download : downloadFile.entrySet()) {
             System.out.println("Downloading: " + download.getKey());
             for (URL url : downloadList.get(download.getKey())) {
                 if (download.getValue().exists()) continue;
                 
                 System.out.println("Downloading From: " + url);
-                try {
-                    download(url, download.getValue());
-                }catch(IOException e){
-                    e.printStackTrace();
-                    
-                }
+                threads.add( download(url, download.getValue()));
+              
             }
         }
+       waitForThreads(threads);
     }
     
 }
