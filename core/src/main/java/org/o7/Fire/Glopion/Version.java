@@ -17,6 +17,7 @@
 package org.o7.Fire.Glopion;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
@@ -33,7 +34,7 @@ public class Version {
     }
     
     public static void main(String[] args) throws Throwable {
-        Files.writeString(new File("Version").toPath(), buildString(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        Files.write(new File("Version").toPath(), buildString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     }
     
     
