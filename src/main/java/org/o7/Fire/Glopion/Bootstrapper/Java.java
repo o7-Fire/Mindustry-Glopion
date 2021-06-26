@@ -34,9 +34,6 @@ public class Java {
             if (Arrays.asList(args).contains("training")){
                 training = true;
                 System.out.println("Training");
-            }else{
-                System.out.println("Doing nothing ok");
-                return;
             }
         }
         StringBuilder classPath = new StringBuilder(System.getProperty("java.class.path"));
