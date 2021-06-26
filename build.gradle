@@ -160,7 +160,7 @@ subprojects {
     dependencies{
         testImplementation(files(mindustryExecutable))
         testImplementation(rootProject)
-        compileOnly(files(mindustryExecutable))
+        //compileOnly(files(mindustryExecutable))
         compileOnly(rootProject)
     }
 
