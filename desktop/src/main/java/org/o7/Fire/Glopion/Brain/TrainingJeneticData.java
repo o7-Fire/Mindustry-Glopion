@@ -78,7 +78,7 @@ public class TrainingJeneticData {
         List<EvolutionResult<IntegerGene, Integer>> arrayListCapped = Collections.synchronizedList(new ArrayListCapped<>(100));
         AtomicInteger integer = new AtomicInteger(0);
         long murdered = engine.stream()
-                .limit(Limits.bySteadyFitness(10))
+                .limit(Limits.bySteadyFitness(10*100))
                 .filter(s-> integer.get() <= s.bestFitness())
                 .peek(s -> integer.set(s.bestFitness()))
                 .peek(arrayListCapped::add).count();
@@ -89,8 +89,8 @@ public class TrainingJeneticData {
             score.put(e,test(e));
         }
         Arrays.sort(survivor,  Comparator.comparing(score::get));
-        System.out.println("Fitness n0: " + survivor[0].bestFitness());
-        System.out.println("Fitness n100: " + survivor[survivor.length-1].bestFitness());
+        System.out.println("Fitness n0: " + survivor[0].bestFitness() + ", Test Score: " + score.get(survivor));
+        System.out.println("Fitness n100: " + survivor[survivor.length-1].bestFitness() + ", Test Score: " + score.get(survivor.length-1));
         EvolutionResult<IntegerGene, Integer> n0Result = survivor[0], n100Result = survivor[survivor.length - 1];
         int[] n0 = new int[n0Result.bestPhenotype().genotype().chromosome().length()];
         for (int i = 0; i < n0.length; i++) {
