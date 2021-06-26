@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Brain;
 
 import Atom.File.FileUtility;
 import Atom.Time.Time;
+import Atom.Utility.Meth;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import com.aparapi.Kernel;
@@ -11,6 +12,7 @@ import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.Limits;
 import io.jenetics.util.Factory;
+import org.nd4j.common.primitives.AtomicDouble;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
 
 import java.awt.*;
@@ -24,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class TrainingJeneticData extends Kernel {
     public static final ArrayList<MachineRecorder> record = new ArrayList<>(), recordTest = new ArrayList<>();
@@ -67,48 +70,24 @@ public class TrainingJeneticData extends Kernel {
             index++;
         }
         System.out.println("Parameters: " + parameterSize);
-        TrainingKernel.inputRecord_$constant$ = inputRecord_$constant$;
-        TrainingKernel.outputRecord_$constant$ = outputRecord_$constant$;
-        TrainingKernel.structure_$constant$ = structure;
-        TrainingKernel.structureLength = structure_$constant$.length;
-        TrainingKernel.networkInputSize = sample.getInputSize();
-        TrainingKernel.networkOutputSize = sample.getOutputSize();
+
         training();
     }
     
-    public static int evalAparapi(Genotype<IntegerGene> h) {
-        JeneticNeuralNetwork neuralNetwork = neuralNetPool.obtain();
-        
-        Time time = new Time(TimeUnit.MILLISECONDS);
-        
-        Chromosome<IntegerGene> chromosome = h.chromosome();
-        int[] raw = new int[chromosome.length()];
-        for (int i = 0; i < raw.length; i++) {
-            raw[i] = chromosome.get(i).intValue();
-        }
-        
-        TrainingKernel kernel = new TrainingKernel(raw);
-        kernel.setExecutionModeWithoutFallback(EXECUTION_MODE.GPU);
-        kernel.execute(inputRecord_$constant$.length);
-        measurementEval.add(time.elapsed());
-        
-        return kernel.getError();
-    }
-    
-    public static int eval(Genotype<IntegerGene> h) {
+    public static double eval(Genotype<IntegerGene> h) {
         JeneticNeuralNetwork neuralNetwork = neuralNetPool.obtain();
         neuralNetwork.set(h.chromosome());
         Time time = new Time(TimeUnit.MILLISECONDS);
-        int error = 0;
+        ArrayList<Long> error = new ArrayList<>();
         for (MachineRecorder m : record) {
             int[][] input = m.getInput();
             for (int j = 0, inputLength = input.length; j < inputLength; j++) {
                 int[] in = input[j];
-                error += neuralNetwork.error(in, m.getOutput()[j]);
+                error.add((long) neuralNetwork.error(in, m.getOutput()[j]));
             }
         }
         measurementEval.add(time.elapsed());
-        return error;
+        return Meth.avg(error);
     }
     
     public static double avg(long... arr) {
@@ -127,38 +106,63 @@ public class TrainingJeneticData extends Kernel {
         FileUtility.write(file, gson.toJson(array).getBytes());
     }
     
-    public static int test(EvolutionResult<IntegerGene, Integer> result) {
+    public static void saveResult(EvolutionResult<IntegerGene, Double> evolutionResult){
+        double score = test(evolutionResult);
+        System.out.println("Generation: " + evolutionResult.generation() + ", Fitness: " + evolutionResult.bestFitness() + ", Test Score: " + score);
+        String name = "Generation-" + evolutionResult.generation() + "-Fitness-"+ evolutionResult.bestFitness() + "-Score-" + score;
+        Chromosome<IntegerGene> chromosome = evolutionResult.bestPhenotype().genotype().chromosome();
+        int[] n0 = new int[chromosome.length()];
+        for (int i = 0; i < n0.length; i++) {
+            n0[i] = chromosome.get(i).intValue();
+        }
+        saveArray(name,n0);
+    }
+    
+    public static double test(EvolutionResult<IntegerGene, Double> result) {
         JeneticNeuralNetwork neuralNetwork = neuralNetPool.obtain();
         Genotype<IntegerGene> h = result.bestPhenotype().genotype();
         neuralNetwork.set(h.chromosome());
-        int error = 0;
+        ArrayList<Long> error = new ArrayList<>();
         for (MachineRecorder m : record) {
             int[][] input = m.getInput();
             for (int j = 0, inputLength = input.length; j < inputLength; j++) {
                 int[] in = input[j];
-                error += neuralNetwork.error(in, m.getOutput()[j]);
+                error.add((long) neuralNetwork.error(in, m.getOutput()[j]));
             }
         }
-        return error;
+        return Meth.avg(error);
     }
     
     public static void training() {
         System.out.println("Using: " + (Runtime.getRuntime().availableProcessors() - 1) + " Processor");
-        Engine<IntegerGene, Integer> engine = Engine.builder(TrainingJeneticData::evalAparapi, geneFactory).optimize(Optimize.MINIMUM).executor(Pool.parallelAsync).build();
-        List<EvolutionResult<IntegerGene, Integer>> arrayListCapped = Collections.synchronizedList(new ArrayListCapped<>(500));
-        AtomicInteger integer = new AtomicInteger(0);
-        long murdered = engine.stream().limit(Limits.byExecutionTime(Duration.ofSeconds(5))).limit(Limits.bySteadyFitness(50 * 10)).filter(s -> integer.get() <= s.bestFitness()).peek(s -> integer.set(s.bestFitness())).peek(s -> System.out.println("Generation: " + s.generation() + ",Best Fitness: " + s.bestFitness() + ",Worse Fitness: " + s.worstFitness())).peek(arrayListCapped::add).count();
+        Engine<IntegerGene, Double> engine = Engine//
+                .builder(TrainingJeneticData::eval, geneFactory)//
+                .optimize(Optimize.MINIMUM)//
+                .executor(Pool.parallelAsync)//
+                .build();
+        List<EvolutionResult<IntegerGene, Double>> arrayListCapped = Collections.synchronizedList(new ArrayListCapped<>(500));
+        final double[] integer = new double[]{100000};
+        long murdered = engine
+                .stream()//
+                .limit(Limits.byExecutionTime(Duration.ofHours(3)))//
+                //.limit(Limits.bySteadyFitness(50 * 10))//
+                .peek(s -> System.out.println("Generation: " + s.generation() + ",Best Fitness: " + s.bestFitness() + ",Worse Fitness: " + s.worstFitness()))//
+                .peek(s-> System.out.println(test(s)))
+                .filter(s -> integer[0] <= s.bestFitness())//
+                .peek(s ->  integer[0] = (s.bestFitness()))//
+                .peek(arrayListCapped::add)//
+                .count();
         System.out.println("Finish training, testing thing");
         printMeasure();
-        EvolutionResult<IntegerGene, Integer>[] survivor = arrayListCapped.toArray(new EvolutionResult[]{});
-        HashMap<EvolutionResult<IntegerGene, Integer>, Integer> score = new HashMap<>();
-        for (EvolutionResult<IntegerGene, Integer> e : survivor) {
+        EvolutionResult<IntegerGene, Double>[] survivor = arrayListCapped.toArray(new EvolutionResult[]{});
+        HashMap<EvolutionResult<IntegerGene, Double>, Double> score = new HashMap<>();
+        for (EvolutionResult<IntegerGene, Double> e : survivor) {
             score.put(e, test(e));
         }
         Arrays.sort(survivor, Comparator.comparing(score::get));
         System.out.println("Fitness n0: " + survivor[0].bestFitness() + ", Test Score: " + score.get(survivor));
         System.out.println("Fitness n100: " + survivor[survivor.length - 1].bestFitness() + ", Test Score: " + score.get(survivor.length - 1));
-        EvolutionResult<IntegerGene, Integer> n0Result = survivor[0], n100Result = survivor[survivor.length - 1];
+        EvolutionResult<IntegerGene, Double> n0Result = survivor[0], n100Result = survivor[survivor.length - 1];
         int[] n0 = new int[n0Result.bestPhenotype().genotype().chromosome().length()];
         for (int i = 0; i < n0.length; i++) {
             n0[i] = n0Result.bestPhenotype().genotype().chromosome().get(i).intValue();

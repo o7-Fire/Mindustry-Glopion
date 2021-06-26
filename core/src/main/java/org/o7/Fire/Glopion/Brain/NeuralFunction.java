@@ -36,12 +36,21 @@ public enum NeuralFunction {
         return expected - output;
     }
     
-    public static int loss(int[] output, int[] expected) {
-        int d = 0;
+    public static double loss(int[] output, int[] expected) {
+        long[] d = new long[output.length];
         for (int i = 0; i < output.length; i++) {
-            d += Math.abs(output[i] - expected[i]);
+            d[i]  = Math.abs(output[i] - expected[i]);
         }
-        return d;
+        return avg(d);
+    }
+    public static double avg(long... arr) {
+        long sum = 0;
+        int length = 0;
+        for (long l : arr) {
+            sum += l;
+            length++;
+        }
+        return (double) sum / length;
     }
     
     public int process(int f) {
