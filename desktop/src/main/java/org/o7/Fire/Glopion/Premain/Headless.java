@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Premain;
 
 import Atom.Reflect.Reflect;
 import mindustry.mod.ModClassLoader;
+import org.o7.Fire.Glopion.Brain.AparapiBenchmark;
 import org.o7.Fire.Glopion.Brain.TrainingJeneticData;
 
 import java.util.Arrays;
@@ -28,6 +29,8 @@ public class Headless {
             }
         }else if(arg.contains("logging")){
             System.out.println("logging");
+        }else if(arg.contains("benchmark")){
+            AparapiBenchmark.main(args);
         }
     }
 }
