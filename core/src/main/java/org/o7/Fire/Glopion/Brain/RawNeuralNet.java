@@ -38,7 +38,8 @@ public interface RawNeuralNet extends Serializable {
 		int[] output = new int[outputSize];
 		for (int i = 0; i < outputSize; i++) {//for node
 			int node = 0;
-			for (int v : array) {//node input summation
+			for (int j = 0, arrayLength = array.length; j < arrayLength; j++) {
+				int v = array[j];//node input summation
 				node += v * getRaw(index[0]);//weight
 				index[0] = index[0] + 1;
 			}
