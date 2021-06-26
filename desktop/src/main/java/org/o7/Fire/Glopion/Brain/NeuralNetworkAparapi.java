@@ -12,7 +12,8 @@ public interface NeuralNetworkAparapi extends RawNeuralNet{
         
             for (int j = 0; j < outputSize; j++) {//for node
                 int node = 0;
-                for (int v : input) {//node input summation
+                for (int k = 0, inputLength = input.length; k < inputLength; k++) {
+                    int v = input[k];//node input summation
                     node += v * raw[index];//weight
                     index++;
                 }
