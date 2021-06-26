@@ -52,7 +52,7 @@ public interface NeuralNetworkAparapi extends RawNeuralNet{
     int[] getOutput();
     
     @Override
-    default int error(int[] input, int[] expected) {
+    default double error(int[] input, int[] expected) {
         int[] output = process(input);
         int d = 0;
         for (int i = 0; i < output.length; i++) {
