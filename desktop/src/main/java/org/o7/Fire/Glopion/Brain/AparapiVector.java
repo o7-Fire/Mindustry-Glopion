@@ -18,6 +18,9 @@ public class AparapiVector extends Kernel {
         int c = 0;
         for (int j = 0; j < 5; j++) {
             c =  a * b + j;
+            c = a * c * j * b;
+            c = c - j;
+            c = c / a;
         }
         return c;
     }
