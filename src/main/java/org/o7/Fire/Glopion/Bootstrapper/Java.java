@@ -14,7 +14,7 @@ public class Java {
     public static URL stableGlopion;
     static {
         try {
-            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/v4.4/Mindustry-Glopion-DeepPatch.jar");
+            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/v4.4.1/Mindustry-Glopion-DeepPatch.jar");
         }catch(MalformedURLException e){
             e.printStackTrace();
             System.out.println("impossible");
@@ -53,15 +53,15 @@ public class Java {
             System.out.println("Downloading: " + stableGlopion);
             downloading.add(SharedBootstrapper.download(stableGlopion, glopion));
         }
-     
+        SharedBootstrapper.downloadAll();
+        SharedBootstrapper.waitForThreads(downloading);
         URLClassLoader resource = new URLClassLoader(new URL[]{glopion.toURI().toURL()});
         try {
             SharedBootstrapper.checkDependency(resource.getResourceAsStream("dependencies"));
         }catch(Exception e){
             e.printStackTrace();
         }
-        SharedBootstrapper.downloadAll();
-        SharedBootstrapper.waitForThreads(downloading);
+     
         classPath.append(File.pathSeparator).append(glopion.getAbsolutePath());
         classPath.append(File.pathSeparator).append(mindustry.getAbsolutePath());
         for(File f : SharedBootstrapper.getFiles())
