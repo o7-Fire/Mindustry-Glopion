@@ -34,7 +34,7 @@ jobs:
         key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
 
     - name: Write Dependency
-      run: ./gradlew desktop:writeDependency -PgithubRepo="$GITHUB_REPOSIT
+      run: ./gradlew desktop:writeDependency -PgithubRepo="$GITHUB_REPOSIT"
     #Build all mods
     - name: Build bootstrapper jar
       run: ./gradlew deploy -PgithubRepo="$GITHUB_REPOSITORY"
