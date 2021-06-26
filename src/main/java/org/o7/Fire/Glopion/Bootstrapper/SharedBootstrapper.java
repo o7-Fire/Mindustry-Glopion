@@ -60,6 +60,7 @@ public class SharedBootstrapper {
    static {
        if(System.getProperty("MindustryVersion", null) == null)
            System.setProperty("MindustryVersion", "v127");
+       
    }
     public static URL getMindustryURL() throws MalformedURLException {
         
