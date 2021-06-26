@@ -70,25 +70,27 @@ public class Main extends Mod {
     }
   
     private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator){
-        if (iterator.hasNext() && !Vars.headless)
+        if (!iterator.hasNext() && !Vars.headless){
             Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+            return;
+        }
         while (iterator.hasNext()){
             Map.Entry<String, File> s = iterator.next();
             if(s.getValue().exists()){
-                Core.app.post(()->downloadLibrary0(iterator));
-                return;
+                continue;
             }
             Seq<URL> seq = Seq.with(downloadList.get(s.getKey()));
             Log.info("Downloading: " + s.getKey());
             if(Vars.headless){
                 BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
-                    //Core.app.post(() -> downloadLibrary0(iterator));
+                    Core.app.post(() -> downloadLibrary0(iterator));
                 }, Throwable::printStackTrace);
             }else{
                 BootstrapperUI.downloadGUI(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
-                    //Core.app.post(() -> downloadLibrary0(iterator));
+                    Core.app.post(() -> downloadLibrary0(iterator));
                 });
             }
+            break;
         }
  
        
@@ -99,7 +101,7 @@ public class Main extends Mod {
         StringBuilder sb = new StringBuilder("Following library need to be downloaded\n[");
         for(Map.Entry<String, File> s : downloadFile.entrySet()) {
             if(s.getValue().exists())continue;
-            sb.append(s.getKey()).append(", ");
+            sb.append(s.getKey()).append("\n");
         }
         sb.append("]");
         final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
@@ -123,8 +125,9 @@ public class Main extends Mod {
       
         jar = getFlavorJar(flavor);
         SharedBootstrapper.parent = Core.files.cache("libs").file();
-       
-        if (jar.exists()){
+        
+        boolean classExist = Main.class.getClassLoader().getResourceAsStream(classpath.replace('.','/')+".class") != null;
+        if (jar.exists() || classExist){
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
                 ClassLoader parent = Main.class.getClassLoader();
@@ -185,10 +188,10 @@ public class Main extends Mod {
     }
     
     public static void runOnUI(Runnable r) {
-        if (Vars.ui != null && Vars.ui.loadfrag != null){
-            r.run();
-        }else{
+        if (Vars.ui == null || Vars.ui.loadfrag == null || Core.scene != null){
             Events.on(EventType.ClientLoadEvent.class, cr -> runOnUI(r));
+        }else{
+            r.run();
         }
     }
     
