@@ -97,8 +97,10 @@ public class BootstrapperUI extends Mod {
     public static void downloadConfirm(String url, Fi jar, Runnable done) {
         ui.showCustomConfirm(url, jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", () -> BootstrapperUI.downloadGUI(url, jar, done), Main::disable);
     }
-    
     public static void downloadGUI(String url, Fi jar, Runnable done) {
+        downloadGUI(url, jar, done, ()->{});
+    }
+    public static void downloadGUI(String url, Fi jar, Runnable done, Runnable onCance) {
         
         try {
             boolean[] cancel = {false};
@@ -119,6 +121,7 @@ public class BootstrapperUI extends Mod {
             dialog.buttons.button("@cancel", Icon.cancel, () -> {
                 cancel[0] = true;
                 dialog.hide();
+                onCance.run();
             }).size(210f, 64f);
             dialog.setFillParent(false);
             dialog.show();
