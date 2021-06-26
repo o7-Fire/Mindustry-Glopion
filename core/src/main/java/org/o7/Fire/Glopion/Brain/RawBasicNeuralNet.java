@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class RawBasicNeuralNet implements RawNeuralNet, Pool.Poolable, PoolObject.Object {
 	public int[] raw;
-	public int[] output;
+	public final int[] output;
 	public NeuralFunction function = NeuralFunction.Identity;
 	
 	public RawBasicNeuralNet(int[] structure, int inputSize){
