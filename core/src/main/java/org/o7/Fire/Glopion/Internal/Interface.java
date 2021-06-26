@@ -168,12 +168,11 @@ public class Interface {
     }
     
     public static void showInfo(String s) {
-        if (Vars.ui == null) Events.on(EventType.ClientLoadEvent.class, se -> Vars.ui.showInfo(s));
-        else Vars.ui.showInfo(s);
+        runOnUI(()->Vars.ui.showInfo(s));
     }
     
     public static void runOnUI(Runnable r) {
-        if (Vars.ui == null) Events.on(EventType.ClientLoadEvent.class, s -> r.run());
+        if (Vars.ui == null || Core.scene != null) Events.on(EventType.ClientLoadEvent.class, s -> r.run());
         r.run();
     }
     

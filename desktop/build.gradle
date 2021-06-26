@@ -9,7 +9,7 @@ tasks.withType(JavaCompile) {
     options.compilerArgs.addAll(['--release', '11'])//android 4.4 like java 8
 }
 
-static String getHttp(String jarUrl, Dependency dependency) {
+static String getHttp(String jarUrl, ModuleVersionIdentifier dependency) {
     try {
         URL jarfile = new URL(jarUrl)
         InputStream inStream = jarfile.openStream()
@@ -28,6 +28,49 @@ static String getHttp(String jarUrl, Dependency dependency) {
     return null
 }
 
+
+
+dependencies {
+    compileOnly(atomModule(":Atomic")) {
+        because("runtime")
+    }
+    compileOnly(atomModule(":Desktop")) {
+        because("runtime")
+    }
+    compileOnly (group: 'com.aparapi', name: 'aparapi', version: '2.0.0') {because("runtime")}
+
+    //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}
+    compileOnly (group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
+        because("runtime")
+    }
+    compileOnly (group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M1') {
+        because("runtime")
+    }
+    compileOnly (group: 'org.jfree', name: 'jfreechart', version: '1.5.3') {
+        because("runtime")
+    }
+    testImplementation group: 'org.jfree', name: 'jfreechart', version: '1.5.3'
+    testImplementation group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M1'
+    testImplementation group: 'com.aparapi', name: 'aparapi', version: '2.0.0'
+    testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
+    testImplementation group: 'org.jblas', name: 'jblas', version: '1.2.5'
+    testImplementation(atomModule(":Atomic"))
+    testImplementation(atomModule(":Desktop"))
+    testImplementation(aproj(":core"))
+    implementation(aproj(":core")) {
+        exclude group: "com.github.o7-Fire.Atomic-Library", module: "Atomic"
+    }
+
+}
+
+
+task collectAllDeps {
+    doLast {
+
+
+
+    }
+}
 task writeDependency() {
     File txt = new File(projectDir, "src/main/resources/dependencies")
     txt.parentFile.mkdirs()
@@ -39,22 +82,32 @@ task writeDependency() {
         Properties depends = new Properties()
         ArrayList<Future<String>> task = new ArrayList<>()
         ExecutorService service = Executors.newCachedThreadPool()
-        configurations.compileOnly.allDependencies.each { dependency ->
+        HashSet<String> exist = new HashSet<>()
+        configurations.runtimeClasspath.getResolvedConfiguration().getResolvedArtifacts().each{
+            ModuleVersionIdentifier dep = it.getModuleVersion().getId()
+            exist.add("$dep.group:$dep.name")
+        }
+        def conf = configurations.compileClasspath
 
-            if (dependency.reason == "runtime") {
+            println conf.name
+            conf.getResolvedConfiguration().getResolvedArtifacts().each {
+                ModuleVersionIdentifier dep = it.getModuleVersion().getId()
+                if(exist.contains("$dep.group:$dep.name"))return;
+                println "$dep.group:$dep.name:$dep.version"
 
                 for (ArtifactRepository repository : project.repositories.asList()) {
                     try {
                         String url = repository.properties.get('url')
+                        if (!url.startsWith("http"))continue;
                         if (!url.endsWith("/"))
                             url = url + "/"
                         String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
-                                dependency.group.replace('.', '/'), dependency.name, dependency.version,
-                                dependency.name, dependency.version)
+                                dep.group.replace('.', '/'), dep.name, dep.version,
+                                dep.name, dep.version)
                         Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
                             @Override
                             String call() throws Exception {
-                                return getHttp(jarUrl, dependency)
+                                return getHttp(jarUrl, dep)
                             }
                         })
                         task.add(f)
@@ -62,7 +115,8 @@ task writeDependency() {
                     }
                 }
             }
-        }
+
+
         println task.size() + " searching"
         for (Future<String> f : task) {
             //println f.get()
@@ -84,34 +138,7 @@ task writeDependency() {
 
     }
 }
-
-dependencies {
-    compileOnly(atomModule(":Atomic")) {
-        because("runtime")
-    }
-    compileOnly(atomModule(":Desktop")) {
-        because("runtime")
-    }
-    compileOnly (group: 'com.aparapi', name: 'aparapi', version: '2.0.0') {because("runtime")}
-
-    //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}
-    compileOnly (group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
-        because("runtime")
-    }
-    testImplementation group: 'com.aparapi', name: 'aparapi', version: '2.0.0'
-    testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
-    testImplementation group: 'org.jblas', name: 'jblas', version: '1.2.5'
-    testImplementation(atomModule(":Atomic"))
-    testImplementation(atomModule(":Desktop"))
-    testImplementation(aproj(":core"))
-    implementation(aproj(":core")) {
-        exclude group: "com.github.o7-Fire.Atomic-Library", module: "Atomic"
-    }
-
-}
-
 task base(type: Jar, dependsOn: ":core:compileJava") {
-    dependsOn(writeDependency)
     archiveFileName = "desktop.jar"
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest.attributes('Main-Class': modsNJavaMain)//what

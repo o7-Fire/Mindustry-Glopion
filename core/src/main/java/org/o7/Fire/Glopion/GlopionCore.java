@@ -1,11 +1,14 @@
 package org.o7.Fire.Glopion;
 
 import Atom.Reflect.Reflect;
+import Atom.String.WordGenerator;
 import Atom.Utility.Pool;
 import arc.Core;
 import arc.util.Log;
+import mindustry.Vars;
 import mindustry.mod.Mod;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
+import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
@@ -31,6 +34,7 @@ public class GlopionCore extends Mod implements Module {
     public static boolean machineVisualizeRenderSettings;
     
     static {
+        Interface.runOnUI(()-> Vars.ui.showCustomConfirm("Saddad", WordGenerator.newWord(2000), "yes", "no", ()->{}, ()->{}));
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);
