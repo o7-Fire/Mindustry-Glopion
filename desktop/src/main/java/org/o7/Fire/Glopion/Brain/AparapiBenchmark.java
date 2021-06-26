@@ -20,11 +20,11 @@ import static org.o7.Fire.Glopion.Brain.TrainingJeneticData.*;
 public class AparapiBenchmark {
     public static void vectorBenchmark(){
         int error = 0;
-        int length = 1024 * 1024;
+        int length = 1024 * 1024 * 1024;
         //Device device = Device.best();
         //System.out.println("Best Device: " + device.getShortDescription());
         int[] a = new int[length], b = new int[length];
-        System.out.println("Vector Operation: " + length );
+        System.out.println("Vector Operation:  1024 * 1024 * 1024"  );
         NeuralFunction.assignRandom(a);
         NeuralFunction.assignRandom(b);
         for (Device d : KernelManager.instance().getDefaultPreferences().getPreferredDevices(null)) {
@@ -43,7 +43,6 @@ public class AparapiBenchmark {
             for (int i = 0; i < 10; i++) {
                 AparapiVector vector = new AparapiVector(a, b);
                 Time time = new Time(TimeUnit.MILLISECONDS);
-                vector.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.GPU);
                 vector.execute(range);
                 measurement.add(time.elapsed());
             }
