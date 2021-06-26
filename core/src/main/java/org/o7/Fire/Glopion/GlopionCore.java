@@ -3,6 +3,7 @@ package org.o7.Fire.Glopion;
 import Atom.Reflect.Reflect;
 import Atom.String.WordGenerator;
 import Atom.Utility.Pool;
+import Atom.Utility.Utility;
 import arc.Core;
 import arc.util.Log;
 import mindustry.Vars;
@@ -32,9 +33,8 @@ public class GlopionCore extends Mod implements Module {
     public static HudMenu glopionHud;
     public static AtomicDialog machineInformation;
     public static boolean machineVisualizeRenderSettings;
-    
+   
     static {
-        Interface.runOnUI(()-> Vars.ui.showCustomConfirm("Saddad", WordGenerator.newWord(2000), "yes", "no", ()->{}, ()->{}));
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);

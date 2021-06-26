@@ -26,6 +26,8 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'java-library'
 
+
+
 sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -123,16 +125,16 @@ allprojects {
                 downloadMindustry(getMindustryURL(), getMindustryFile());
             }
             File mindustry = file(mindustryExecutable)
-            if(mindustry.exists()) {
-                compileOnly(files(mindustry))
+            //if(mindustry.exists()) {
+            //    compileOnly(files(mindustry))
                 //testCompileOnly(files(mindustry))
-                testImplementation(files(mindustry))
-            }else {//if you feel fancy remove this else
+           //     testImplementation(files(mindustry))
+            //}else {//if you feel fancy remove this else
                 compileOnly("com.github.Anuken.Mindustry:desktop:$mindustryHash")
                 compileOnly("com.github.Anuken.Arc:arc-core:$arcHash")
                 compileOnly("com.github.Anuken.Arc:backend-sdl:$arcHash")
                 compileOnly("com.github.Anuken.Mindustry:core:$mindustryHash")
-            }
+           // }
             compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
 
         }
@@ -192,6 +194,7 @@ ext{
 dependencies {
 
 }
+
 //make .class jar with executable main and MANIFEST.MF
 //your typical jar
 task base(type: Jar){

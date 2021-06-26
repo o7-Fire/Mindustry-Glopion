@@ -67,7 +67,7 @@ public class Identification {
         Packets.ConnectPacket c = new Packets.ConnectPacket();
         Player p = null;
         if (Groups.player.size() > 2) p = Random.getRandom(Groups.player);
-        c.name = p == null ? (Random.getBool() ? Utility.capitalizeEnforce(WordGenerator.newWord(Random.getInt(5, maxNameLength))) : WordGenerator.newWord(Random.getInt(5, maxNameLength))) : p.name + Translation.getRandomHexColor();
+        c.name = p == null ? (Random.getBool() ? Utility.capitalizeEnforce(WordGenerator.newWord(Random.getInt(5, maxNameLength)).toString()) : WordGenerator.newWord(Random.getInt(5, maxNameLength)).toString()) : p.name + Translation.getRandomHexColor();
         c.locale = null;//lol no
         c.mods = new Seq<>();
         c.mobile = Random.getBool();

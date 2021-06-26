@@ -29,7 +29,6 @@ static String getHttp(String jarUrl, ModuleVersionIdentifier dependency) {
 }
 
 
-
 dependencies {
     compileOnly(atomModule(":Atomic")) {
         because("runtime")
@@ -37,16 +36,16 @@ dependencies {
     compileOnly(atomModule(":Desktop")) {
         because("runtime")
     }
-    compileOnly (group: 'com.aparapi', name: 'aparapi', version: '2.0.0') {because("runtime")}
+    compileOnly(group: 'com.aparapi', name: 'aparapi', version: '2.0.0') { because("runtime") }
 
     //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}
-    compileOnly (group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
+    compileOnly(group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
         because("runtime")
     }
-    compileOnly (group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M1') {
+    compileOnly(group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M1') {
         because("runtime")
     }
-    compileOnly (group: 'org.jfree', name: 'jfreechart', version: '1.5.3') {
+    compileOnly(group: 'org.jfree', name: 'jfreechart', version: '1.5.3') {
         because("runtime")
     }
     testImplementation group: 'org.jfree', name: 'jfreechart', version: '1.5.3'
@@ -63,14 +62,6 @@ dependencies {
 
 }
 
-
-task collectAllDeps {
-    doLast {
-
-
-
-    }
-}
 task writeDependency() {
     File txt = new File(projectDir, "src/main/resources/dependencies")
     txt.parentFile.mkdirs()
@@ -83,38 +74,40 @@ task writeDependency() {
         ArrayList<Future<String>> task = new ArrayList<>()
         ExecutorService service = Executors.newCachedThreadPool()
         HashSet<String> exist = new HashSet<>()
-        configurations.runtimeClasspath.getResolvedConfiguration().getResolvedArtifacts().each{
+        configurations.runtimeClasspath.getResolvedConfiguration().getResolvedArtifacts().each {
             ModuleVersionIdentifier dep = it.getModuleVersion().getId()
             exist.add("$dep.group:$dep.name")
         }
         def conf = configurations.compileClasspath
+        def skip = ["com.github.Anuken", "annotations"]
+        conf.getResolvedConfiguration().getResolvedArtifacts().each {
+            ModuleVersionIdentifier dep = it.getModuleVersion().getId()
+            if (exist.contains("$dep.group:$dep.name")) return;
+            String name = "$dep.group:$dep.name:$dep.version";
+            for(String s : skip) {
+                if (name.contains(s)) return ;
+            }
 
-            println conf.name
-            conf.getResolvedConfiguration().getResolvedArtifacts().each {
-                ModuleVersionIdentifier dep = it.getModuleVersion().getId()
-                if(exist.contains("$dep.group:$dep.name"))return;
-                println "$dep.group:$dep.name:$dep.version"
-
-                for (ArtifactRepository repository : project.repositories.asList()) {
-                    try {
-                        String url = repository.properties.get('url')
-                        if (!url.startsWith("http"))continue;
-                        if (!url.endsWith("/"))
-                            url = url + "/"
-                        String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
-                                dep.group.replace('.', '/'), dep.name, dep.version,
-                                dep.name, dep.version)
-                        Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
-                            @Override
-                            String call() throws Exception {
-                                return getHttp(jarUrl, dep)
-                            }
-                        })
-                        task.add(f)
-                    } catch (Exception e) {
-                    }
+            for (ArtifactRepository repository : project.repositories.asList()) {
+                try {
+                    String url = repository.properties.get('url')
+                    if (!url.startsWith("http")) continue;
+                    if (!url.endsWith("/"))
+                        url = url + "/"
+                    String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
+                            dep.group.replace('.', '/'), dep.name, dep.version,
+                            dep.name, dep.version)
+                    Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
+                        @Override
+                        String call() throws Exception {
+                            return getHttp(jarUrl, dep)
+                        }
+                    })
+                    task.add(f)
+                } catch (Exception e) {
                 }
             }
+        }
 
 
         println task.size() + " searching"

@@ -86,9 +86,14 @@ public class Main extends Mod {
                     Core.app.post(() -> downloadLibrary0(iterator));
                 }, Throwable::printStackTrace);
             }else{
-                BootstrapperUI.downloadGUI(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
-                    Core.app.post(() -> downloadLibrary0(iterator));
+                Vars.ui.showConfirm("Download Library",s.getKey(),()->{
+                    BootstrapperUI.downloadGUI(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
+                        Core.app.post(() -> downloadLibrary0(iterator));
+                    },()->{
+                        Core.app.post(() -> downloadLibrary0(iterator));
+                    });
                 });
+              
             }
             break;
         }
@@ -98,17 +103,11 @@ public class Main extends Mod {
     
     }
     public static void downloadLibrary(){
-        StringBuilder sb = new StringBuilder("Following library need to be downloaded\n[");
-        for(Map.Entry<String, File> s : downloadFile.entrySet()) {
-            if(s.getValue().exists())continue;
-            sb.append(s.getKey()).append("\n");
-        }
-        sb.append("]");
         final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
         if(Vars.headless){
             Core.app.post(() -> downloadLibrary0(iterator));
         }else{
-            Main.runOnUI(() -> Vars.ui.showCustomConfirm("Downloading Library", sb.toString(), "Download", "No", () -> Core.app.post(() -> downloadLibrary0(iterator)), () -> {}));
+            Main.runOnUI(() -> Vars.ui.showCustomConfirm("Downloading Library", downloadFile.size() + " library total", "Download", "No", () -> Core.app.post(() -> downloadLibrary0(iterator)), () -> {}));
         }
     }
     public static Fi getFlavorJar(String flavor){
@@ -127,6 +126,9 @@ public class Main extends Mod {
         SharedBootstrapper.parent = Core.files.cache("libs").file();
         
         boolean classExist = Main.class.getClassLoader().getResourceAsStream(classpath.replace('.','/')+".class") != null;
+        if(classExist){
+            Log.infoTag("Glopion-Bootstrapper", "Found in classpath, loading from classpath");
+        }
         if (jar.exists() || classExist){
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
