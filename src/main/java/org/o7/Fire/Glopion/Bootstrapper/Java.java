@@ -53,7 +53,7 @@ public class Java {
             System.out.println("Downloading: " + stableGlopion);
             downloading.add(SharedBootstrapper.download(stableGlopion, glopion));
         }
-        SharedBootstrapper.downloadAll();
+        
         SharedBootstrapper.waitForThreads(downloading);
         URLClassLoader resource = new URLClassLoader(new URL[]{glopion.toURI().toURL()});
         try {
@@ -61,7 +61,7 @@ public class Java {
         }catch(Exception e){
             e.printStackTrace();
         }
-     
+        SharedBootstrapper.downloadAll();
         classPath.append(File.pathSeparator).append(glopion.getAbsolutePath());
         classPath.append(File.pathSeparator).append(mindustry.getAbsolutePath());
         for(File f : SharedBootstrapper.getFiles())
