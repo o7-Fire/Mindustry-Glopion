@@ -145,17 +145,20 @@ public class Main extends Mod {
                 
                 if(!Vars.mobile && somethingMissing()){
                     downloadLibrary();
-                }else{
+                }
                     if(downloadFile.size() != 0){
-                        URL[] urls = new URL[downloadFile.values().size() + 1];
-                        int i = 0;
-                        for(File s : downloadFile.values())
-                            urls[i++] = (s.toURI().toURL());
-                        urls[i] = jar.file().toURI().toURL();
-                        classLoader = new URLClassLoader(urls, parent);
+                        Seq<URL> urls = new Seq<>();
+                        for(File s : downloadFile.values()) {
+                            if(s.exists())
+                                urls.add (s.toURI().toURL());
+                        }
+                        if(!urls.isEmpty()){
+                            urls.add(jar.file().toURI().toURL());
+                            classLoader = new URLClassLoader(urls.toArray(), parent);
+                        }
                     }
                     unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
-                }
+                
                 StringBuilder sb = new StringBuilder().append("Class: ").append(unloaded).append("\n");
                 sb.append("Flavor: ").append(flavor).append("\n");
                 sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
