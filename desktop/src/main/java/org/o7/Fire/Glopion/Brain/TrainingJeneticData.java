@@ -37,7 +37,7 @@ public class TrainingJeneticData {
         distributeDataset();
         MachineRecorder sample = recordTest.get(0);
         System.out.println("Input Size: " + sample.getInputSize());
-        System.out.println("Output Size" + sample.getOutputSize());
+        System.out.println("Output Size: " + sample.getOutputSize());
         structure = new int[]{40, 40, 30, sample.getOutputSize()};
         biasSize = RawNeuralNet.needRaw(sample.getInputSize(),structure);
         neuralNetPool = new JeneticNetworkPool( structure);
