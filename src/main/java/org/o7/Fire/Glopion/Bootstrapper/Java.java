@@ -72,10 +72,7 @@ public class Java {
         if (javaBin.exists()) java = javaBin.getAbsolutePath();
         list.addAll(Arrays.asList(java, "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Headless"));
         list.addAll(Arrays.asList(args));
-        if (training){
-            StartServer.run();
-            
-        }
+        //if (training){ StartServer.run(); }
         System.exit(new ProcessBuilder(list.toArray(new String[0])).inheritIO().start().waitFor());
     }
     

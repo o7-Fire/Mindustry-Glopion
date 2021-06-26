@@ -1,5 +1,6 @@
 package org.o7.Fire.Glopion.Brain;
 
+import Atom.Time.Time;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import com.google.gson.Gson;
@@ -17,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TrainingJeneticData {
@@ -42,9 +44,11 @@ public class TrainingJeneticData {
         geneFactory = Genotype.of(IntegerChromosome.of(Integer.MIN_VALUE,Integer.MAX_VALUE, biasSize));
         training();
     }
+    public static final ArrayList<Time> measurementEval = new ArrayList<>();
     public static int eval(Genotype<IntegerGene> h){
         JeneticNeuralNetwork neuralNetwork = neuralNetPool.obtain();
         neuralNetwork.set(h.chromosome());
+        Time time = new Time(TimeUnit.MILLISECONDS);
         int error = 0;
         for (MachineRecorder m : record) {
             int[][] input = m.getInput();
@@ -53,7 +57,17 @@ public class TrainingJeneticData {
                 error += neuralNetwork.error(in, m.getOutput()[j]);
             }
         }
+        measurementEval.add(time.elapsed());
         return error;
+    }
+    public static double avg(long... arr) {
+        long sum = 0;
+        int length = 0;
+        for (long l : arr) {
+            sum += l;
+            length++;
+        }
+        return (double) sum / length;
     }
     public static int test(EvolutionResult<IntegerGene, Integer> result){
         JeneticNeuralNetwork neuralNetwork = neuralNetPool.obtain();
@@ -78,7 +92,7 @@ public class TrainingJeneticData {
         List<EvolutionResult<IntegerGene, Integer>> arrayListCapped = Collections.synchronizedList(new ArrayListCapped<>(100));
         AtomicInteger integer = new AtomicInteger(0);
         long murdered = engine.stream()
-                .limit(Limits.bySteadyFitness(10*100))
+                .limit(Limits.bySteadyFitness(10*10))
                 .filter(s-> integer.get() <= s.bestFitness())
                 .peek(s -> integer.set(s.bestFitness()))
                 .peek(arrayListCapped::add).count();
@@ -107,6 +121,13 @@ public class TrainingJeneticData {
         System.out.println("Congratulation here your n100");
         System.out.println(Arrays.toString(n100));
         System.out.println("Total Murdered: " + murdered);
+        long[] measure = new long[measurementEval.size()];
+        for (int i = 0, measurementSize = measurementEval.size(); i < measurementSize; i++) {
+            Time m = measurementEval.get(i);
+            measure[i] = m.getSrc();
+        }
+        System.out.println("Size Sample: " + measure.length);
+        System.out.println("Average Evaluation Time: " + TrainingJeneticData.avg(measure) + " ms");
     }
     public static void distributeDataset(){
         int size = record.size() / 4;
