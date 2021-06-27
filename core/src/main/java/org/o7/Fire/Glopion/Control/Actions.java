@@ -5,7 +5,7 @@ package org.o7.Fire.Glopion.Control;
 //Name for human
 //No real operation here
 /** implement {@link mindustry.net.Administration.ActionType} */
-public enum Control {
+public enum Actions {
     MoveVertical,
     MoveHorizontal,
     Rotate,

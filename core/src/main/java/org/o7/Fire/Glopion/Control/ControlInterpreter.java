@@ -40,9 +40,9 @@ public class ControlInterpreter extends ModsModule implements WorldModule {
     }
     
     public static void random(MachineControl control){
-        interpret(Random.getRandom(Control.values()),control,Random.getFloat());
+        interpret(Random.getRandom(Actions.values()),control,Random.getFloat());
     }
-    public static void interpret(Control c, MachineControl control, float value){
+    public static void interpret(Actions c, MachineControl control, float value){
         Vars.ui.hudfrag.setHudText(c.name() + ": " + value);
         switch (c){
             case MoveHorizontal:

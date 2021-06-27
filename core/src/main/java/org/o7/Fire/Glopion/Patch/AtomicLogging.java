@@ -15,7 +15,7 @@ import org.o7.Fire.Glopion.Module.ModsModule;
 
 import java.io.Writer;
 
-public class AtomicLogger extends ModsModule {
+public class AtomicLogging extends ModsModule {
     public static Writer writer;
     public static final Seq<String> logBuffer = new Seq<>();
     public static String[] tags = {"[green][D][]", "[royal][I][]", "[yellow][W][]", "[scarlet][E][]", ""};

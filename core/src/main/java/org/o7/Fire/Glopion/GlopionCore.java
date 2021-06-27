@@ -8,6 +8,7 @@ import arc.Core;
 import arc.util.Log;
 import mindustry.Vars;
 import mindustry.mod.Mod;
+import org.o7.Fire.Glopion.Control.GlopionControl;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
@@ -23,6 +24,7 @@ import java.util.concurrent.Executors;
 
 public class GlopionCore extends Mod implements Module {
     public static AtomicDialog modsMenu;
+    public static GlopionControl glopionControl = new GlopionControl();
     public static boolean test;
     //public static CommandsListFrag commFrag;
     public static WorldInformation worldInformation;

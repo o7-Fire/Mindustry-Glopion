@@ -21,7 +21,7 @@ import arc.Core;
 import arc.input.KeyCode;
 import mindustry.Vars;
 import mindustry.gen.Icon;
-import org.o7.Fire.Glopion.Patch.AtomicLogger;
+import org.o7.Fire.Glopion.Patch.AtomicLogging;
 
 public class LogView extends ScrollableDialog {
     
@@ -60,12 +60,12 @@ public class LogView extends ScrollableDialog {
     }
     
     private String getLog() {
-        if (last != AtomicLogger.logBuffer.size){
+        if (last != AtomicLogging.logBuffer.size){
             StringBuilder sb = new StringBuilder();
-            for (int i = AtomicLogger.logBuffer.size - 1; i >= 0; i--) {
-                sb.append(AtomicLogger.logBuffer.get(i)).append("[white]\n");
+            for (int i = AtomicLogging.logBuffer.size - 1; i >= 0; i--) {
+                sb.append(AtomicLogging.logBuffer.get(i)).append("[white]\n");
             }
-            last = AtomicLogger.logBuffer.size;
+            last = AtomicLogging.logBuffer.size;
             lastLog = sb.toString();
         }
         return lastLog;
@@ -75,8 +75,8 @@ public class LogView extends ScrollableDialog {
         Pool.daemon(()->{
             Core.app.post(()->{
                 String eval = Vars.mods.getScripts().runConsole(see);
-                AtomicLogger.logBuffer.add(eval);
-                AtomicLogger.logBuffer.add(">" + see);
+                AtomicLogging.logBuffer.add(eval);
+                AtomicLogging.logBuffer.add(">" + see);
             });
         }).start();
     }
