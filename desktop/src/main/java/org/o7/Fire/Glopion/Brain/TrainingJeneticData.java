@@ -150,9 +150,9 @@ public class TrainingJeneticData extends Kernel {
                 .limit(Limits.byExecutionTime(Duration.ofHours(3)))//
                 //.limit(Limits.bySteadyFitness(50 * 10))//
                 .peek(s -> System.out.println("Generation: " + s.generation() + ",Best Fitness: " + s.bestFitness() + ",Worse Fitness: " + s.worstFitness()))//
-                .peek(s-> System.out.println(test(s)))
                 .filter(s -> integer[0] <= s.bestFitness())//
                 .peek(s ->  integer[0] = (s.bestFitness()))//
+                .peek(TrainingJeneticData::saveResult)
                 .peek(arrayListCapped::add)//
                 .count();
         System.out.println("Finish training, testing thing");
