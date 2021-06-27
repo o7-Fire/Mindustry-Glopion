@@ -18,6 +18,7 @@ package org.o7.Fire.Glopion.Module.Patch;
 
 import Atom.Reflect.FieldTool;
 import Atom.Reflect.Reflect;
+import arc.Core;
 import arc.graphics.Color;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
@@ -26,7 +27,9 @@ import mindustry.graphics.LoadRenderer;
 import mindustry.graphics.Pal;
 import mindustry.input.DesktopInput;
 import mindustry.input.MobileInput;
+import org.o7.Fire.Glopion.Control.GlopionControl;
 import org.o7.Fire.Glopion.Gen.Callable;
+import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningReport;
 import org.o7.Fire.Glopion.Module.ModsModule;
@@ -41,6 +44,7 @@ public class VarsPatch extends ModsModule {
     
     @Override
     public void preInit() {
+        Core.input.getDevices().add(GlopionCore.glopionControl);
         //java 8 only
         try {
             Field orange = LoadRenderer.class.getDeclaredField("orange"), color = LoadRenderer.class.getDeclaredField("color");

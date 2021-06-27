@@ -22,7 +22,7 @@ import mindustry.input.DesktopInput;
 import mindustry.ui.Styles;
 import org.o7.Fire.Glopion.GlopionCore;
 
-public class DesktopInputPatched extends DesktopInput {
+public class DesktopInputPatched extends DesktopInput  {
     
     
     @Override

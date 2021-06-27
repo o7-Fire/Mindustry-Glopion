@@ -37,7 +37,9 @@ public class EventExtended {
     public enum Connect {
         Disconnected, Connected
     }
-    
+  public enum InputUpdate{
+        Pre, Post
+  }
     public enum Game {
         Start, Stop
     }

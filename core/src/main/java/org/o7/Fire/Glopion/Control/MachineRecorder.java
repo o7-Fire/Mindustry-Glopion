@@ -315,13 +315,13 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     
     public int[] captureAction() {
         
-        return new int[]{(int) (player.unit().vel.y * precision), /** {@link Control#MoveVertical} */
-                (int) (player.unit().vel.x * precision), /** {@link Control#MoveHorizontal} */
-                (int) (player.unit().rotation * precision), /** {@link Control#Rotate} */
-                player.shooting ? 1 : 0, /** {@link Control#Shooting} */
-                player.unit().mining() ? 1 : 0, /** {@link Control#Mining} */
-                player.boosting() ? 1 : 0, /** {@link Control#Boosting} */
-                player.unit().isBuilding() ? 1 : 0, /** {@link Control#Building} */};
+        return new int[]{(int) (player.unit().vel.y * precision), /** {@link Actions#MoveVertical} */
+                (int) (player.unit().vel.x * precision), /** {@link Actions#MoveHorizontal} */
+                (int) (player.unit().rotation * precision), /** {@link Actions#Rotate} */
+                player.shooting ? 1 : 0, /** {@link Actions#Shooting} */
+                player.unit().mining() ? 1 : 0, /** {@link Actions#Mining} */
+                player.boosting() ? 1 : 0, /** {@link Actions#Boosting} */
+                player.unit().isBuilding() ? 1 : 0, /** {@link Actions#Building} */};
     }
     
     public boolean timePass() {
