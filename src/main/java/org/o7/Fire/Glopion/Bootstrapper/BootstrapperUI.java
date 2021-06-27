@@ -20,6 +20,7 @@ import mindustry.graphics.Pal;
 import mindustry.mod.Mod;
 import mindustry.ui.Bar;
 import mindustry.ui.dialogs.BaseDialog;
+import org.o7.Fire.Glopion.Bootstrapper.UI.DependencyManager;
 import org.o7.Fire.Glopion.Bootstrapper.UI.FlavorDialog;
 import org.o7.Fire.Glopion.Bootstrapper.UI.ProviderURLDialog;
 
@@ -38,6 +39,7 @@ import static org.o7.Fire.Glopion.Bootstrapper.Main.*;
 public class BootstrapperUI extends Mod {
     public FlavorDialog flavorDialog;
     public ProviderURLDialog providerURLDialog;
+    public DependencyManager dependencyManager;
     public Properties release = new Properties();
     public Cell<Table> tableCell = null;
     public Table t = null;
@@ -59,7 +61,7 @@ public class BootstrapperUI extends Mod {
             });
         }catch(Throwable ignored){}
     }
-    public static void download(String furl, Fi dest, Intc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
+    public static void download(String furl, Fi dest, Longc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
         Threads.daemon(() -> {
             try {
                 dest.parent().mkdirs();
@@ -69,9 +71,9 @@ public class BootstrapperUI extends Mod {
                 RandomAccessFile out = new RandomAccessFile(dest.file(),"rw");
                 
                 byte[] data = new byte[4096];
-                long size = con.getContentLength();
+                long size = con.getContentLengthLong();
                 long counter = 0;
-                length.get((int) size);
+                length.get( size);
                 int x;
                 while ((x = in.read(data, 0, data.length)) >= 0 && !canceled.get()) {
                     counter += x;
@@ -105,10 +107,10 @@ public class BootstrapperUI extends Mod {
         try {
             boolean[] cancel = {false};
             float[] progress = {0};
-            int[] length = {0};
+            long[] length = {0};
             
             
-            BaseDialog dialog = new BaseDialog("Downloading");
+            BaseDialog dialog = new BaseDialog("Downloading: " + jar.name());
             download(url, jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
                 done.run();
                 dialog.hide();
@@ -117,7 +119,7 @@ public class BootstrapperUI extends Mod {
                 ui.showException(e);
             });
             
-            dialog.cont.add(new Bar(() -> length[0] == 0 ? "Downloading: " + url : (int) (progress[0] * length[0]) / 1024 / 1024 + "/" + length[0] / 1024 / 1024 + " MB", () -> Pal.accent, () -> progress[0])).width(400f).height(70f);
+            dialog.cont.add(new Bar(() -> length[0] == 0 ? "Downloading: " + url : SharedBootstrapper.humanReadableByteCountSI((long) (length[0] * progress[0])) + "/" + SharedBootstrapper.humanReadableByteCountSI(length[0]), () -> Pal.accent, () -> progress[0])).width(400f).height(70f);
             dialog.buttons.button("@cancel", Icon.cancel, () -> {
                 cancel[0] = true;
                 dialog.hide();
@@ -193,6 +195,7 @@ public class BootstrapperUI extends Mod {
     public void init() {
         providerURLDialog = new ProviderURLDialog(this);
         flavorDialog = new FlavorDialog(this);
+        dependencyManager = new DependencyManager();
         fetchRelease(suc -> tryDownload());
         tableCell = ui.settings.game.row().table().growX();
         t = tableCell.get();
@@ -206,6 +209,7 @@ public class BootstrapperUI extends Mod {
         t.check("Force Update", Core.settings.getBool("glopion-auto-update", false), b -> Core.settings.put("glopion-auto-update", b)).row();
         t.button("Glopion Flavor [accent]" + Core.settings.getString("glopion-flavor", flavor), flavorDialog::show).disabled(s -> release.isEmpty()).growX().row();
         t.button("Provider URL", providerURLDialog::show).growX().row();
+        t.button("Dependency", dependencyManager::show).growX().row();
         t.button("Refresh", () -> {
             buildUI();
             fetchRelease(suc -> {

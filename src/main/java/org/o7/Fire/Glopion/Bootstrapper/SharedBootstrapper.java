@@ -6,18 +6,21 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 
 //Java 8+ only
 public class SharedBootstrapper {
-    public static final long version = 13;
+    public static final long version = 15;
     
     @NotNull
     public static File parent = new File("cache/");
     public static Properties dependencies = new Properties();
     public static HashMap<String, List<URL>> downloadList = new HashMap<>();
-    public static HashMap<String, File> downloadFile = new HashMap<>();
-    
+    public static TreeMap<String, File> downloadFile = new TreeMap<>();
+    public static HashMap<String, String> sizeList = new HashMap<>();
+ 
     public static void checkDependency(InputStream is) throws IOException {
         downloadFile.clear();
         downloadList.clear();
@@ -27,11 +30,18 @@ public class SharedBootstrapper {
         SharedBootstrapper.parent.mkdirs();
         for (String key : dependencies.stringPropertyNames()) {
             String[] download = dependencies.getProperty(key).split(" ");
+            String[] keys = key.split("-", 2);
+            try {
+                String size = humanReadableByteCountSI(Long.parseLong(keys[0]));
+                key = keys[1];
+                sizeList.put(key, size);
+             
+            }catch(Exception ignored){}
             ArrayList<URL> downloadURL = new ArrayList<>();
             for (String s : download)
                 downloadURL.add(new URL(s));
             downloadList.put(key, downloadURL);
-            File downloadPath = new File(parent, key.replace(':', File.separatorChar)).getAbsoluteFile();
+            File downloadPath = new File(parent, downloadURL.get(0).getFile());
             downloadPath.getParentFile().mkdirs();
             downloadFile.put(key, downloadPath);
         }
@@ -82,6 +92,17 @@ public class SharedBootstrapper {
             if (!download.getValue().exists()) return true;
         }
         return false;
+    }
+    public static String humanReadableByteCountSI(long bytes) {
+        if (-1000 < bytes && bytes < 1000) {
+            return bytes + " B";
+        }
+        CharacterIterator ci = new StringCharacterIterator("kMGTPE");
+        while (bytes <= -999_950 || bytes >= 999_950) {
+            bytes /= 1000;
+            ci.next();
+        }
+        return String.format("%.1f %cB", bytes / 1000.0, ci.current());
     }
     public static void waitForThreads(List<Thread> threads){
         while (!threads.isEmpty()){

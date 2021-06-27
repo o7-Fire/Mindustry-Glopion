@@ -9,14 +9,13 @@ tasks.withType(JavaCompile) {
     options.compilerArgs.addAll(['--release', '11'])//android 4.4 like java 8
 }
 
-static String getHttp(String jarUrl, ModuleVersionIdentifier dependency) {
+static String getHttp(String jarUrl, String qualified) {
     try {
         URL jarfile = new URL(jarUrl)
-        InputStream inStream = jarfile.openStream()
-        if (inStream != null) {
-            String qualified = String.format("%s:%s:%s", dependency.group, dependency.name, dependency.version)
-
-            return qualified + " " + jarUrl
+        HttpURLConnection connection = jarfile.openConnection()
+        InputStream inputStream = jarfile.openStream()
+        if (inputStream != null) {
+            return connection.getContentLengthLong() + "-" + qualified + " " + jarUrl
         }
     } catch (FileNotFoundException e) {
         //System.err.println(e.toString());
@@ -42,13 +41,41 @@ dependencies {
     compileOnly(group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
         because("runtime")
     }
-    compileOnly(group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M1') {
-        because("runtime")
-    }
+
     compileOnly(group: 'org.jfree', name: 'jfreechart', version: '1.5.3') {
         because("runtime")
     }
+    //DL4J and its cult
+    compileOnly (group: 'org.deeplearning4j', name: 'rl4j-core', version: '1.0.0-M1'){
+        exclude group: 'org.bytedeco', module: 'opencv-platform'
+        exclude group: 'org.bytedeco', module: 'open-cv'
+        exclude group: 'org.bytedeco', module: 'leptonica-platform'
+        exclude group: 'org.bytedeco', module: 'hdf5-platform'
+        exclude group: 'org.bytedeco', module: 'ffmpeg-platform'
+        exclude group: 'org.bytedeco', module: 'ffmpeg'
+        because("runtime")
+    }
+    compileOnly(group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M1') {
+        because("runtime")
+    }
+    compileOnly(group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-M1') {
+        because("runtime")
+    }
+    //nvidia, man fragnance
+    if(isRunner) {
+        compileOnly(group: 'org.nd4j', name: 'nd4j-cuda-11.0-platform', version: '1.0.0-M1') {
+            because("runtime")
+        }
+        compileOnly(group: 'org.nd4j', name: 'nd4j-cuda-11.0', version: '1.0.0-M1') {
+            because("runtime")
+        }
+        compileOnly(group: 'org.bytedeco', name: 'cuda-platform-redist', version: '11.0-8.0-1.5.4') {
+            because("runtime")
+        }
+    }
+    testImplementation group: 'org.deeplearning4j', name: 'rl4j-core', version: '1.0.0-M1'
     testImplementation group: 'org.jfree', name: 'jfreechart', version: '1.5.3'
+    testImplementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-M1'
     testImplementation group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M1'
     testImplementation group: 'com.aparapi', name: 'aparapi', version: '2.0.0'
     testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
@@ -61,7 +88,7 @@ dependencies {
     }
 
 }
-
+//native don't get included
 task writeDependency() {
     File txt = new File(projectDir, "src/main/resources/dependencies")
     txt.parentFile.mkdirs()
@@ -79,11 +106,14 @@ task writeDependency() {
             exist.add("$dep.group:$dep.name")
         }
         def conf = configurations.compileClasspath
-        def skip = ["com.github.Anuken", "annotations"]
+        def skip = ["com.github.Anuken", "annotations", "android", "ios"]
         conf.getResolvedConfiguration().getResolvedArtifacts().each {
             ModuleVersionIdentifier dep = it.getModuleVersion().getId()
             if (exist.contains("$dep.group:$dep.name")) return;
             String name = "$dep.group:$dep.name:$dep.version";
+            if(it.classifier != null) {
+                name = name + ":" + it.classifier;
+            }
             for(String s : skip) {
                 if (name.contains(s)) return ;
             }
@@ -94,17 +124,29 @@ task writeDependency() {
                     if (!url.startsWith("http")) continue;
                     if (!url.endsWith("/"))
                         url = url + "/"
-                    String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar", url.toString(),
-                            dep.group.replace('.', '/'), dep.name, dep.version,
+                    String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar",
+                            url.toString(),
+                            dep.group.replace('.', '/'),
+                            dep.name, dep.version,
                             dep.name, dep.version)
+
+                    if(it.classifier != null){
+                        jarUrl = String.format("%s%s/%s/%s/%s-%s-%s.jar",
+                                url.toString(),
+                                dep.group.replace('.', '/'),
+                                dep.name, dep.version,
+                                dep.name, dep.version, it.classifier)
+                    }
+
                     Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
                         @Override
                         String call() throws Exception {
-                            return getHttp(jarUrl, dep)
+                            return getHttp(jarUrl, name)
                         }
                     })
                     task.add(f)
                 } catch (Exception e) {
+                    e.printStackTrace()
                 }
             }
         }

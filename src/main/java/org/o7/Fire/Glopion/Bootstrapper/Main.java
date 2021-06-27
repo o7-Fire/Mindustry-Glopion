@@ -3,16 +3,22 @@ package org.o7.Fire.Glopion.Bootstrapper;
 import arc.Core;
 import arc.Events;
 import arc.files.Fi;
+import arc.input.KeyCode;
 import arc.struct.Seq;
+import arc.util.Align;
 import arc.util.Log;
+import arc.util.async.Threads;
 import mindustry.Vars;
 import mindustry.core.Version;
 import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.mod.Mods;
+import mindustry.ui.dialogs.BaseDialog;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -20,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static mindustry.Vars.mobile;
 import static org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper.*;
 
 public class Main extends Mod {
@@ -69,9 +76,9 @@ public class Main extends Mod {
         }
     }
   
-    private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator){
+    private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator, boolean yesToAll){
         if (!iterator.hasNext() && !Vars.headless){
-            Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+            Core.app.post(()->Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit));
             return;
         }
         while (iterator.hasNext()){
@@ -80,24 +87,50 @@ public class Main extends Mod {
                 continue;
             }
             Seq<URL> seq = Seq.with(downloadList.get(s.getKey()));
-            Log.info("Downloading: " + s.getKey());
-            if(Vars.headless){
-                BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
-                    Core.app.post(() -> downloadLibrary0(iterator));
-                }, Throwable::printStackTrace);
-            }else{
-                Vars.ui.showConfirm("Download Library",s.getKey(),()->{
-                    BootstrapperUI.downloadGUI(seq.random().toExternalForm(), new Fi(s.getValue()), () -> {
-                        Core.app.post(() -> downloadLibrary0(iterator));
-                    },()->{
-                        Core.app.post(() -> downloadLibrary0(iterator));
-                    });
-                });
-              
+            URL url = seq.random();
+    
+            String size = sizeList.get(s.getKey());
+            if(size == null){
+                try {//blocking
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    size = SharedBootstrapper.humanReadableByteCountSI(connection.getContentLengthLong());
+                    size = "(" + size + ")";
+                    connection.disconnect();
+                }catch(IOException e){
+                    size = "(don't know)";
+                }
+                sizeList.put(s.getKey(),size);
             }
-            break;
+            Log.info("Downloading: " + s.getKey());
+            if(!yesToAll)
+            if(Core.settings.getString(s.getKey()) != null)
+                continue;
+            if(Vars.headless){
+                BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> { }, Throwable::printStackTrace);
+            }else{
+                Runnable run = ()->BootstrapperUI.downloadGUI(url.toExternalForm(), new Fi(s.getValue()), () -> {
+                    if(!yesToAll) downloadLibrary0(iterator,yesToAll);
+                },()->{
+                    if(!yesToAll) downloadLibrary0(iterator,yesToAll);
+                });
+                String finalSize = size;
+             
+                
+                Core.app.post(()->{
+                    if(yesToAll){
+                        run.run();
+                    }else{
+                        Vars.ui.showCustomConfirm("Download Library", s.getKey(), "Download " + (finalSize == null ? "" : finalSize), "Skip", run, () -> {
+                            Core.settings.put(s.getKey(), "skip");
+                            if(!yesToAll) downloadLibrary0(iterator,yesToAll);
+                        });
+                    }
+                });
+           
+            }
+            if(!yesToAll)break;
         }
- 
+    
        
         
     
@@ -105,9 +138,28 @@ public class Main extends Mod {
     public static void downloadLibrary(){
         final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
         if(Vars.headless){
-            Core.app.post(() -> downloadLibrary0(iterator));
+            Core.app.post(() -> downloadLibrary0(iterator, true));
         }else{
-            Main.runOnUI(() -> Vars.ui.showCustomConfirm("Downloading Library", downloadFile.size() + " library total", "Download", "No", () -> Core.app.post(() -> downloadLibrary0(iterator)), () -> {}));
+            Main.runOnUI(()->{
+                BaseDialog dialog = new BaseDialog("Download Library");
+                dialog.cont.add(downloadFile.size() + " library total").width(mobile ? 400f : 500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
+                dialog.buttons.defaults().size(200f, 54f).pad(2f);
+                dialog.setFillParent(false);
+                dialog.buttons.button("No", () -> {
+                    dialog.hide();
+                });
+                dialog.buttons.button("Yes", () -> {
+                    dialog.hide();
+                    Threads.daemon(() -> downloadLibrary0(iterator, false));
+                });
+                dialog.buttons.button("Yes to all", () -> {
+                    dialog.hide();
+                    Threads.daemon(() -> downloadLibrary0(iterator, true));
+                });
+                dialog.keyDown(KeyCode.escape, dialog::hide);
+                dialog.keyDown(KeyCode.back, dialog::hide);
+                dialog.show();
+            });
         }
     }
     public static Fi getFlavorJar(String flavor){
@@ -146,15 +198,21 @@ public class Main extends Mod {
                 if(!Vars.mobile && somethingMissing()){
                     downloadLibrary();
                 }
+                Seq<URL> urls = new Seq<>();
                     if(downloadFile.size() != 0){
-                        Seq<URL> urls = new Seq<>();
+                   
                         for(File s : downloadFile.values()) {
                             if(s.exists())
                                 urls.add (s.toURI().toURL());
                         }
                         if(!urls.isEmpty()){
                             urls.add(jar.file().toURI().toURL());
-                            classLoader = new URLClassLoader(urls.toArray(), parent);
+                            URL[] url = new URL[urls.size];
+                            int i = 0;
+                            for (URL url1 : urls) {
+                                url[i++] = url1;
+                            }
+                            classLoader = new URLClassLoader(url, parent);
                         }
                     }
                     unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
@@ -166,8 +224,8 @@ public class Main extends Mod {
                 sb.append("Classloader: ").append(classLoader.getClass()).append("\n");
                 if(dependencies.size() != 0){
                     sb.append("Dependency: ").append("\n");
-                    for(Object o : dependencies.keySet()){
-                        sb.append(" -").append(o).append("=").append(downloadFile.get(String.valueOf(o))).append("\n");
+                    for(URL o : urls){
+                        sb.append(" ").append(o).append("\n");
                     }
                 }
                 info = sb.toString();
@@ -193,7 +251,7 @@ public class Main extends Mod {
     }
     
     public static void runOnUI(Runnable r) {
-        if (Vars.ui == null || Vars.ui.loadfrag == null || Core.scene != null){
+        if (Vars.ui == null || Vars.ui.loadfrag == null || Core.scene == null){
             Events.on(EventType.ClientLoadEvent.class, cr -> runOnUI(r));
         }else{
             r.run();

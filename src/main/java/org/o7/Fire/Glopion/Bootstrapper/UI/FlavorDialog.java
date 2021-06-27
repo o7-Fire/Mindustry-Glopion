@@ -27,6 +27,7 @@ public class FlavorDialog extends BaseDialog {
         super("Glopion Flavor");
         bootstrapper = main;
         shown(this::build);
+        onResize(this::build);
     }
     boolean sameModifier = true, sameVersion = true, compatibleBootstrapperVersion = true;
     @Override

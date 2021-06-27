@@ -15,7 +15,7 @@ public class Java {
     
     static {
         try {
-            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/v4.4.3/Mindustry-Glopion-DeepPatch.jar");
+            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/v4.5/Mindustry-Glopion-DeepPatch.jar");
         }catch(MalformedURLException e){
             e.printStackTrace();
             System.out.println("impossible");

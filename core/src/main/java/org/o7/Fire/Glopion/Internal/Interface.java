@@ -172,7 +172,7 @@ public class Interface {
     }
     
     public static void runOnUI(Runnable r) {
-        if (Vars.ui == null || Core.scene != null) Events.on(EventType.ClientLoadEvent.class, s -> r.run());
+        if (Vars.ui == null || Core.scene == null) Events.on(EventType.ClientLoadEvent.class, s -> r.run());
         r.run();
     }
     
