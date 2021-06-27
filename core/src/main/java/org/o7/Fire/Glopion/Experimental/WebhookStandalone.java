@@ -77,7 +77,7 @@ public class WebhookStandalone {
         dat = "```java\n" + dat + "\n```";
         content.content = dat;
         String finalJson = gson.toJson(content);
-        conn.getOutputStream().write(finalJson.getBytes(StandardCharsets.UTF_8));
+        conn.getOutputStream().write(finalJson.getBytes());
         conn.getOutputStream().flush();
         conn.getOutputStream().close();
         try {

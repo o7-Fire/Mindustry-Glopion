@@ -64,7 +64,7 @@ public class AtomicLogger extends ModsModule {
             String stackTrace = st == null || !Reflect.debug ? "" : "-" + st;//if st is not null and is debug
             text = String.format("[%s] [%s%s] %s", Utility.getDate(), threadInfo, stackTrace, text);
             try {
-                writer.write("[" + Character.toUpperCase(level.name().charAt(0)) + "] " + Log.removeColors(text) + System.lineSeparator());
+                writer.write("[" + Character.toUpperCase(level.name().charAt(0)) + "] " + Log.removeColors(text) + System.getProperty("line.separator"));
                 writer.flush();
             }catch(Exception ignored){ }
             

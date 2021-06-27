@@ -34,7 +34,7 @@ public class InfoBox {
             PrintWriter writer = new PrintWriter(out);
             t.printStackTrace(writer);
             FileOutputStream fs = new FileOutputStream(f);
-            fs.write(out.toString().getBytes(StandardCharsets.UTF_8));
+            fs.write(out.toString().getBytes());
             fs.close();
         }catch(Throwable ignored){}
     }

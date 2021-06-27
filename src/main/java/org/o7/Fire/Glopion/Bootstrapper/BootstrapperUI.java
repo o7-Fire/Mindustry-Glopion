@@ -71,7 +71,10 @@ public class BootstrapperUI extends Mod {
                 RandomAccessFile out = new RandomAccessFile(dest.file(),"rw");
                 
                 byte[] data = new byte[4096];
-                long size = con.getContentLengthLong();
+                long size = -1;
+                try {
+                    size = Long.parseLong(con.getHeaderField("content-length"));
+                }catch(Exception ignored){}
                 long counter = 0;
                 length.get( size);
                 int x;

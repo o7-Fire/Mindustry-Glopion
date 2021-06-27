@@ -8,6 +8,7 @@ import arc.struct.Seq;
 import arc.util.Align;
 import arc.util.Log;
 import arc.util.async.Threads;
+import arc.util.serialization.Base64Coder;
 import mindustry.Vars;
 import mindustry.core.Version;
 import mindustry.game.EventType;
