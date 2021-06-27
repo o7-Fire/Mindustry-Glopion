@@ -12,7 +12,12 @@ import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.Limits;
 import io.jenetics.util.Factory;
-import org.nd4j.common.primitives.AtomicDouble;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
+import org.deeplearning4j.nn.weights.WeightInit;
+import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.learning.config.Sgd;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
 
 import java.awt.*;
@@ -25,8 +30,6 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class TrainingJeneticData extends Kernel {
     public static final ArrayList<MachineRecorder> record = new ArrayList<>(), recordTest = new ArrayList<>();
@@ -181,6 +184,7 @@ public class TrainingJeneticData extends Kernel {
     }
     
     public static void printMeasure() {
+        
         long[] measure = new long[measurementEval.size()];
         for (int i = 0, measurementSize = measurementEval.size(); i < measurementSize; i++) {
             Time m = measurementEval.get(i);
