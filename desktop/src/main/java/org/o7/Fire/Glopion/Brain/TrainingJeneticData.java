@@ -104,6 +104,8 @@ public class TrainingJeneticData extends Kernel {
     }
     
     public static void saveArray(String name, int... array) {
+        if(!name.endsWith(".json"))
+            name = name + ".json";
         File file = new File(name).getAbsoluteFile();
         System.out.println("Saving: " + file.getAbsolutePath());
         FileUtility.write(file, gson.toJson(array).getBytes());
