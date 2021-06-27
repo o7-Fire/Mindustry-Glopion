@@ -25,6 +25,9 @@ public class DependencyManager extends BaseDialog {
         super("Dependency Manager");
         addCloseButton();
         buttons.button("Download All", Icon.left, Main::downloadLibrary).size(210f, 64f);
+        buttons.button("Why",Icon.left, ()->{
+            Vars.ui.showInfo("Unless you want download 500mb of jar everytime there is new update");
+        }).size(210f, 64f);
         shown(this::build);
         onResize(this::build);
     }
