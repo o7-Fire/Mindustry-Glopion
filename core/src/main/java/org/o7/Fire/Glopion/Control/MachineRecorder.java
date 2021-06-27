@@ -90,7 +90,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     
     public static String visualize(int[][] matrix) {
-        String h = Arrays.deepToString(matrix).replace("],", System.lineSeparator());
+        String h = Arrays.deepToString(matrix).replace("],", System.getProperty("line.separator"));
         h = " " + h.substring(1, h.length() - 2);
         return h;
     }
@@ -171,7 +171,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     
     public static String visualize(Object[][] matrix) {
-        return " " + Arrays.deepToString(matrix).replace("],", System.lineSeparator()).substring(1);
+        return " " + Arrays.deepToString(matrix).replace("],", System.getProperty("line.separator")).substring(1);
     }
     
     public static int[][] worldDataToVisual(Tile[][] rawMatrix) {

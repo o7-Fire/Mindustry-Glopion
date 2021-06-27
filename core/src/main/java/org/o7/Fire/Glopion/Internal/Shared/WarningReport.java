@@ -99,12 +99,12 @@ public class WarningReport implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WarningReport that = (WarningReport) o;
-        return Objects.equals(problem, that.problem) && Objects.equals(whyItsAProblem, that.whyItsAProblem) && Objects.equals(howToFix, that.howToFix) && level == that.level;
+        return problem.equals(that.problem) && whyItsAProblem.equals(that.whyItsAProblem) && howToFix.equals(that.howToFix) && level == that.level;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(problem, whyItsAProblem, howToFix, level);
+        return Arrays.hashCode(new Object[]{problem, whyItsAProblem, howToFix, level});
     }
     
     @Override
