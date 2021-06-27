@@ -4,7 +4,9 @@ import Atom.Reflect.Reflect;
 import mindustry.mod.ModClassLoader;
 import org.o7.Fire.Glopion.Brain.AparapiBenchmark;
 import org.o7.Fire.Glopion.Brain.TrainingJeneticData;
+import org.o7.Fire.Glopion.Experimental.WebhookStandalone;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,6 +16,15 @@ public class Headless {
     //Class org.o7.Fire.Glopion.Premain.Run
     //JVM: 16
     public static void main(String[] args) {
+        if(System.getenv("DiscordWebhook") != null){
+            try {
+                WebhookStandalone standalone = new WebhookStandalone(System.getenv("DiscordWebhook"));
+                System.setOut(standalone.asPrintStream());
+                System.out.println("Test");
+            }catch(MalformedURLException e){
+                e.printStackTrace();
+            }
+        }
         if(Reflect.debug){
             System.out.println("Mindustry Jar Classloader: " + MindustryLauncher.class.getClassLoader().getClass().getCanonicalName());
             System.out.println("Current Jar Classloader: " + ModClassLoader.class.getClassLoader().getClass().getCanonicalName());
