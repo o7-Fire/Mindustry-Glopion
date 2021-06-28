@@ -3,12 +3,16 @@ package org.o7.Fire.Glopion.Brain.Observation;
 import org.deeplearning4j.rl4j.space.Encodable;
 import org.deeplearning4j.rl4j.space.ObservationSpace;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
 
-public class PlayerScreen implements Encodable, ObservationSpace<PlayerScreen> {
+public class PlayerObservationScreen implements Encodable, ObservationSpace<PlayerObservationScreen> {
     protected MachineRecorder machineRecorder;
-    public PlayerScreen(MachineRecorder recorder){
+    protected final int radius, diamater;
+    public PlayerObservationScreen(MachineRecorder recorder, int radius){
         this.machineRecorder = recorder;
+        this.radius = radius;
+        this.diamater = radius + radius;
     }
     
     @Override
@@ -23,31 +27,31 @@ public class PlayerScreen implements Encodable, ObservationSpace<PlayerScreen> {
     
     @Override
     public INDArray getData() {
-        return null;
+        return Nd4j.create( MachineRecorder.worldDataToVisualFlat(machineRecorder.getWorldData(radius)));
     }
     
     @Override
     public Encodable dup() {
-        return null;
+        return new PlayerObservationScreen(machineRecorder,radius);
     }
     
     @Override
     public String getName() {
-        return null;
+        return "Plater Screen";
     }
     
     @Override
     public int[] getShape() {
-        return new int[0];
+        return new int[]{ diamater*diamater};
     }
     
     @Override
     public INDArray getLow() {
-        return null;
+        return PlayerObservationTensor.def;
     }
     
     @Override
     public INDArray getHigh() {
-        return null;
+        return PlayerObservationTensor.def;
     }
 }

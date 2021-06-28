@@ -8,8 +8,8 @@ import mindustry.game.EventType;
 import org.o7.Fire.Glopion.Brain.Observation.PlayerObservationTensor;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
 
-public class NativeSingleplayer extends PlayerObservationTensor implements StateController {
-    public NativeSingleplayer() {
+public class NativeSingleplayerTensor extends PlayerObservationTensor implements StateController {
+    public NativeSingleplayerTensor() {
         super(Vars.player, MachineRecorder.maxView);
         Events.run(EventType.Trigger.newGame,this::unlock);
     }
@@ -27,7 +27,7 @@ public class NativeSingleplayer extends PlayerObservationTensor implements State
     }
     protected volatile boolean lock = false;
     @Override
-    public NativeSingleplayer reset() {
+    public NativeSingleplayerTensor reset() {
         if(!isMultiplayer()){
             Vars.control.playMap(Vars.state.map, Vars.state.rules);
             lock();

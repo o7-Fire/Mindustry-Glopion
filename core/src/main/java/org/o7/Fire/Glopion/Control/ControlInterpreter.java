@@ -14,6 +14,7 @@ public class ControlInterpreter extends ModsModule implements WorldModule {
     public void update() {
         if(Vars.state.isPlaying() && System.currentTimeMillis() > nextAction){
             //random(MachineControl.mainPlayer);
+            /*
             if(GlopionCore.machineVisualizeRenderSettings && mainPlayerRecorder != null){
                 Tile[][] tiles = mainPlayerRecorder.getWorldData(MachineRecorder.maxView);
                 int[][] visual = MachineRecorder.worldDataToVisual(tiles);
@@ -21,6 +22,8 @@ public class ControlInterpreter extends ModsModule implements WorldModule {
             }
             mainPlayerRecorder.getEnvironmentInformation();
             nextAction = System.currentTimeMillis() + 32;
+            
+             */
         }
     }
     
