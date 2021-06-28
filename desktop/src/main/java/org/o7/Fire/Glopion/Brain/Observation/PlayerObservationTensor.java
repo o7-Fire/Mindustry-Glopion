@@ -3,7 +3,6 @@ package org.o7.Fire.Glopion.Brain.Observation;
 import mindustry.Vars;
 import mindustry.core.World;
 import mindustry.gen.Player;
-import mindustry.world.Tile;
 import org.deeplearning4j.rl4j.space.Encodable;
 import org.deeplearning4j.rl4j.space.ObservationSpace;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -13,9 +12,7 @@ import org.o7.Fire.Glopion.Brain.Observation.Spatial.SpatialInformationExtractor
 
 import java.util.Arrays;
 
-import static mindustry.Vars.world;
-
-public class PlayerObservation implements Encodable, ObservationSpace<PlayerObservation> {
+public class PlayerObservationTensor implements Encodable, ObservationSpace<PlayerObservationTensor> {
     protected Player player;
     protected static INDArray def = Nd4j.create(1);
     public int radiusObservation, diameterObservation;
@@ -32,7 +29,7 @@ public class PlayerObservation implements Encodable, ObservationSpace<PlayerObse
     }
     protected INDArray low, high;
     protected final float[][][] tileTensor, minValue, maxValue;
-    public PlayerObservation(Player player, int radiusObservation){
+    public PlayerObservationTensor(Player player, int radiusObservation){
         this.player = player;
         this.radiusObservation = radiusObservation;
         this.diameterObservation = radiusObservation + radiusObservation;
@@ -95,7 +92,7 @@ public class PlayerObservation implements Encodable, ObservationSpace<PlayerObse
     
     @Override
     public Encodable dup() {
-        return new PlayerObservation(player, radiusObservation);
+        return new PlayerObservationTensor(player, radiusObservation);
     }
     
     @Override

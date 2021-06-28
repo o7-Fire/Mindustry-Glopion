@@ -8,13 +8,10 @@ import org.deeplearning4j.rl4j.learning.configuration.QLearningConfiguration;
 import org.deeplearning4j.rl4j.learning.sync.qlearning.discrete.QLearningDiscreteDense;
 import org.deeplearning4j.rl4j.network.configuration.DQNDenseNetworkConfiguration;
 import org.deeplearning4j.rl4j.network.dqn.DQN;
-import org.deeplearning4j.rl4j.policy.DQNPolicy;
 import org.o7.Fire.Glopion.Brain.MDP.PlayerDiscreteMDP;
-import org.o7.Fire.Glopion.Brain.Observation.PlayerObservation;
 import org.o7.Fire.Glopion.Brain.State.NativeSingleplayer;
 import org.o7.Fire.Glopion.Control.NativeControl;
 import org.o7.Fire.Glopion.Experimental.Experimental;
-import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
 
 import java.io.IOException;

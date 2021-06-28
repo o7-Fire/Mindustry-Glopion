@@ -5,11 +5,10 @@ import Atom.Utility.Pool;
 import arc.Events;
 import mindustry.Vars;
 import mindustry.game.EventType;
-import mindustry.gen.Player;
-import org.o7.Fire.Glopion.Brain.Observation.PlayerObservation;
+import org.o7.Fire.Glopion.Brain.Observation.PlayerObservationTensor;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
 
-public class NativeSingleplayer extends PlayerObservation implements StateController {
+public class NativeSingleplayer extends PlayerObservationTensor implements StateController {
     public NativeSingleplayer() {
         super(Vars.player, MachineRecorder.maxView);
         Events.run(EventType.Trigger.newGame,this::unlock);
