@@ -6,7 +6,7 @@ public interface InterfaceControl {
     
     float high(int index);
     
-    int sizeInput();
+    int getSize();
     
-    void rawInput(float data, int index);
+    void rawInput(int index);
 }
