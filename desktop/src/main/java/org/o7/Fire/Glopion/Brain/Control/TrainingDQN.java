@@ -31,6 +31,7 @@ public class TrainingDQN implements Experimental {
             return;
         }
         alreadyDoIt = true;
+        Threads.daemon("DQN Training",()->{
         DQN dqn = null;
         try {
             dqn = DQN.load(path);
@@ -38,7 +39,7 @@ public class TrainingDQN implements Experimental {
         }catch(IOException e){
         
         }
-        
+       
         final QLearningConfiguration Qconifg = getConfig(250 * 4 * 120, 5);
         final DQNDenseNetworkConfiguration conf = getDQN();
         final NativeSingleplayer nativeSingleplayer = new NativeSingleplayer();
@@ -49,7 +50,7 @@ public class TrainingDQN implements Experimental {
         }else {
             network = new QLearningDiscreteDense(mdp, conf, Qconifg);
         }
-        Threads.daemon("DQN Training",()->{
+        
             //start the training
             try {
             network.train();

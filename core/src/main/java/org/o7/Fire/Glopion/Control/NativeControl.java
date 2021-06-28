@@ -21,9 +21,8 @@ public class NativeControl implements InterfaceControl {
     protected IntFloatMap floatMap = null;
     public NativeControl(Input input){
         this.input = input;
-        Field f = Reflect.getField(KeyboardDevice.class,"axes",input.getKeyboard());
         try {
-            floatMap = (IntFloatMap) f.get(input.getKeyboard());
+            floatMap = Reflect.getField(KeyboardDevice.class,"axes",input.getKeyboard());;
         }catch(Exception e){
             Log.err("Failed to get Keyboard Axis: " + e);
         }
