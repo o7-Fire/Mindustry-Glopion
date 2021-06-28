@@ -15,6 +15,7 @@ import org.o7.Fire.Glopion.Brain.State.NativeSingleplayer;
 import org.o7.Fire.Glopion.Control.NativeControl;
 import org.o7.Fire.Glopion.Experimental.Experimental;
 import org.o7.Fire.Glopion.GlopionCore;
+import org.o7.Fire.Glopion.Internal.Interface;
 
 import java.io.IOException;
 
@@ -27,7 +28,11 @@ public class TrainingDQN implements Experimental {
     @Override
     public void run() {
         if(alreadyDoIt){
-            Vars.ui.showInfo("Training underway");
+            Interface.showInfo("Training Underway");
+            return;
+        }
+        if(!Vars.state.isPlaying()){
+            Interface.showInfo("Go play a map");
             return;
         }
         alreadyDoIt = true;
@@ -63,6 +68,6 @@ public class TrainingDQN implements Experimental {
             }
             alreadyDoIt = false;
         });
-    
+      
     }
 }

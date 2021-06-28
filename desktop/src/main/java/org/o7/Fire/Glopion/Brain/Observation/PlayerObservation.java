@@ -74,7 +74,7 @@ public class PlayerObservation implements Encodable, ObservationSpace<PlayerObse
             int currentX = Vars.player.tileX();
             int currentY = Vars.player.tileY();
             for (int y = -radiusObservation; y < radiusObservation; y++) {
-                int indexX = x + radiusObservation, indexY = y + radiusObservation;
+                int indexX = x + radiusObservation , indexY = y + radiusObservation ;
                 currentX = currentX + x;
                 currentY = currentY + y;
                 spatialInformationExtractor.read(World.unconv(currentX), World.unconv(currentY), tileTensor[indexX][indexY]);
@@ -105,7 +105,7 @@ public class PlayerObservation implements Encodable, ObservationSpace<PlayerObse
     
     @Override
     public int[] getShape() {
-        return new int[]{radiusObservation, radiusObservation, spatialInformationExtractor.size()};
+        return new int[]{diameterObservation, diameterObservation, spatialInformationExtractor.size()};
     }
     
     @Override
