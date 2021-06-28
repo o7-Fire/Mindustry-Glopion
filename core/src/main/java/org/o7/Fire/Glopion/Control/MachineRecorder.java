@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Control;
 
 import Atom.File.FileUtility;
 import Atom.Struct.PoolObject;
+import Atom.Utility.Meth;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import Atom.Utility.Utility;
@@ -40,7 +41,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     protected static final long delay = 250;//human visual response time
     protected static final long delaySave = 12 * 1000;
     protected static final int temporaryArraySize = (int) (delaySave / delay);
-    public static int maxView = 12;
+    public static int maxView = 3;
     public static HashMap<Integer, String> color = new HashMap<>();
     public static PoolObject<Seq<Entityc>> poolEntity = new SeqPool<>();
     public static int precision = 100;
@@ -173,7 +174,32 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public static String visualize(Object[][] matrix) {
         return " " + Arrays.deepToString(matrix).replace("],", System.getProperty("line.separator")).substring(1);
     }
-    
+    public static float[] worldDataToVisualFlat(Tile[][] rawMatrix) {
+        float[] vector = new float[rawMatrix.length * rawMatrix.length ];
+        int index = 0;
+        for (int j = 0, rawMatrixLength = rawMatrix.length; j < rawMatrixLength; j++) {
+            Tile[] x = rawMatrix[j];
+            for (int i = 0, xLength = x.length; i < xLength; i++) {
+                Tile y = x[i];
+                vector[index] = Meth.normalize(Integer.MAX_VALUE, Integer.MIN_VALUE, renderTile(y));
+                index++;
+            }
+        
+        }
+        return vector;
+    }
+    public static float[][] worldDataToVisualF(Tile[][] rawMatrix) {
+        float[][] matrix = new float[rawMatrix.length][rawMatrix.length];
+        int xPointer = 0, yPointer = 0;
+        for (Tile[] x : rawMatrix) {
+            for (Tile y : x) {
+                matrix[xPointer][yPointer++] = Meth.normalize(Integer.MAX_VALUE, Integer.MIN_VALUE, renderTile(y));
+            }
+            yPointer = 0;
+            xPointer++;
+        }
+        return matrix;
+    }
     public static int[][] worldDataToVisual(Tile[][] rawMatrix) {
         int[][] matrix = new int[rawMatrix.length][rawMatrix.length];
         int xPointer = 0, yPointer = 0;
@@ -241,6 +267,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public void getEnvironmentInformation(int[] vector) {
         vectorWriter.reset(vector);
         int index = vectorWriter.index;
+        
         for (Item item : Vars.content.items()) {
             vector[index] = player.closestCore().items().get(item);
             index++;

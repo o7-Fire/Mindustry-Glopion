@@ -4,17 +4,17 @@ import org.deeplearning4j.gym.StepReply;
 import org.deeplearning4j.rl4j.mdp.MDP;
 import org.deeplearning4j.rl4j.space.DiscreteSpace;
 import org.deeplearning4j.rl4j.space.ObservationSpace;
-import org.o7.Fire.Glopion.Brain.Observation.PlayerObservationTensor;
+import org.o7.Fire.Glopion.Brain.Observation.PlayerObservationScreen;
 import org.o7.Fire.Glopion.Brain.State.StateController;
 import org.o7.Fire.Glopion.Control.InterfaceControl;
 
-public class PlayerDiscreteMDP implements MDP<PlayerObservationTensor, Integer, DiscreteSpace> {
+public class PlayerDiscreteMDPScreen implements MDP<PlayerObservationScreen, Integer, DiscreteSpace> {
 
-    protected final PlayerObservationTensor observation;
+    protected final PlayerObservationScreen observation;
     protected final InterfaceControl interfaceControl;
     protected final DiscreteSpace discreteSpace;
     protected final StateController state;
-    public PlayerDiscreteMDP(PlayerObservationTensor observation, InterfaceControl interfaceControl, StateController stateController){
+    public PlayerDiscreteMDPScreen(PlayerObservationScreen observation, InterfaceControl interfaceControl, StateController stateController){
         this.state = stateController;
         this.observation = observation;
         this.interfaceControl = interfaceControl;
@@ -23,7 +23,7 @@ public class PlayerDiscreteMDP implements MDP<PlayerObservationTensor, Integer, 
     }
  
     @Override
-    public ObservationSpace<PlayerObservationTensor> getObservationSpace() {
+    public ObservationSpace<PlayerObservationScreen> getObservationSpace() {
         return observation;
     }
     
@@ -33,7 +33,7 @@ public class PlayerDiscreteMDP implements MDP<PlayerObservationTensor, Integer, 
     }
     
     @Override
-    public PlayerObservationTensor reset() {
+    public PlayerObservationScreen reset() {
         state.reset();
         return observation;
     }
@@ -44,7 +44,7 @@ public class PlayerDiscreteMDP implements MDP<PlayerObservationTensor, Integer, 
     }
     
     @Override
-    public StepReply<PlayerObservationTensor> step(Integer action) {
+    public StepReply<PlayerObservationScreen> step(Integer action) {
         interfaceControl.rawInput(action);
         state.nextStep();
         return new StepReply<>(observation,state.reward(),state.isDone(),state.info());
@@ -56,8 +56,8 @@ public class PlayerDiscreteMDP implements MDP<PlayerObservationTensor, Integer, 
     }
     
     @Override
-    public MDP<PlayerObservationTensor, Integer, DiscreteSpace> newInstance() {
+    public MDP<PlayerObservationScreen, Integer, DiscreteSpace> newInstance() {
         System.out.println("Copying Instance: " + this.getClass().getSimpleName());
-        return new PlayerDiscreteMDP(observation,interfaceControl, state);
+        return new PlayerDiscreteMDPScreen(observation,interfaceControl, state);
     }
 }

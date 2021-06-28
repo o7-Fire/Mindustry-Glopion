@@ -8,8 +8,9 @@ import org.deeplearning4j.rl4j.learning.configuration.QLearningConfiguration;
 import org.deeplearning4j.rl4j.learning.sync.qlearning.discrete.QLearningDiscreteDense;
 import org.deeplearning4j.rl4j.network.configuration.DQNDenseNetworkConfiguration;
 import org.deeplearning4j.rl4j.network.dqn.DQN;
-import org.o7.Fire.Glopion.Brain.MDP.PlayerDiscreteMDP;
-import org.o7.Fire.Glopion.Brain.State.NativeSingleplayer;
+import org.o7.Fire.Glopion.Brain.MDP.PlayerDiscreteMDPScreen;
+import org.o7.Fire.Glopion.Brain.State.NativeSingleplayerTensor;
+import org.o7.Fire.Glopion.Brain.State.NativeSingleplayerScreen;
 import org.o7.Fire.Glopion.Control.NativeControl;
 import org.o7.Fire.Glopion.Experimental.Experimental;
 import org.o7.Fire.Glopion.Internal.Interface;
@@ -44,9 +45,9 @@ public class TrainingDQN implements Experimental {
        
         final QLearningConfiguration Qconifg = getConfig(250 * 4 * 120, 5);
         final DQNDenseNetworkConfiguration conf = getDQN();
-        final NativeSingleplayer nativeSingleplayer = new NativeSingleplayer();
-        final PlayerDiscreteMDP mdp = new PlayerDiscreteMDP(nativeSingleplayer, new NativeControl(Core.input), nativeSingleplayer);
-        final QLearningDiscreteDense<NativeSingleplayer> network;
+        final NativeSingleplayerScreen nativeSingleplayer = new NativeSingleplayerScreen();
+        final PlayerDiscreteMDPScreen mdp = new PlayerDiscreteMDPScreen(nativeSingleplayer, new NativeControl(Core.input), nativeSingleplayer);
+        final QLearningDiscreteDense<NativeSingleplayerTensor> network;
         if(dqn != null){
             network = new QLearningDiscreteDense(mdp,dqn,Qconifg);
         }else {
