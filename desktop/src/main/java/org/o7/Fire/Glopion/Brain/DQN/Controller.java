@@ -13,7 +13,7 @@ public class Controller {
     public static DQNDenseNetworkConfiguration getDQN(){
         return DQNDenseNetworkConfiguration.builder()
                 .updater(new Nadam(Math.pow(10, -3.5)))
-                .numHiddenNodes(1200)
+                .numHiddenNodes(120)
                 .numLayers(6)
                 .build();
     }
