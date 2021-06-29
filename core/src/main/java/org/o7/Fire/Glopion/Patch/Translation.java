@@ -35,6 +35,7 @@ import static org.o7.Fire.Glopion.Internal.Interface.registerWords;
 
 //TODO decentralize text id translation
 public class Translation extends ModsModule {
+    public static final ObjectMap<String, String> bundle = new ObjectMap<>();
     public static final ArrayList<String> normalSinglet = new ArrayList<>(Arrays.asList("Run"));
     public static final ArrayList<String> singlet1 = new ArrayList<>(Arrays.asList("String", "Integer", "Float", "Long", "Boolean", "Commands", "Settings"));
     public static final HashMap<String, String> generalSettings = new HashMap<>();
@@ -78,6 +79,12 @@ public class Translation extends ModsModule {
         return s;
     }
     
+    public static void registerWords(String s, String s1){
+        Interface.registerWords(s, s1);
+    }
+    public static void registerWords(String s){
+       registerWords(s,s);
+    }
     public static void register() {
         registerWords("Ozone");
         registerWords("Glopion");
