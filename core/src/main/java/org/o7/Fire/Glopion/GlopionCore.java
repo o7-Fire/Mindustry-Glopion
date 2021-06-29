@@ -60,7 +60,7 @@ public class GlopionCore extends Mod implements Module {
         moduleRegisterer.core();
         OptionsDialog.classSettings.add(GlopionCore.class);
         if (Core.settings != null) OptionsDialog.load(k -> Core.settings.getString(k, null));
-        Translation.add("machineVisualizeRenderSettings","Machine Recorder Visualization");
+    
         Pool.parallelAsync = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
             Thread t = Executors.defaultThreadFactory().newThread(r);
             t.setName(t.getName() + "-Atomic-Executor");
@@ -72,6 +72,7 @@ public class GlopionCore extends Mod implements Module {
     
     @Override
     public void init() {
+        Translation.registerWords("machineVisualizeRenderSettings","Machine Recorder Visualization");
         try {
             moduleRegisterer.init();
         }catch(Throwable t){

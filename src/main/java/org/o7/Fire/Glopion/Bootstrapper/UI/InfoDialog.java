@@ -6,6 +6,7 @@ import mindustry.ui.dialogs.BaseDialog;
 
 public class InfoDialog extends BaseDialog {
     final String text;
+    
     public InfoDialog(String title, String text){
         super(title);
         this.text = text;

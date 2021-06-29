@@ -22,6 +22,7 @@ import mindustry.ui.Bar;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.Bootstrapper.UI.DependencyManager;
 import org.o7.Fire.Glopion.Bootstrapper.UI.FlavorDialog;
+import org.o7.Fire.Glopion.Bootstrapper.UI.InfoDialog;
 import org.o7.Fire.Glopion.Bootstrapper.UI.ProviderURLDialog;
 
 import java.io.BufferedInputStream;
@@ -212,6 +213,7 @@ public class BootstrapperUI extends Mod {
         t.check("Force Update", Core.settings.getBool("glopion-auto-update", false), b -> Core.settings.put("glopion-auto-update", b)).row();
         t.button("Glopion Flavor [accent]" + Core.settings.getString("glopion-flavor", flavor), flavorDialog::show).disabled(s -> release.isEmpty()).growX().row();
         t.button("Provider URL", providerURLDialog::show).growX().row();
+        if(SharedBootstrapper.downloadList.size() != 0)
         t.button("Dependency", dependencyManager::show).growX().row();
         t.button("Refresh", () -> {
             buildUI();
@@ -247,12 +249,7 @@ public class BootstrapperUI extends Mod {
             buildUI();
         }).growX().row();
         if (loaded != null){
-            t.button("Loaded: [accent]" + loaded.getClass().getSimpleName(), () -> new BaseDialog("Loaded Glopion") {
-                {
-                    addCloseButton();
-                    cont.add(info + "\nURL: " + release.getProperty(flavor)).growX().growY();
-                }
-            }.show()).growX().row();
+            t.button("Loaded: [accent]" + loaded.getClass().getSimpleName(), () -> new InfoDialog("Loaded Glopion", info + "\nURL: " + release.getProperty(flavor)).show()).growX().row();
         }
         
     }

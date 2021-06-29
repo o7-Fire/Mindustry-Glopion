@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion;
 
 import Atom.Reflect.Reflect;
 import arc.util.Log;
+import org.o7.Fire.Glopion.Patch.Translation;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
 
 public class GlopionDesktop extends GlopionCore {
@@ -14,6 +15,7 @@ public class GlopionDesktop extends GlopionCore {
     public void preInit() throws Throwable {
         Log.debug("Invoked @ preInit", GlopionDesktop.class.getCanonicalName());
         OptionsDialog.classSettings.add(GlopionDesktop.class);
+   
         super.preInit();
         if (!deepPatch && enableDeepPatchSettings){
             Log.infoTag("DeepPatch", "Entering DeepPatch");
@@ -21,5 +23,11 @@ public class GlopionDesktop extends GlopionCore {
         }else if(deepPatch){
             Log.infoTag("DeepPatch", "Alive");
         }
+    }
+    
+    @Override
+    public void init() {
+        Translation.registerWords("enableDeepPatchSettings", "Deep Patch");
+        super.init();
     }
 }

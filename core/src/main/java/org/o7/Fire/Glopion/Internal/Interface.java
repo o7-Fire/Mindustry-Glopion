@@ -69,6 +69,7 @@ import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Patch.Translation.getRandomHexColor;
 
 public class Interface {
+    @Deprecated
     public static final ObjectMap<String, String> bundle = new ObjectMap<>();
     public static Map<Integer, ArrayList<Building>> buildingCache = Collections.synchronizedMap(new WeakHashMap<>());
     private static long lastToast = 0;
@@ -247,13 +248,12 @@ public class Interface {
         }
         return false;
     }
-    
+    @Deprecated
     public synchronized static void registerWords(String key, String value) {
         if (GlopionCore.colorPatchSettings) value = getRandomHexColor() + value + "[white]";
-        
         bundle.put(key, value);
     }
-    
+    @Deprecated
     public synchronized static void registerWords(String key) {
         registerWords(key, key);
     }

@@ -21,7 +21,7 @@ public class SharedBootstrapper {
     public static TreeMap<String, File> downloadFile = new TreeMap<>();
     public static HashMap<String, String> sizeList = new HashMap<>();
     public static HashMap<String, Long> sizeLongList = new HashMap<>();
- 
+    public static long totalSize = 0;
     public static void checkDependency(InputStream is) throws IOException {
         downloadFile.clear();
         downloadList.clear();
@@ -33,11 +33,12 @@ public class SharedBootstrapper {
             String[] download = dependencies.getProperty(key).split(" ");
             String[] keys = key.split("-", 2);
             try {
-               
-                String size = humanReadableByteCountSI(Long.parseLong(keys[0]));
+               long l = Long.parseLong(keys[0]);
+               totalSize += l;
+                String size = humanReadableByteCountSI(l);
                 key = keys[1];
                 sizeList.put(key, size);
-                sizeLongList.put(key,Long.parseLong(keys[0]));
+                sizeLongList.put(key, l);
              
             }catch(Exception ignored){}
             ArrayList<URL> downloadURL = new ArrayList<>();
