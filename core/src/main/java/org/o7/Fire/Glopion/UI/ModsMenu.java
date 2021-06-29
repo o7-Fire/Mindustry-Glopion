@@ -17,10 +17,13 @@
 package org.o7.Fire.Glopion.UI;
 
 
+import arc.scene.Element;
 import arc.scene.style.Drawable;
 import arc.scene.ui.Dialog;
 import arc.scene.ui.TextButton;
 import arc.struct.ObjectMap;
+import arc.struct.Seq;
+import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.Styles;
@@ -30,9 +33,11 @@ import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Patch.Translation;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeSet;
 
 public class ModsMenu extends ScrollableDialog {
-    static ArrayList<Dialog> dialogs = new ArrayList<>();
+    static Seq<Dialog> dialogs = new Seq<>();
     static ObjectMap<Dialog, Drawable> dialogDrawableHashMap = new ObjectMap<>();
     TextButton.TextButtonStyle textButtonStyle;
     
@@ -42,11 +47,12 @@ public class ModsMenu extends ScrollableDialog {
         addNavButton("o7-Discord", Icon.discord, () -> {
             Interface.openLink("https://discord.o7fire.tk");
         });
-    
+     
     }
     
     public static void add(Dialog dialog) {
         dialogs.add(dialog);
+        
     }
     
     public static void add(Dialog dialog, Drawable d) {
@@ -69,7 +75,13 @@ public class ModsMenu extends ScrollableDialog {
             });
     
         })).growX().row();
-    
+    children.sort(new Comparator<Element>() {
+        @Override
+        public int compare(Element o1, Element o2) {
+            if(o1.name == null || o2.name == null)return 0;
+            return Strings.stripColors(o1.name).compareTo(Strings.stripColors(o2.name));
+        }
+    });
     }
     
     void generic() {
@@ -84,7 +96,7 @@ public class ModsMenu extends ScrollableDialog {
         }else{
             String title = d.title.getText().toString();
             if (title.isEmpty()) title = Translation.get(d.getClass().getCanonicalName());
-            title = Translation.colorized(title);
+            else title = Translation.get(title);
             table.button(title, dialogDrawableHashMap.get(d, Icon.book), d::show).growX();
         }
         table.row();

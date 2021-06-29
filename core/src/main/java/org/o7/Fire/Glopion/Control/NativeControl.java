@@ -17,7 +17,12 @@ import java.util.HashSet;
 
 public class NativeControl implements InterfaceControl {
     protected final Input input;
-    public static final HashSet<Binding> block = new HashSet<>(Arrays.asList(Binding.menu, Binding.pause, Binding.schematic_menu, Binding.toggle_menus, Binding.minimap, Binding.planet_map));
+    public static final HashSet<Binding> block = new HashSet<>(Arrays.asList(
+            Binding.menu, Binding.pause, Binding.schematic_menu, Binding.toggle_menus, Binding.minimap, Binding.planet_map,//
+            Binding.console, Binding.mouse_move, Binding.pan, Binding.chat_mode, Binding.chat, Binding.chat_scroll, Binding.chat_history_next,//
+            Binding.chat_history_prev, Binding.player_list, Binding.toggle_block_status, Binding.toggle_power_lines, Binding.screenshot,//
+            Binding.fullscreen,Binding.minimap,Binding.research//
+    ));
     protected IntFloatMap floatMap = null;
     public NativeControl(Input input){
         this.input = input;
@@ -107,12 +112,13 @@ public class NativeControl implements InterfaceControl {
     }
     @Override
     public void rawInput(int index) {
+        
         index--;//eliminated from equation
         if(index < 0)return;//no op
         if(index >= getSize())throw new IndexOutOfBoundsException(getSize() + " requested: " + index);
-        int mouse = getSize() - index;
-        if(4 > mouse){
-            switch (mouse){
+        int mouse = index - keyCodes.length ;
+     
+            switch (mouse) {
                 case 0:
                     mouseX(1);
                     return;
@@ -125,11 +131,9 @@ public class NativeControl implements InterfaceControl {
                 case 3:
                     mouseY(-1);
                     return;
-                default:
-                    throw new IllegalStateException("mouse index: " + mouse + ", index: " + index);
             }
-        }
         KeyCode keyCode = keyCodes[index];
+        Log.infoTag("Input",keyCode.name());
         boolean axis = keyCode.axis;
         if(keyCode.axis){
             float increment = ((index % 2) == 0) ? -1 : 1;//assume thing happends
