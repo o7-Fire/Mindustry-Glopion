@@ -8,11 +8,11 @@ import arc.struct.Seq;
 import arc.util.Align;
 import arc.util.Log;
 import arc.util.async.Threads;
-import arc.util.serialization.Base64Coder;
 import mindustry.Vars;
 import mindustry.core.Version;
 import mindustry.game.EventType;
 import mindustry.mod.Mod;
+import mindustry.mod.ModClassLoader;
 import mindustry.mod.Mods;
 import mindustry.ui.dialogs.BaseDialog;
 
@@ -22,15 +22,14 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import static mindustry.Vars.mobile;
 import static org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper.*;
+import static org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper.parent;
 
 public class Main extends Mod {
+    public static final ArrayList<Throwable> error = new ArrayList<>();
     public static String flavor = Core.settings.getString("glopion-flavor", "Release-" + Version.buildString());
     public static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/");
     public static ClassLoader classLoader;
@@ -42,9 +41,7 @@ public class Main extends Mod {
     public static Main main;
     public static String classpath = "org.o7.Fire.Glopion.";
     public static String info = "None";
-    public static final ArrayList<Throwable> error = new ArrayList<>();
     
-
     
     public Main() {
         classpath = classpath + flavor.split("-")[0] + "Launcher";
@@ -76,22 +73,22 @@ public class Main extends Mod {
             runOnUI(() -> Vars.ui.showInfo("Bootstrapper Disabled"));
         }
     }
-  
-    private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator, boolean yesToAll){
+    
+    private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator, boolean yesToAll) {
         if (!iterator.hasNext() && !Vars.headless){
-            Core.app.post(()->Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit));
+            Core.app.post(() -> Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit));
             return;
         }
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             Map.Entry<String, File> s = iterator.next();
-            if(s.getValue().exists()){
+            if (s.getValue().exists()){
                 continue;
             }
             Seq<URL> seq = Seq.with(downloadList.get(s.getKey()));
             URL url = seq.random();
-    
+            
             String size = sizeList.get(s.getKey());
-            if(size == null){
+            if (size == null){
                 try {//blocking
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     size = SharedBootstrapper.humanReadableByteCountSI(connection.getContentLengthLong());
@@ -100,50 +97,61 @@ public class Main extends Mod {
                 }catch(IOException e){
                     size = "(don't know)";
                 }
-                sizeList.put(s.getKey(),size);
+                sizeList.put(s.getKey(), size);
             }
             Log.info("Downloading: " + s.getKey());
-            if(!yesToAll)
-            if(Core.settings.getString(s.getKey()) != null)
-                continue;
-            if(Vars.headless){
+            if (!yesToAll) if (Core.settings.getString(s.getKey()) != null) continue;
+            if (Vars.headless){
                 BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> { }, Throwable::printStackTrace);
             }else{
-                Runnable run = ()->BootstrapperUI.downloadGUI(url.toExternalForm(), new Fi(s.getValue()), () -> {
-                    if(!yesToAll) downloadLibrary0(iterator,yesToAll);
-                },()->{
-                    if(!yesToAll) downloadLibrary0(iterator,yesToAll);
+                Runnable run = () -> BootstrapperUI.downloadGUI(url.toExternalForm(), new Fi(s.getValue()), () -> {
+                    downloadLibrary0(iterator, yesToAll);
+                }, () -> {
+                    Core.settings.put(s.getKey(), "skip");
+                    downloadLibrary0(iterator, yesToAll);
                 });
                 String finalSize = size;
-             
                 
-                Core.app.post(()->{
-                    if(yesToAll){
+                
+                Core.app.post(() -> {
+                    if (yesToAll){
                         run.run();
                     }else{
                         Vars.ui.showCustomConfirm("Download Library", s.getKey(), "Download " + (finalSize == null ? "" : finalSize), "Skip", run, () -> {
                             Core.settings.put(s.getKey(), "skip");
-                            if(!yesToAll) downloadLibrary0(iterator,yesToAll);
+                            downloadLibrary0(iterator, yesToAll);
                         });
                     }
                 });
-           
             }
-            if(!yesToAll)break;
+             break;
         }
-    
-       
         
-    
+        
     }
-    public static void downloadLibrary(){
+    
+    public static void downloadLibrary() {
+        long totalSize = 0, totalDownload = 0;
+        TreeMap<String, File> list = new TreeMap<>();
+        for(Map.Entry<String, File> s : downloadFile.entrySet()) {
+            if (!s.getValue().exists()){
+                list.put(s.getKey(), s.getValue());
+                Long l =  sizeLongList.get(s.getKey());
+                if(l != null){
+                    totalSize = totalSize + l;
+                }
+                totalDownload++;
+            }
+        }
         final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
-        if(Vars.headless){
+        if (Vars.headless){
             Core.app.post(() -> downloadLibrary0(iterator, true));
         }else{
-            Main.runOnUI(()->{
+            long finalTotalDownload = totalDownload;
+            long finalTotalSize = totalSize;
+            Main.runOnUI(() -> {
                 BaseDialog dialog = new BaseDialog("Download Library");
-                dialog.cont.add(downloadFile.size() + " library total").width(mobile ? 400f : 500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
+                dialog.cont.add(finalTotalDownload + " Library Total\n Size Total: " + SharedBootstrapper.humanReadableByteCountSI(finalTotalSize)).width(mobile ? 400f : 500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
                 dialog.buttons.defaults().size(200f, 54f).pad(2f);
                 dialog.setFillParent(false);
                 dialog.buttons.button("No", () -> {
@@ -163,10 +171,12 @@ public class Main extends Mod {
             });
         }
     }
-    public static Fi getFlavorJar(String flavor){
+    
+    public static Fi getFlavorJar(String flavor) {
         String path = flavor.replace('-', '/') + ".jar";
         return Core.files.cache(path);
     }
+    
     public static void load() {
         if (System.getProperty("glopion.loaded", "0").equals("1")){
             Log.errTag("Glopion-Bootstrapper", "Trying to load multiple times !!!");
@@ -174,58 +184,59 @@ public class Main extends Mod {
         }
         System.setProperty("glopion.loaded", "1");
         
-      
+        
         jar = getFlavorJar(flavor);
         SharedBootstrapper.parent = Core.files.cache("libs").file();
         
-        boolean classExist = Main.class.getClassLoader().getResourceAsStream(classpath.replace('.','/')+".class") != null;
-        if(classExist){
+        boolean classExist = Main.class.getClassLoader().getResourceAsStream(classpath.replace('.', '/') + ".class") != null;
+        if (classExist){
             Log.infoTag("Glopion-Bootstrapper", "Found in classpath, loading from classpath");
         }
         if (jar.exists() || classExist){
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             try {
+                ModClassLoader modClassLoader = new ModClassLoader();
                 ClassLoader parent = Main.class.getClassLoader();
                 Log.info(parent.getClass().getSimpleName());
                 classLoader = Vars.platform.loadJar(jar, parent);
+                modClassLoader.addChild(parent);
+                modClassLoader.addChild(classLoader);
                 InputStream is = classLoader.getResourceAsStream("dependencies");
-                if(is != null){
+                if (is != null){
                     Log.info("found dependencies list");
-                    if(Vars.mobile)
-                        Log.err("IN MOBILE");
+                    if (Vars.mobile) Log.err("IN MOBILE");
                     checkDependency(is);
                 }
                 
-                if(!Vars.mobile && somethingMissing()){
+                if (!Vars.mobile && somethingMissing()){
                     downloadLibrary();
                 }
                 Seq<URL> urls = new Seq<>();
-                    if(downloadFile.size() != 0){
-                   
-                        for(File s : downloadFile.values()) {
-                            if(s.exists())
-                                urls.add (s.toURI().toURL());
-                        }
-                        if(!urls.isEmpty()){
-                            urls.add(jar.file().toURI().toURL());
-                            URL[] url = new URL[urls.size];
-                            int i = 0;
-                            for (URL url1 : urls) {
-                                url[i++] = url1;
-                            }
-                            classLoader = new URLClassLoader(url, parent);
-                        }
+                if (downloadFile.size() != 0){
+                    for (File s : downloadFile.values()) {
+                        if (s.exists()) urls.add(s.toURI().toURL());
                     }
-                    unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
+                    if (!urls.isEmpty()){
+                        urls.add(jar.file().toURI().toURL());
+                        URL[] url = new URL[urls.size];
+                        int i = 0;
+                        for (URL url1 : urls) {
+                            url[i++] = url1;
+                        }
+                       modClassLoader.addChild(new URLClassLoader(url));
+                    }
+                }
+                classLoader = modClassLoader;
+                unloaded = (Class<? extends Mod>) Class.forName(classpath, true, classLoader);
                 
                 StringBuilder sb = new StringBuilder().append("Class: ").append(unloaded).append("\n");
                 sb.append("Flavor: ").append(flavor).append("\n");
                 sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
                 sb.append("Size: ").append(jar.length()).append(" bytes\n");
                 sb.append("Classloader: ").append(classLoader.getClass()).append("\n");
-                if(dependencies.size() != 0){
+                if (dependencies.size() != 0){
                     sb.append("Dependency: ").append("\n");
-                    for(URL o : urls){
+                    for (URL o : urls) {
                         sb.append(" ").append(o).append("\n");
                     }
                 }
@@ -240,15 +251,15 @@ public class Main extends Mod {
         
         
     }
-   
+    
     
     public static void handleException(Throwable e) {
         e.printStackTrace();
         error.add(e);
         Log.errTag("Glopion-Bootstrapper", e.toString());
         runOnUI(() -> Vars.ui.showException("Glopion-Bootstrapper Failed To Load", e));
-    
-    
+        
+        
     }
     
     public static void runOnUI(Runnable r) {
