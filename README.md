@@ -14,3 +14,8 @@ use the code `o7-Fire/Mindustry-Glopion` to get glopion for free
 ![](https://media.discordapp.net/attachments/840181901288538112/845661460104347718/unknown.png)
 
 what you just see is the pinnacle of Java and now the fall
+
+<a href="https://my.fsf.org/join"><img src="https://static.fsf.org/nosvn/appeal2020/fall/banner.png" alt="Destination: freedom."></a>
+
+<h4 align="center">Visitor's count :eyes:</h4>
+<p align="center"><img src="https://profile-counter.glitch.me/%7Bsketchyirishman%7D/count.svg" alt="sketchyirishman :: Visitor's Count" /></p>
