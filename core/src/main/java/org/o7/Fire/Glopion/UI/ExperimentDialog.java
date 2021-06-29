@@ -24,16 +24,19 @@ import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Patch.Translation;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class ExperimentDialog extends ScrollableDialog {
     {
         icon = Icon.production;
     }
     
-    protected HashSet<Class<? extends Experimental>> experimental = new HashSet<>();
+    protected TreeSet<Class<? extends Experimental>> experimental = new TreeSet<>(new Comparator<Class<? extends Experimental>>() {
+        @Override
+        public int compare(Class<? extends Experimental> o1, Class<? extends Experimental> o2) {
+            return o1.getSimpleName().compareTo(o2.getSimpleName());
+        }
+    });
     protected HashMap<Class<? extends Experimental>, Experimental> cache = new HashMap<>();
     public ExperimentDialog() {
         experimental.addAll(Arrays.asList(RelayChatToWebhook.class, LogToDiscordWebhook.class, ThreadStackTrace.class, OutOfMemory.class, LockAllContent.class, SwingBox.class, UnlockAllContent.class));

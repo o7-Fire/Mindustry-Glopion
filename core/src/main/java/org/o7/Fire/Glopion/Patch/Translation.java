@@ -60,6 +60,8 @@ public class Translation extends ModsModule {
         return Strings.stripColors(s).length() != s.length();
     }
     
+    
+    
     public static String get(String key) {
         
         return Interface.getBundle(key, null);
