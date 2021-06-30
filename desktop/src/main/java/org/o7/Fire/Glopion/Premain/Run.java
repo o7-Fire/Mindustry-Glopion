@@ -12,6 +12,7 @@ public class Run {
         if (System.getProperty("glopion-deepPatch") == null){
             System.setProperty("glopion-deepPatch", "1");
             System.setProperty("dev", "1");//let's assume you use Intellij Run Button
+            System.out.println("DEV ?");
         }
         MindustryLauncher.main(args);
     }
