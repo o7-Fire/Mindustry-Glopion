@@ -183,7 +183,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     public float[] worldDataVector = new float[getSize()], compiledVector = null;
     public int getSize(){
-        return maxView*maxView+maxView*maxView;
+        return (maxView+maxView) * (maxView+maxView);
     }
     public int compiledIndex = getSize();
     public int getCompiledSize(){
