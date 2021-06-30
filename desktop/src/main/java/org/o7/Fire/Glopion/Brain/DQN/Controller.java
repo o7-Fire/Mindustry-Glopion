@@ -8,12 +8,10 @@ import org.nd4j.linalg.learning.config.Nadam;
 
 public class Controller {
     
-    
-    
     public static DQNDenseNetworkConfiguration getDQN(){
         return DQNDenseNetworkConfiguration.builder()
-                .updater(new Nadam(Math.pow(10, -3.5)))
-                .numHiddenNodes(480)
+                .updater(new Nadam(Math.pow(10, -1.1)))
+                .numHiddenNodes(600)
                 .numLayers(6)
                 .build();
     }

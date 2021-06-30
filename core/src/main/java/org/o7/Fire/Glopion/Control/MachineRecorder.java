@@ -6,6 +6,8 @@ import Atom.Utility.Meth;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import Atom.Utility.Utility;
+import arc.Core;
+import arc.func.Floatp;
 import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Strings;
@@ -13,6 +15,7 @@ import arc.util.io.Writes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import mindustry.Vars;
+import mindustry.ctype.ContentType;
 import mindustry.gen.Entityc;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
@@ -41,7 +44,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     protected static final long delay = 250;//human visual response time
     protected static final long delaySave = 12 * 1000;
     protected static final int temporaryArraySize = (int) (delaySave / delay);
-    public static int maxView = 3;
+    public static int maxView = 6;
     public static HashMap<Integer, String> color = new HashMap<>();
     public static PoolObject<Seq<Entityc>> poolEntity = new SeqPool<>();
     public static int precision = 100;
@@ -145,8 +148,12 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public static int renderTile(Tile t) {
         if (t == null) return 0;
         Seq<Entityc> seq1 = poolEntity.obtain();
-        if (seq1.isEmpty()) Groups.bullet.intersect(t.worldx(), t.worldy(), 2, 2, seq1::add);
-        if (seq1.isEmpty()) Groups.unit.intersect(t.worldx(), t.worldy(), 1, 1, seq1::add);
+        try {
+            if (seq1.isEmpty()) Groups.bullet.intersect(t.worldx(), t.worldy(), 2, 2, seq1::add);
+        }catch(Exception ignored){}
+        try {
+            if (seq1.isEmpty()) Groups.unit.intersect(t.worldx(), t.worldy(), 1, 1, seq1::add);
+        }catch(Exception ignored){}
         int render = 0;
         if (!seq1.isEmpty()){
             Entityc entity = seq1.remove(0);
@@ -174,8 +181,43 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public static String visualize(Object[][] matrix) {
         return " " + Arrays.deepToString(matrix).replace("],", System.getProperty("line.separator")).substring(1);
     }
-    public static float[] worldDataToVisualFlat(Tile[][] rawMatrix) {
-        float[] vector = new float[rawMatrix.length * rawMatrix.length ];
+    public float[] worldDataVector = new float[getSize()], compiledVector = null;
+    public int getSize(){
+        return maxView*maxView;
+    }
+    public int compiledIndex = getSize();
+    public int getCompiledSize(){
+        return getSize()+12;
+    }
+    
+    public void enviromentInformation(){
+        compiledIndex = getSize();
+        incrementAssignCompiledIndex(()-> player.unit().vel().getX());
+        incrementAssignCompiledIndex(()-> player.unit().vel().getY());
+        incrementAssignCompiledIndex(()-> player.unit().closestEnemyCore().tile().dst(player.tileOn()));
+        incrementAssignCompiledIndex(()-> player.unit().closestCore().tile().dst(player.tileOn()));
+        incrementAssignCompiledIndex(()-> player.unit().closestEnemyCore().tile().dst(player.tileOn()));
+    }
+    public void incrementAssignCompiledIndex(Floatp fc){
+        compiledVector[compiledIndex] = 0;
+        compiledIndex++;
+        try {
+            compiledVector[compiledIndex] = fc.get();
+        }catch(Throwable ignored){}
+    }
+    public float[] compiledVector(){
+        if(compiledVector == null)
+            compiledVector = new float[getCompiledSize()];
+        worldDataToVisualFlat(getWorldData(maxView),compiledVector);
+        enviromentInformation();
+        return compiledVector;
+    }
+    public float[] worldDataToVisualFlat(Tile[][] rawMatrix) {
+        worldDataToVisualFlat(rawMatrix, worldDataVector);
+        return worldDataVector;
+    }
+    public static void worldDataToVisualFlat(Tile[][] rawMatrix, float[] vector) {
+       
         int index = 0;
         for (int j = 0, rawMatrixLength = rawMatrix.length; j < rawMatrixLength; j++) {
             Tile[] x = rawMatrix[j];
@@ -186,7 +228,6 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
             }
         
         }
-        return vector;
     }
     public static float[][] worldDataToVisualF(Tile[][] rawMatrix) {
         float[][] matrix = new float[rawMatrix.length][rawMatrix.length];
