@@ -183,7 +183,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     public float[] worldDataVector = new float[getSize()], compiledVector = null;
     public int getSize(){
-        return maxView*maxView;
+        return maxView*maxView+maxView*maxView;
     }
     public int compiledIndex = getSize();
     public int getCompiledSize(){
@@ -217,14 +217,17 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         return worldDataVector;
     }
     public static void worldDataToVisualFlat(Tile[][] rawMatrix, float[] vector) {
-       
         int index = 0;
         for (int j = 0, rawMatrixLength = rawMatrix.length; j < rawMatrixLength; j++) {
             Tile[] x = rawMatrix[j];
-            for (int i = 0, xLength = x.length; i < xLength; i++) {
-                Tile y = x[i];
-                vector[index] = Meth.normalize(Integer.MAX_VALUE, Integer.MIN_VALUE, renderTile(y));
-                index++;
+            try {
+                for (int i = 0, xLength = x.length; i < xLength; i++) {
+                    Tile y = x[i];
+                    vector[index] = Meth.normalize(Integer.MAX_VALUE, Integer.MIN_VALUE, renderTile(y));
+                    index++;
+                }
+            }catch(ArrayIndexOutOfBoundsException e){
+                throw new ArrayIndexOutOfBoundsException("Vector length is: " + vector.length + ", while matrix length is: " + rawMatrix.length + ", " + x.length +". " + e.getMessage());
             }
         
         }
