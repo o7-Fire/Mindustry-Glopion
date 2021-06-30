@@ -21,7 +21,7 @@ public class NativeControl implements InterfaceControl {
             Binding.menu, Binding.pause, Binding.schematic_menu, Binding.toggle_menus, Binding.minimap, Binding.planet_map,//
             Binding.console, Binding.mouse_move, Binding.pan, Binding.chat_mode, Binding.chat, Binding.chat_scroll, Binding.chat_history_next,//
             Binding.chat_history_prev, Binding.player_list, Binding.toggle_block_status, Binding.toggle_power_lines, Binding.screenshot,//
-            Binding.fullscreen,Binding.minimap,Binding.research//
+            Binding.fullscreen,Binding.minimap,Binding.research,Binding.block_info//
     ));
     protected IntFloatMap floatMap = null;
     public NativeControl(Input input){
