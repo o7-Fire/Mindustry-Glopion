@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Brain.State;
 
 import Atom.Reflect.UnThread;
 import Atom.Utility.Pool;
+import arc.Core;
 import arc.Events;
 import mindustry.Vars;
 import mindustry.game.EventType;
@@ -66,8 +67,9 @@ public class NativeSingleplayerScreen extends PlayerObservationScreen implements
     @Override
     public void nextStep() {
         //todo don't
+        Vars.control.resume();
         Pool.submit(()->{
-            UnThread.sleep(250);
+            UnThread.sleep((3000 / Core.graphics.getFramesPerSecond()));
             unlock();
         });
         lock();

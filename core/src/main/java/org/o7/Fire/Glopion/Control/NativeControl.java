@@ -105,19 +105,19 @@ public class NativeControl implements InterfaceControl {
         throw new IllegalArgumentException("Can't find KeyCode: " + b.name() + " " + data);
     }
     public void mouseX(int increment){
-        input.mouseX(input.mouseX()+increment);
+        Log.infoTag("Input","Mouse X:" + increment);
+       input.mouseX(input.mouseX()+increment);
     }
     public void mouseY(int increment){
-        input.mouseY(input.mouseY()+increment);
+        Log.infoTag("Input","Mouse Y:" + increment);
+       input.mouseY(input.mouseY()+increment);
     }
     @Override
     public void rawInput(int index) {
-        
         index--;//eliminated from equation
         if(index < 0)return;//no op
         if(index >= getSize())throw new IndexOutOfBoundsException(getSize() + " requested: " + index);
         int mouse = index - keyCodes.length ;
-     
             switch (mouse) {
                 case 0:
                     mouseX(1);
@@ -133,13 +133,15 @@ public class NativeControl implements InterfaceControl {
                     return;
             }
         KeyCode keyCode = keyCodes[index];
-        Log.infoTag("Input",keyCode.name());
+      
         boolean axis = keyCode.axis;
         if(keyCode.axis){
             float increment = ((index % 2) == 0) ? -1 : 1;//assume thing happends
-            floatMap.put(keyCode.ordinal(),increment);
+           floatMap.put(keyCode.ordinal(),increment);
+            Log.infoTag("Input","Axis: "+keyCode.name() + " " + increment);
             return;
         }
-        input.getKeyboard().keyDown(keyCode);
+        Log.infoTag("Input",keyCode.name());
+      input.getKeyboard().keyDown(keyCode);
     }
 }

@@ -1,6 +1,7 @@
 package org.o7.Fire.Glopion.Brain.Control;
 
 import arc.Core;
+import arc.Input;
 import arc.util.Log;
 import arc.util.async.Threads;
 import mindustry.Vars;
@@ -11,6 +12,7 @@ import org.deeplearning4j.rl4j.network.dqn.DQN;
 import org.o7.Fire.Glopion.Brain.MDP.PlayerDiscreteMDPScreen;
 import org.o7.Fire.Glopion.Brain.State.NativeSingleplayerTensor;
 import org.o7.Fire.Glopion.Brain.State.NativeSingleplayerScreen;
+import org.o7.Fire.Glopion.Control.MachineInput;
 import org.o7.Fire.Glopion.Control.NativeControl;
 import org.o7.Fire.Glopion.Experimental.Experimental;
 import org.o7.Fire.Glopion.Internal.Interface;
@@ -34,6 +36,10 @@ public class TrainingDQN implements Experimental {
             return;
         }
         alreadyDoIt = true;
+   
+        Input original = Core.input;
+        MachineInput machineInput = new MachineInput(original);
+        Core.input = machineInput;
         Threads.daemon("DQN Training",()->{
         DQN dqn = null;
         try {
@@ -42,7 +48,7 @@ public class TrainingDQN implements Experimental {
         }catch(IOException e){
         
         }
-       
+        
         final QLearningConfiguration Qconifg = getConfig(250 * 4 * 120, 5);
         final DQNDenseNetworkConfiguration conf = getDQN();
         final NativeSingleplayerScreen nativeSingleplayer = new NativeSingleplayerScreen();
@@ -58,12 +64,12 @@ public class TrainingDQN implements Experimental {
             try {
             network.train();
             mdp.close();
-        
                 network.getPolicy().save(path);
                 Log.info("Saved: " + path);
             }catch(Exception e){
                 e.printStackTrace();
             }
+            Core.app.post(()->Core.input = original);
             alreadyDoIt = false;
         });
       
