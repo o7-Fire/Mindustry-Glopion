@@ -4,6 +4,7 @@ import arc.Core;
 import arc.Events;
 import arc.util.Log;
 import arc.util.Time;
+import arc.util.async.Threads;
 import mindustry.game.EventType;
 import org.o7.Fire.Glopion.Patch.Translation;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
@@ -39,7 +40,13 @@ public class GlopionDesktop extends GlopionCore {
                 String[] cmd = new String[]{java, "-Dglopion-deepPatch=1", "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Run"};
                 Log.info(Arrays.toString(cmd));
                 new ProcessBuilder(cmd).inheritIO().start();
-                Time.run(1.2f,()->Core.app.exit());
+                Threads.daemon(()->{
+                    try {
+                        Thread.sleep(1000);
+                    }catch(InterruptedException e){
+                    }
+                    Core.app.exit();
+                });
             }else {
                 Log.warn(GlopionDesktop.class.getClassLoader().getClass() +" is not URLClassLoader, aborting DeepPatch");
             }
