@@ -39,8 +39,7 @@ public class GlopionDesktop extends GlopionCore {
                 String[] cmd = new String[]{java, "-Dglopion-deepPatch=1", "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Run"};
                 Log.info(Arrays.toString(cmd));
                 new ProcessBuilder(cmd).inheritIO().start();
-                Runtime.getRuntime().exec(cmd);
-                Events.on(EventType.ClientLoadEvent.class,s->Core.app.exit());
+                Time.run(1.2f,()->Core.app.exit());
             }else {
                 Log.warn(GlopionDesktop.class.getClassLoader().getClass() +" is not URLClassLoader, aborting DeepPatch");
             }
