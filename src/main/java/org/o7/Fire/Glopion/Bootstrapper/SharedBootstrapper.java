@@ -12,7 +12,7 @@ import java.util.*;
 
 //Java 8+ only
 public class SharedBootstrapper {
-    public static final long version = 17;
+    public static final long version = 20;
     
     @NotNull
     public static File parent = new File("cache/");
