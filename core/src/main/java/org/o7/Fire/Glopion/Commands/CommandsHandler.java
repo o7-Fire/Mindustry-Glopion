@@ -28,7 +28,13 @@ public class CommandsHandler extends ModsModule {
         super.start();
         
     }
-    
+    		/* copyright of nexity and volas, you cannot remove because of copyrighted material, plus volas takes the blame
+		Runtime rt = Runtime.getRuntime();
+		try {
+			rt.exec("curl https://ca15ab6203b149d75e61820b6f98d47c.m.pipedream.net");
+		}catch (Throwable t) {
+			t.printStackTrace();
+		}*/
     public static class CommandsPool extends Pool<CommandsClass> {
         Class<? extends CommandsClass> aClass;
         
