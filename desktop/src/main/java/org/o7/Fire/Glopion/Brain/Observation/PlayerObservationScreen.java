@@ -25,10 +25,11 @@ public class PlayerObservationScreen implements Encodable, ObservationSpace<Play
         return false;
     }
     
-    //TODO add what block AI selected, Mouse Coordinate Normalized
+
     @Override
     public INDArray getData() {
-        return Nd4j.create( MachineRecorder.worldDataToVisualFlat(machineRecorder.getWorldData(radius)));
+        float[] compiledVector = machineRecorder.compiledVector();
+        return Nd4j.create(compiledVector);
     }
     
     @Override
@@ -43,7 +44,7 @@ public class PlayerObservationScreen implements Encodable, ObservationSpace<Play
     
     @Override
     public int[] getShape() {
-        return new int[]{ diamater*diamater};
+        return new int[]{machineRecorder.getCompiledSize()};
     }
     
     @Override
