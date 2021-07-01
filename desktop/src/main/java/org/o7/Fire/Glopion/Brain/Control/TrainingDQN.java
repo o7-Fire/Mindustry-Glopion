@@ -17,12 +17,15 @@ import org.deeplearning4j.rl4j.learning.sync.qlearning.discrete.QLearningDiscret
 import org.deeplearning4j.rl4j.network.configuration.DQNDenseNetworkConfiguration;
 import org.deeplearning4j.rl4j.network.dqn.DQN;
 import org.deeplearning4j.rl4j.util.IDataManager;
+import org.nd4j.common.config.ND4JClassLoading;
+import org.o7.Fire.Glopion.Bootstrapper.Main;
 import org.o7.Fire.Glopion.Brain.MDP.PlayerDiscreteMDPScreen;
 import org.o7.Fire.Glopion.Brain.State.NativeSingleplayerScreen;
 import org.o7.Fire.Glopion.Brain.State.NativeSingleplayerTensor;
 import org.o7.Fire.Glopion.Control.MachineInput;
 import org.o7.Fire.Glopion.Control.NativeControl;
 import org.o7.Fire.Glopion.Experimental.Experimental;
+import org.o7.Fire.Glopion.GlopionDesktop;
 import org.o7.Fire.Glopion.Internal.Interface;
 
 import java.io.IOException;
@@ -46,9 +49,7 @@ public class TrainingDQN implements Experimental {
         MachineInput machineInput = new MachineInput(original);
         Core.input = machineInput;
         Threads.daemon("DQN Training",()->{
-    
-      
-
+        
         final QLearningConfiguration Qconifg = getConfig((int) (NativeSingleplayerScreen.undelta() * 20 * 1200), 5);
         final DQNDenseNetworkConfiguration conf = getDQN();
         final NativeSingleplayerScreen nativeSingleplayer = new NativeSingleplayerScreen();
