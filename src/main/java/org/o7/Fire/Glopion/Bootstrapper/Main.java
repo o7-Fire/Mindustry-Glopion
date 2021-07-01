@@ -54,6 +54,7 @@ public class Main extends Mod {
             handleException(t);
         }
         main = this;
+        if(!Vars.headless)
         bootstrapper = new BootstrapperUI();
         if (unloaded != null){
             try {
@@ -204,6 +205,9 @@ public class Main extends Mod {
             //TODO handle development enviroment classpath, URL classpath for dependency,
             Seq<URL> urls = new Seq<>();
             ModClassLoader modClassloader = new ModClassLoader();
+            try{
+                modClassloader = (ModClassLoader) Vars.mods.mainLoader();
+            }catch(ClassCastException ignored){}
             
             ClassLoader //
                     parentClasslaoder = Main.class.getClassLoader(),//if development enviroment then its system else Platform.loadjar
@@ -250,6 +254,7 @@ public class Main extends Mod {
                             url[i++] = url1;
                         }
                         dependencyClassloader = new URLClassLoader(url);
+                       
                         mainClassloader = dependencyClassloader;
                         //modClassloader.addChild(dependencyClassloader);
                     }
@@ -258,7 +263,9 @@ public class Main extends Mod {
             }catch(Throwable e){
                 handleException(e);
             }
+            
             if (mainClassloader != null) try {
+                modClassloader.addChild(mainClassloader);
                 Log.infoTag("Glopion-Bootstrapper", "Main: " + mainClassloader.getClass().getSimpleName());
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, mainClassloader);
             }catch(Throwable e){
@@ -310,7 +317,8 @@ public class Main extends Mod {
     
     @Override
     public void init() {
-        bootstrapper.init();
+        if(bootstrapper != null)
+            bootstrapper.init();
         if (loaded != null) try {
             loaded.init();
         }catch(Exception e){

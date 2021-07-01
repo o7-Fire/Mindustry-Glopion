@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-public abstract class ScrollableDialog extends AtomicDialog {
+public abstract class  ScrollableDialog extends AtomicDialog {
     protected Table table = new Table();
     protected ScrollPane scrollPane = new ScrollPane(table);
     protected ArrayList<Runnable> onInit = new ArrayList<>();

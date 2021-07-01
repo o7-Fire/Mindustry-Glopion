@@ -59,6 +59,7 @@ public class GlopionDesktop extends GlopionCore {
     @Override
     public void init() {
         Translation.registerWords("enableDeepPatchSettings", "Deep Patch");
+        
         super.init();
     }
 }

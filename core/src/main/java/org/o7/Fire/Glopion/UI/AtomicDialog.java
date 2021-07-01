@@ -43,7 +43,7 @@ public class AtomicDialog extends BaseDialog {
         addNavButton("Refresh", Icon.refresh, this::setup);
     }
     
-    protected void setup() {
+    protected void setup()  {
     
     }
     
