@@ -14,6 +14,7 @@ import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.mod.ModClassLoader;
 import mindustry.mod.Mods;
+import mindustry.mod.Plugin;
 import mindustry.ui.dialogs.BaseDialog;
 
 import java.io.File;
@@ -27,7 +28,7 @@ import java.util.*;
 import static mindustry.Vars.mobile;
 import static org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper.*;
 
-public class Main extends Mod {
+public class Main extends Plugin {
     public static final ArrayList<Throwable> error = new ArrayList<>();
     public static String flavor = Core.settings.getString("glopion-flavor", "Release-" + Version.buildString());
     public static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/");
@@ -271,7 +272,13 @@ public class Main extends Mod {
             }catch(Throwable e){
                 handleException(e);
             }
-            
+            String atomExist = "false";
+            try {
+                Class.forName("Atom.Manifest", false, Main.class.getClassLoader());
+                atomExist = "Exist";
+            }catch(Throwable e){
+                atomExist = e.getMessage();
+            }
             StringBuilder sb = new StringBuilder().append("Class: ").append(unloaded).append("\n");
             sb.append("Flavor: ").append(flavor).append("\n");
             sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
@@ -281,7 +288,7 @@ public class Main extends Mod {
             sb.append("Parent Classloader: ").append(parentClasslaoder).append("\n");
             sb.append("Platform Classloader: ").append(platformClassloader).append("\n");
             sb.append("Dependency Classloader: ").append(dependencyClassloader).append("\n");
-            
+            sb.append("Atom Library: ").append(atomExist).append("\n");
             if (dependencies.size() != 0){
                 sb.append("Dependency: ").append("\n");
                 for (URL o : urls) {
