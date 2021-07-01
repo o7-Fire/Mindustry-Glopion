@@ -248,9 +248,9 @@ public class BootstrapperUI extends Mod {
             ui.showInfoFade("Bootstrapper Configuration Reseted");
             buildUI();
         }).growX().row();
-        if (loaded != null){
-            t.button("Loaded: [accent]" + loaded.getClass().getSimpleName(), () -> new InfoDialog("Loaded Glopion", info + "\nURL: " + release.getProperty(flavor)).show()).growX().row();
-        }
+        String load = loaded == null ? "None" : loaded.getClass().getSimpleName();
+        t.button("Loaded: [accent]" + load, () -> new InfoDialog("Loaded Glopion", info + "\nURL: " + release.getProperty(flavor)).show()).growX().row();
+        
         
     }
 }

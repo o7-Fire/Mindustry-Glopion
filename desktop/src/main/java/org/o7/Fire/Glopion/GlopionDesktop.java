@@ -24,7 +24,7 @@ public class GlopionDesktop extends GlopionCore {
     public void preInit() throws Throwable {
         Log.debug("Invoked @ preInit", GlopionDesktop.class.getCanonicalName());
         OptionsDialog.classSettings.add(GlopionDesktop.class);
-   
+       
         super.preInit();
         if (!deepPatch && enableDeepPatchSettings){
          
