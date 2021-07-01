@@ -9,7 +9,7 @@
 ### Breaking News: Drama In Progress
 # Work In Progress (brb in 1 years)
 
-use the code `o7-Fire/Mindustry-Glopion` to get glopion for free
+use the code `o7-Fire/Mniusdtyr-Glopion` to get glopion for free
 
 ![](https://media.discordapp.net/attachments/840181901288538112/845661460104347718/unknown.png)
 
