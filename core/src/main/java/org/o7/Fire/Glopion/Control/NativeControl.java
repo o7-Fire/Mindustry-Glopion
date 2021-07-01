@@ -142,6 +142,6 @@ public class NativeControl implements InterfaceControl {
             return;
         }
         Log.infoTag("Input",keyCode.name());
-      input.getKeyboard().keyDown(keyCode);
+        input.getKeyboard().keyDown(keyCode);
     }
 }

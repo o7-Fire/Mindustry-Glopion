@@ -5,24 +5,44 @@ import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import arc.Core;
 import arc.Events;
-import arc.func.Floatc;
-import arc.func.Floatp;
 import mindustry.Vars;
 import mindustry.ctype.ContentType;
 import mindustry.game.EventType;
 import mindustry.game.Gamemode;
-import mindustry.gen.Groups;
 import mindustry.maps.Map;
-import mindustry.world.Tile;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.o7.Fire.Glopion.Brain.Observation.PlayerObservationScreen;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static mindustry.Vars.player;
+import static mindustry.Vars.state;
+
 public class NativeSingleplayerScreen extends PlayerObservationScreen implements StateController {
+    final List<Float> reward = Collections.synchronizedList(new ArrayList<>());
     public NativeSingleplayerScreen() {
         super(new MachineRecorder(Vars.player), MachineRecorder.maxView);
         Events.run(EventType.Trigger.newGame,this::unlock);
+        Events.run(EventType.Trigger.teamCoreDamage, () -> reward.add(-1f));
+        Events.on(EventType.UnitDestroyEvent.class, e->{
+            if(e.unit.team == Vars.player.team()){
+                reward.add(-e.unit.health);
+            }else{
+                reward.add(e.unit.health);
+            }
+        });
+        Events.on(EventType.WinEvent.class, e->{
+           reward.add(1000f);
+        });
+        Events.on(EventType.LoseEvent.class, e->{
+            reward.add(-1000f);
+        });
+      
     }
     
     private void unlock() {
@@ -35,10 +55,13 @@ public class NativeSingleplayerScreen extends PlayerObservationScreen implements
     @Override
     public INDArray getData() {
         float[] compiledVector = machineRecorder.compiledVector();
+        if(compiledVector.length != getShape()[0])throw new IndexOutOfBoundsException("Vector: " + compiledVector.length +", shape: " + Arrays.toString(getShape()));
         machineRecorder.incrementAssignCompiledIndex( ()->(float) Math.min(Vars.state.enemies, 1));
         machineRecorder.incrementAssignCompiledIndex( ()->(float) Core.graphics.getHeight() / Core.input.mouseY());
         machineRecorder.incrementAssignCompiledIndex( ()->(float)Core.graphics.getWidth() / Core.input.mouseX());
         machineRecorder.incrementAssignCompiledIndex( ()->(float) Vars.content.getBy(ContentType.block).size / Vars.control.input.block.id);
+        machineRecorder.incrementAssignCompiledIndex( ()->(float)  (Vars.control.input.block.isPlaceable() ? 1 : 0));
+        machineRecorder.incrementAssignCompiledIndex( ()-> (state.rules.infiniteResources || (player.closestCore() != null && (player.closestCore().items.has(Vars.control.input.block.requirements, state.rules.buildCostMultiplier) || state.rules.infiniteResources))) && player.isBuilder() ? 1 : 0);
         return Nd4j.create(compiledVector);
     }
     
@@ -107,7 +130,10 @@ public class NativeSingleplayerScreen extends PlayerObservationScreen implements
     
     @Override
     public double reward() {
-        return (double) Vars.player.unit().healthf() +  (Vars.state.stats.enemyUnitsDestroyed/100) + (Vars.state.stats.buildingsBuilt/100) + (Vars.state.stats.wavesLasted / 10) -  (Vars.state.enemies / 100);
+        double d = 1 - Vars.player.unit().healthf();
+        while (!reward.isEmpty())
+            d += reward.remove(0);
+        return (double) d ;
     }
     
     @Override

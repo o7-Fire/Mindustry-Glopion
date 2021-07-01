@@ -1,16 +1,27 @@
 package org.o7.Fire.Glopion.Control;
 
 import arc.Core;
+import arc.Events;
+import arc.graphics.g2d.Draw;
 import arc.input.KeyCode;
 import arc.input.KeyboardDevice;
 import arc.struct.IntFloatMap;
 import arc.struct.IntSet;
+import mindustry.Vars;
+import mindustry.game.EventType;
+import mindustry.gen.Icon;
+import mindustry.graphics.Drawf;
 
 public class MachineKeyboard extends KeyboardDevice {
     protected final IntSet pressed = new IntSet();
     protected final IntSet lastFramePressed = new IntSet();
     protected final IntFloatMap axes = new IntFloatMap();
     protected long nextFlush = 0;
+    public MachineKeyboard(){
+        Events.run(EventType.Trigger.draw,()->{
+            Drawf.circles(Core.input.mouseWorldX(),Core.input.mouseWorldY(),12f / Vars.renderer.getDisplayScale());
+        });
+    }
     @Override
     public void preUpdate() {
         if(System.currentTimeMillis() > nextFlush){
@@ -25,6 +36,7 @@ public class MachineKeyboard extends KeyboardDevice {
     
     @Override
     public void postUpdate(){
+        
         lastFramePressed.clear();
         lastFramePressed.addAll(pressed);
 

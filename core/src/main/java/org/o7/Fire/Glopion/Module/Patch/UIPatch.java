@@ -100,6 +100,7 @@ public class UIPatch extends ModsModule {
         ModsMenu.add(new LogView());
         ModsMenu.add(new ExperimentDialog());
         ModsMenu.add(new OptionsDialog());
+        ModsMenu.add(new ScreenUtilsDialog());
         GlopionCore.modsMenu = new ModsMenu();
         GlopionCore.glopionHud = new HudMenu();
         Cell<Table> h = ui.settings.game.row().table().growX();

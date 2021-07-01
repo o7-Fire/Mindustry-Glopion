@@ -52,6 +52,7 @@ public abstract class ScrollableDialog extends AtomicDialog {
     public void showSetup(){
         onResize(this::init);
         shown(this::init);
+        addRefreshAndClose();
     }
     public void addRefreshAndClose(){
         addCloseButton();
