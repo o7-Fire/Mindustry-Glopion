@@ -4,10 +4,12 @@ import arc.Core;
 import arc.Input;
 import arc.math.Mathf;
 import arc.util.Log;
-import arc.util.Time;
+
 import arc.util.async.Threads;
 import mindustry.Vars;
+import org.deeplearning4j.rl4j.learning.HistoryProcessor;
 import org.deeplearning4j.rl4j.learning.IEpochTrainer;
+import org.deeplearning4j.rl4j.learning.IHistoryProcessor;
 import org.deeplearning4j.rl4j.learning.ILearning;
 import org.deeplearning4j.rl4j.learning.configuration.QLearningConfiguration;
 import org.deeplearning4j.rl4j.learning.listener.TrainingListener;
@@ -37,39 +39,36 @@ public class TrainingDQN implements Experimental {
             Interface.showInfo("Training Underway");
             return;
         }
-        if(!Vars.state.isPlaying()){
-            Interface.showInfo("Go play a map");
-            return;
-        }
+
         alreadyDoIt = true;
         int speed = 4;
         Input original = Core.input;
         MachineInput machineInput = new MachineInput(original);
         Core.input = machineInput;
         Threads.daemon("DQN Training",()->{
-        DQN dqn = null;
-        try {
-            dqn = DQN.load(path);
-            Log.info("Loaded: " + path);
-        }catch(IOException e){
-        
-        }
+    
       
-        Time.setDeltaProvider(() ->{
-            float result = Core.graphics.getDeltaTime() * 60f * speed;
-            return (Float.isNaN(result) || Float.isInfinite(result)) ? speed : Mathf.clamp(result, 0.0001f, (60f * speed) / 10f);
-        });
-        final QLearningConfiguration Qconifg = getConfig((int) (NativeSingleplayerScreen.undelta() * 20 * 30), 5);
+
+        final QLearningConfiguration Qconifg = getConfig((int) (NativeSingleplayerScreen.undelta() * 20 * 1200), 5);
         final DQNDenseNetworkConfiguration conf = getDQN();
         final NativeSingleplayerScreen nativeSingleplayer = new NativeSingleplayerScreen();
         final PlayerDiscreteMDPScreen mdp = new PlayerDiscreteMDPScreen(nativeSingleplayer, new NativeControl(Core.input), nativeSingleplayer);
         final QLearningDiscreteDense<NativeSingleplayerTensor> network;
+        path = nativeSingleplayer.getName() + ".zip";
+            DQN dqn = null;
+            try {
+                dqn = DQN.load(path);
+                Log.info("Loaded: " + path);
+            }catch(IOException e){
+        
+            }
+            HistoryProcessor historyProcessor = new HistoryProcessor(IHistoryProcessor.Configuration.builder().historyLength(40).skipFrame(4).build());
         if(dqn != null){
             network = new QLearningDiscreteDense(mdp,dqn,Qconifg);
         }else {
             network = new QLearningDiscreteDense(mdp, conf, Qconifg);
         }
-        
+        network.setHistoryProcessor(historyProcessor);
             //start the training
             try {
                 network.addListener(new TrainingListener() {
@@ -81,12 +80,13 @@ public class TrainingDQN implements Experimental {
     
                     @Override
                     public void onTrainingEnd() {
-        
+                        Vars.ui.hudfrag.showToast("Saved: " + path);
                     }
     
                     @Override
                     public ListenerResponse onNewEpoch(IEpochTrainer trainer) {
                         Vars.ui.hudfrag.showToast("New Epoch: " + trainer.getEpochCount());
+                     
                         try {
                             network.getPolicy().save(path);
                         }catch(IOException e){
@@ -112,10 +112,6 @@ public class TrainingDQN implements Experimental {
             }catch(Exception e){
                 e.printStackTrace();
             }
-            Time.setDeltaProvider(()-> {
-                float result = Core.graphics.getDeltaTime() * 60f;
-                return (Float.isNaN(result) || Float.isInfinite(result)) ? 1f : Mathf.clamp(result, 0.0001f, 60f / 10f);
-            });
             Core.app.post(()->Core.input = original);
             alreadyDoIt = false;
         });

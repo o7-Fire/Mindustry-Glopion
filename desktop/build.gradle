@@ -62,7 +62,7 @@ dependencies {
         because("runtime")
     }
     //nvidia, man fragnance
-    if(isRunner) {
+    if(isRunner && !githubRepoExist) {
         compileOnly(group: 'org.nd4j', name: 'nd4j-cuda-11.0-platform', version: '1.0.0-M1') {
             because("runtime")
         }

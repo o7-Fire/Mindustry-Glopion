@@ -39,7 +39,7 @@ public class PlayerObservationScreen implements Encodable, ObservationSpace<Play
     
     @Override
     public String getName() {
-        return "Plater Screen";
+        return "Player-Mindustry-Screen";
     }
     
     @Override

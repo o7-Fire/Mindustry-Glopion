@@ -10,6 +10,7 @@ import arc.Core;
 import arc.func.Floatp;
 import arc.struct.Seq;
 import arc.util.Log;
+import arc.util.ScreenUtils;
 import arc.util.Strings;
 import arc.util.io.Writes;
 import com.google.gson.Gson;
@@ -74,7 +75,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public MachineRecorder(Player p) {
         player = p;
         nextCapture  = System.currentTimeMillis() + delaySave + Random.getInt(10000);
-        resetArray();
+        //resetArray();
     }
     
     public static void visualizeColorized(int[] vector, StringBuilder sb) {
@@ -183,7 +184,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     public float[] worldDataVector = new float[getSize()], compiledVector = null;
     public int getSize(){
-        return (maxView+maxView) * (maxView+maxView);
+        return diameter*diameter;
     }
     public int compiledIndex = getSize();
     public int getCompiledSize(){
@@ -191,6 +192,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     }
     
     public void enviromentInformation(){
+        ScreenUtils.getFrameBufferPixels(false);
         compiledIndex = getSize();
         incrementAssignCompiledIndex(()-> player.unit().vel().getX());
         incrementAssignCompiledIndex(()-> player.unit().vel().getY());
@@ -365,10 +367,9 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         }
         return matrix;
     }
-    
+    int diameter = maxView + maxView;
+    Tile[][] matrix = new Tile[diameter][diameter];
     public Tile[][] getWorldData(int radius) {
-        int diameter = radius + radius;
-        Tile[][] matrix = new Tile[diameter][diameter];
         int x = Vars.player.tileX(), y = Vars.player.tileY();
         for (int yPointer = radius; yPointer > -radius; yPointer--) {
             for (int xPointer = radius; xPointer > -radius; xPointer--) {

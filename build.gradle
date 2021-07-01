@@ -112,8 +112,12 @@ allprojects {
         modhjson += 'minGameVersion: ' + modsNminMindustryVersion + '\n'
         modhjson += "version: " + modsNversion +"\n"
         modhjson += 'hidden: ' + modsNsupportVanillaServer + '\n'
+        githubRepoExist = false
         if(project.hasProperty("githubRepo"))//supplied by workflow runner (gradle.yml)  -PgithubRepo="$GITHUB_REPOSITORY"
-            modhjson += 'repo: \"' + githubRepo +'\" \n'
+        {
+            githubRepoExist = true
+            modhjson += 'repo: \"' + githubRepo + '\" \n'
+        }
         else
             modhjson += 'repo: "' + modsNrepo + '"\n'
 

@@ -10,9 +10,9 @@ public class Controller {
     
     public static DQNDenseNetworkConfiguration getDQN(){
         return DQNDenseNetworkConfiguration.builder()
-                .updater(new Nadam(Math.pow(10, -1.1)))
-                .numHiddenNodes(600)
-                .numLayers(6)
+                .updater(new Nadam(Math.pow(10, -3.1)))
+                .numHiddenNodes(700)
+                .numLayers(5)
                 .build();
     }
     
@@ -22,7 +22,8 @@ public class Controller {
                 .maxEpochStep(stepsPerEpoch)
                 .maxStep(stepsPerEpoch * maxGames)
                 .updateStart(0)
-                .rewardFactor(1.0)
+                .targetDqnUpdateFreq(20)
+                .rewardFactor(0.1)
                 .gamma(0.999)
                 .errorClamp(1.0)
                 .batchSize(16)

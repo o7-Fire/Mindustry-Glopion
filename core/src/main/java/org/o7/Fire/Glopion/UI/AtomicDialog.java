@@ -20,11 +20,12 @@ public class AtomicDialog extends BaseDialog {
     public AtomicDialog(String title, DialogStyle style) {
         super(title, style);
         showSetup();
-        addRefreshAndClose();
+        
     }
     public void showSetup(){
         onResize(this::setup);
         shown(this::setup);
+        addRefreshAndClose();
     }
     public void addRefreshAndClose(){
         addCloseButton();
