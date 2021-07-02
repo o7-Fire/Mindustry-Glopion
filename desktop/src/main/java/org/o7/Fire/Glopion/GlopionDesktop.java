@@ -6,6 +6,7 @@ import arc.util.Log;
 import arc.util.Time;
 import arc.util.async.Threads;
 import mindustry.game.EventType;
+import org.bytedeco.javacpp.Loader;
 import org.o7.Fire.Glopion.Patch.Translation;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
 
@@ -22,6 +23,7 @@ public class GlopionDesktop extends GlopionCore {
     //oh
     @Override
     public void preInit() throws Throwable {
+      
         Log.debug("Invoked @ preInit", GlopionDesktop.class.getCanonicalName());
         OptionsDialog.classSettings.add(GlopionDesktop.class);
        
