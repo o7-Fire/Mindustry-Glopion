@@ -59,12 +59,13 @@ dependencies {
     compileOnly(group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: nd4jVersion) {
         because("runtime")
     }
-    compileOnly(group: 'org.nd4j', name: 'nd4j-native-platform', version: nd4jVersion) {
-        because("runtime")
-    }
+
     //nvidia, man fragnance
     if(isRunner && !githubRepoExist) {
         println("Writing Dep")
+        compileOnly(group: 'org.nd4j', name: 'nd4j-native-platform', version: nd4jVersion) {
+            because("runtime")
+        }
         compileOnly(group: 'org.nd4j', name: 'nd4j-native', version: nd4jVersion, classifier: "linux-x86_64-avx2") {
             because("runtime")
         }
@@ -74,7 +75,6 @@ dependencies {
         compileOnly(group: 'org.nd4j', name: 'nd4j-native', version: nd4jVersion, classifier: "windows-x86_64-avx2") {
             because("runtime")
         }
-
         compileOnly(group: 'org.nd4j', name: 'nd4j-cuda-11.0-platform', version: nd4jVersion) {
             because("runtime")
         }

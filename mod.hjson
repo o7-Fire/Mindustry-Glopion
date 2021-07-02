@@ -4,6 +4,6 @@ description: "Bottom Text"
 author: "o7-Fire"
 main: "org.o7.Fire.Glopion.Bootstrapper.Main"
 minGameVersion: 127
-version: 0.4.5
+version: 0.5.5
 hidden: true
 repo: "o7-Fire/Mindustry-Glopion"
