@@ -10,10 +10,43 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.*;
 
-//Java 8+ only
+//Java 8 only
 public class SharedBootstrapper {
     public static final long version = 22;
-    
+    public static String platform;
+    public static String getPlatform() {
+        if(platform != null)return platform;
+        String jvmName = System.getProperty("java.vm.name", "").toLowerCase();
+        String osName  = System.getProperty("os.name", "").toLowerCase();
+        String osArch  = System.getProperty("os.arch", "").toLowerCase();
+        String abiType = System.getProperty("sun.arch.abi", "").toLowerCase();
+        String libPath = System.getProperty("sun.boot.library.path", "").toLowerCase();
+        if (jvmName.startsWith("dalvik") && osName.startsWith("linux")) {
+            osName = "android";
+        } else if (jvmName.startsWith("robovm") && osName.startsWith("darwin")) {
+            osName = "ios";
+            osArch = "arm";
+        } else if (osName.startsWith("mac os x") || osName.startsWith("darwin")) {
+            osName = "macosx";
+        } else {
+            int spaceIndex = osName.indexOf(' ');
+            if (spaceIndex > 0) {
+                osName = osName.substring(0, spaceIndex);
+            }
+        }
+        if (osArch.equals("i386") || osArch.equals("i486") || osArch.equals("i586") || osArch.equals("i686")) {
+            osArch = "x86";
+        } else if (osArch.equals("amd64") || osArch.equals("x86-64") || osArch.equals("x64")) {
+            osArch = "x86_64";
+        } else if (osArch.startsWith("aarch64") || osArch.startsWith("armv8") || osArch.startsWith("arm64")) {
+            osArch = "arm64";
+        } else if ((osArch.startsWith("arm")) && ((abiType.equals("gnueabihf")) || (libPath.contains("openjdk-armhf")))) {
+            osArch = "armhf";
+        } else if (osArch.startsWith("arm")) {
+            osArch = "arm";
+        }
+        return platform = osName + "-" + osArch;
+    }
     @NotNull
     public static File parent = new File("cache/");
     public static Properties dependencies = new Properties();
@@ -31,6 +64,12 @@ public class SharedBootstrapper {
         SharedBootstrapper.parent.mkdirs();
         for (String key : dependencies.stringPropertyNames()) {
             String[] download = dependencies.getProperty(key).split(" ");
+            String[] keyPlatform = key.split(":");
+            if(keyPlatform.length == 4){
+                if(!keyPlatform[3].startsWith(getPlatform()))
+                    continue;
+            }
+            //System.out.println(Arrays.toString(keyPlatform));
             String[] keys = key.split("-", 2);
             try {
                long l = Long.parseLong(keys[0]);

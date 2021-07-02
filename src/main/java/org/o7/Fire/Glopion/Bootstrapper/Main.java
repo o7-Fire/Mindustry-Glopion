@@ -49,6 +49,7 @@ public class Main extends Plugin {
         Log.infoTag("Mindustry-Version-Combined", Version.combined());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
         Log.infoTag("Glopion-Bootstrapper", "Classpath: " + classpath);
+        Log.infoTag("Platform",SharedBootstrapper.getPlatform());
         try {
             load();
         }catch(Throwable t){
@@ -199,6 +200,16 @@ public class Main extends Plugin {
         boolean classExist = Main.class.getClassLoader().getResourceAsStream(classpath.replace('.', '/') + ".class") != null;
         if (classExist){
             Log.infoTag("Glopion-Bootstrapper", "Found in classpath, loading from classpath");
+            InputStream is = Main.class.getClassLoader().getResourceAsStream("dependencies");
+            if (is != null){
+                Log.info("found dependencies list");
+                if (Vars.mobile) Log.err("IN MOBILE");
+                try {
+                    checkDependency(is);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
         }
         if (jar.exists() || classExist){
             
@@ -214,6 +225,7 @@ public class Main extends Plugin {
                     parentClasslaoder = Main.class.getClassLoader(),//if development enviroment then its system else Platform.loadjar
                     platformClassloader = null, //Glopion instance classloader, handled by mindustry
                     dependencyClassloader = null;//Glopion desktop only, override everything when its not development enviroment
+         
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
                 
