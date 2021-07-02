@@ -102,6 +102,7 @@ allprojects {
         if(!new File(sdkD8).exists())
             sdkD8 = new File(sdkRoot, "nope").getAbsolutePath()
         mindustryExecutable = getMindustryFile()
+        mindustryServerExecutable = getMindustryServerFile()
         //imagine writing json
         modhjson = ""
         modhjson += 'name: "' + modsNname + '"\n'
@@ -125,20 +126,21 @@ allprojects {
         //From Root to every project
         dependencies{
             //
-            if(System.getProperty("modsNBE")  != null && !System.getProperty("modsNBE").isEmpty()) {
+            def be = System.getProperty("modsNBE")  != null && !System.getProperty("modsNBE").isEmpty()
+            if(be) {
                 downloadMindustry(getMindustryURL(), getMindustryFile());
             }
             File mindustry = file(mindustryExecutable)
-            //if(mindustry.exists()) {
-            //    compileOnly(files(mindustry))
+            if(be && mindustry.exists()) {
+                compileOnly(files(mindustry))
                 //testCompileOnly(files(mindustry))
-           //     testImplementation(files(mindustry))
-            //}else {//if you feel fancy remove this else
+               testImplementation(files(mindustry))
+            }else {//if you feel fancy remove this else
                 compileOnly("com.github.Anuken.Mindustry:desktop:$mindustryHash")
                 compileOnly("com.github.Anuken.Arc:arc-core:$arcHash")
                 compileOnly("com.github.Anuken.Arc:backend-sdl:$arcHash")
                 compileOnly("com.github.Anuken.Mindustry:core:$mindustryHash")
-           // }
+            }
             compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
 
         }
@@ -163,6 +165,7 @@ subprojects {
 
     dependencies{
         testImplementation(files(mindustryExecutable))
+        testImplementation(files(mindustryServerExecutable))
         testImplementation(rootProject)
         //compileOnly(files(mindustryExecutable))
         compileOnly(rootProject)
@@ -327,6 +330,19 @@ static void copyToMindustry(File f){
     System.out.println("Copying: " + f.getAbsolutePath() + " to "+ target.getAbsolutePath());
     Files.copy(f.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 }
+static URL getMindustryServerURL(){
+    if(System.getProperty("modsNBE", null) != null) {
+        String h = System.getProperty("modsNBE");
+        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/"+h+"/Mindustry-BE-Server-"+h+".jar")
+    }
+    return new URL("https://github.com/Anuken/Mindustry/releases/download/" + System.getProperty("mindustryHash") + "/server-release.jar");
+}
+
+static File getMindustryServerFile(){
+    URL u = getMindustryServerURL()
+    File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+    return mindustry.getAbsoluteFile();
+}
 
 static URL getMindustryURL(){
     if(System.getProperty("modsNBE", null) != null) {
@@ -345,6 +361,7 @@ static File getMindustryFile(){
 //how lazy to download this
 task download(){
     doLast{
+        downloadMindustry(getMindustryServerURL(), getMindustryServerFile());
         downloadMindustry(getMindustryURL(), getMindustryFile());
     }
 }
