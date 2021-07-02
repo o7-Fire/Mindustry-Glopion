@@ -64,6 +64,7 @@ dependencies {
     }
     //nvidia, man fragnance
     if(isRunner && !githubRepoExist) {
+        println("Writing Dep")
         compileOnly(group: 'org.nd4j', name: 'nd4j-native', version: nd4jVersion, classifier: "linux-x86_64-avx2") {
             because("runtime")
         }
