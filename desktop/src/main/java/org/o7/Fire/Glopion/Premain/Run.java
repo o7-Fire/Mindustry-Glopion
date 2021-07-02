@@ -18,12 +18,12 @@ public class Run {
     }
     
     public static class Server {
+        //run configuration
+        //Classpath: Mindustry-Glopion.desktop.test
+        //Class org.o7.Fire.Glopion.Premain.Server.Run
+        //JVM: 16
         public static void main(String[] args) throws Throwable {
-            AtomicBootstrap bootstrap = new AtomicBootstrap();
-            bootstrap.loadCurrentClasspath();
-            bootstrap.loadClasspath();
-            bootstrap.getLoader().addURL(Cache.tryCache("https://github.com/Anuken/Mindustry/releases/download/v126.2/server-release.jar"));
-            bootstrap.loadMain("mindustry.server.ServerLauncher", args);
+            ServerLauncher.main(args);
         }
     }
 }

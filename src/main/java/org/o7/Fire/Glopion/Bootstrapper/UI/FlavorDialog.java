@@ -74,7 +74,7 @@ public class FlavorDialog extends BaseDialog {
                         Log.err(e);
                     }
                 }
-                boolean mindustryVersionCompatible =  key.contains(Version.build+"");
+                boolean mindustryVersionCompatible =  key.contains(Version.buildString());
                 boolean mindustryModifierCompatible = key.contains(Version.modifier.replace('-','.'));
                 boolean bootstrapperCompatible = bootstrapMin < SharedBootstrapper.version;
                 if (!bootstrapperCompatible && compatibleBootstrapperVersion) continue;
