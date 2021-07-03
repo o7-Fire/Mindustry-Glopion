@@ -44,11 +44,11 @@ public class ModsMenu extends ScrollableDialog {
     public ModsMenu() {
         super("Mods Menu");
         textButtonStyle = Styles.clearPartialt;
-        addNavButton("o7-Discord", Icon.discord, () -> {
-            Interface.openLink("https://discord.o7fire.tk");
-        });
+        
      
     }
+    
+    
     
     public static void add(Dialog dialog) {
         dialogs.add(dialog);

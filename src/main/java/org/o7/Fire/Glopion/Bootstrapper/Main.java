@@ -6,6 +6,7 @@ import arc.files.Fi;
 import arc.input.KeyCode;
 import arc.struct.Seq;
 import arc.util.Align;
+import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.async.Threads;
 import mindustry.Vars;
@@ -44,7 +45,16 @@ public class Main extends Plugin {
     
     
     public Main() {
+        if (System.getProperty("glopion.loaded", "0").equals("1")){
+            Log.errTag("Glopion-Bootstrapper", "Trying to load multiple times !!!");
+            Log.err(new RuntimeException("Trying to load Glopion multiple times !!!"));
+            try {
+                Log.errTag("Glopion-Location", Main.class.getProtectionDomain().getCodeSource().getLocation().toString());
+            }catch(NullPointerException gay){}
+            return;
+        }
         classpath = classpath + flavor.split("-")[0] + "Launcher";
+        Log.info("saddad");
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Mindustry-Version-Combined", Version.combined());
         Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
@@ -67,6 +77,22 @@ public class Main extends Plugin {
         }
     }
     
+    public static void registerSharedCommands(CommandHandler handler, boolean console){
+    
+    }
+    @Override
+    public void registerClientCommands(CommandHandler handler) {
+        registerSharedCommands(handler, false);
+    }
+    
+    @Override
+    public void registerServerCommands(CommandHandler handler) {
+        handler.register("glopion-bootstrapper-info","Get Bootstrapper Information",s->{
+            Log.info(info);
+        });
+        registerSharedCommands(handler, true);
+    }
+    
     public static void disable() {
         Mods.LoadedMod mod = Vars.mods.getMod(Main.class);
         if (mod != null){
@@ -77,8 +103,13 @@ public class Main extends Plugin {
     }
     
     private static void downloadLibrary0(Iterator<Map.Entry<String, File>> iterator, boolean yesToAll) {
-        if (!iterator.hasNext() && !Vars.headless){
-            Core.app.post(() -> Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit));
+        if (!iterator.hasNext() ){
+            Core.app.post(() -> {
+                if(Vars.ui != null)
+                    Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+                else
+                    Log.infoTag("Downloader","Finished Downloading");
+            });
             return;
         }
         while (iterator.hasNext()) {
@@ -104,6 +135,7 @@ public class Main extends Plugin {
             Log.info("Downloading: " + s.getKey());
             if (!yesToAll) if (Core.settings.getString(s.getKey()) != null) continue;
             if (Vars.headless){
+                Log.infoTag("Downloader",s.getKey() + " " + (size == null ? "" : size));
                 BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> { }, Throwable::printStackTrace);
             }else{
                 Runnable run = () -> BootstrapperUI.downloadGUI(url.toExternalForm(), new Fi(s.getValue()), () -> {
@@ -151,15 +183,17 @@ public class Main extends Plugin {
             }
         }
         if(list.size() == 0)return;
+        String info = "Some library may platform dependent, you can skip it\n" + totalDownload + " Library Total\n Size Total: " + SharedBootstrapper.humanReadableByteCountSI(totalSize);
         final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
         if (Vars.headless){
+            Log.infoTag("Dependency-Downloader",info);
             Core.app.post(() -> downloadLibrary0(iterator, true));
         }else{
             long finalTotalDownload = totalDownload;
             long finalTotalSize = totalSize;
             Main.runOnUI(() -> {
                 BaseDialog dialog = new BaseDialog("Download Library");
-                dialog.cont.add("Some library may platform dependent, you can skip it\n" + finalTotalDownload + " Library Total\n Size Total: " + SharedBootstrapper.humanReadableByteCountSI(finalTotalSize)).width(mobile ? 400f : 500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
+                dialog.cont.add(info).width(mobile ? 400f : 500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
                 dialog.buttons.defaults().size(200f, 54f).pad(2f);
                 dialog.setFillParent(false);
                 dialog.buttons.button("Skip to all", () -> {

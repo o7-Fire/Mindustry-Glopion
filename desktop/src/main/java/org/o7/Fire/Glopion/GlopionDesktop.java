@@ -5,6 +5,7 @@ import arc.Events;
 import arc.util.Log;
 import arc.util.Time;
 import arc.util.async.Threads;
+import mindustry.Vars;
 import mindustry.game.EventType;
 import org.bytedeco.javacpp.Loader;
 import org.o7.Fire.Glopion.Patch.Translation;
@@ -39,7 +40,7 @@ public class GlopionDesktop extends GlopionCore {
                 File javaBin = new File(System.getProperty("java.home") + "/bin/java");
                 String java = "java";
                 if (javaBin.exists()) java = javaBin.getAbsolutePath();
-                String[] cmd = new String[]{java, "-Dglopion-deepPatch=1", "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Run"};
+                String[] cmd = new String[]{java, "-Dglopion-deepPatch=1", "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Run" + (Vars.headless ? "$Server" : "")};
                 Log.info(Arrays.toString(cmd));
                 new ProcessBuilder(cmd).inheritIO().start();
                 Threads.daemon(()->{

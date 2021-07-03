@@ -1,19 +1,26 @@
 package org.o7.Fire.Glopion.UI;
 
+import Atom.Time.Time;
 import arc.Core;
 import arc.files.Fi;
-import arc.graphics.Color;
-import arc.graphics.Pixmap;
-import arc.graphics.PixmapIO;
+import arc.graphics.*;
+import arc.graphics.g2d.TextureRegion;
+import arc.graphics.gl.PixmapTextureData;
+import arc.scene.Action;
+import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.Label;
 import arc.util.ScreenUtils;
+import mindustry.gen.Icon;
+
+import java.util.concurrent.TimeUnit;
 
 public class ScreenUtilsDialog extends ScrollableDialog {
     boolean flipY = false;
     volatile boolean bullshitInProgress = false;
     int x = 0, y = 0, h = 0, w = 0;
     float xF, yF, wF = 1, hF = 1;
-    
+  
+    Texture texture = null;
     @Override
     protected void init() {
         if (bullshitInProgress) return;
@@ -57,15 +64,33 @@ public class ScreenUtilsDialog extends ScrollableDialog {
         }).growX().row();
         
         table.table(t -> {
-            Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h, flipY);
+        
+            if(texture != null){
+                texture.dispose();
+                texture = null;
+            }
+            Time time = new Time(TimeUnit.MILLISECONDS);
+            Pixmap pixmap = null;
+            pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h, flipY);
             Fi f = new Fi("test.png");
             f.delete();
-            PixmapIO.writePng(f, pixmap);
+            PixmapIO.writePng(f,pixmap);
             pixmap.dispose();
-            Label label = t.labelWrap(f.absolutePath()).growY().growX().color(Color.gray).get();
-            //t.image(pixmap);
-            
+            texture = new Texture(f);
+            t.image(new TextureRegionDrawable(new TextureRegion(texture))).growX().growY().row();
+            t.add(time.elapsedS()).growX();
         }).growX().growY().color(Color.gray);
         
+    }
+    
+    
+    
+    @Override
+    public void hide(Action action) {
+        if(texture != null){
+            texture.dispose();
+            texture = null;
+        }
+        super.hide(action);
     }
 }
