@@ -107,9 +107,9 @@ public class WarningHandler {
             // Sentry.captureException(t);
         }catch(Throwable ignored){}
         try {
-            
-            if (Reflect.debug || Vars.headless){
+            if(Reflect.debug || Vars.headless || Vars.mobile)
                 t.printStackTrace();
+            if (Reflect.debug){
                 handleStealthMindustry(t, "Glopion-Debug");
             }
         }catch(Throwable ignored){}

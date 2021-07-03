@@ -12,7 +12,7 @@ import java.util.*;
 
 //Java 8 only
 public class SharedBootstrapper {
-    public static final long version = 25;
+    public static final long version = 27;
     public static String platform;
     public static String getPlatform() {
         if(platform != null)return platform;
