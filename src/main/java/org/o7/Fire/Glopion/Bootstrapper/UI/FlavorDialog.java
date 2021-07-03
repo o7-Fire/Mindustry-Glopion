@@ -50,6 +50,7 @@ public class FlavorDialog extends BaseDialog {
             build();
         }).growX().row();
         cont.check("Compatible With Bootstrapper Version",compatibleBootstrapperVersion, b-> {
+            Vars.ui.showInfo("may cause startup error, or won't load");
             compatibleBootstrapperVersion = b;
             build();
         }).growX().row();
