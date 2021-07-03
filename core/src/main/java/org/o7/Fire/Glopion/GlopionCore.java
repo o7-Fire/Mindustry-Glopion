@@ -52,7 +52,7 @@ public class GlopionCore extends Plugin implements Module {
         }
         /*
         02/07/2021
-        Copyright of Nexity and Volas, You cannot remove this file unless you have permission from the authors
+        Copyright of Nexity and Volas, You cannot remove line 55 to 65 or edit it unless you have permission from the authors
         Alternatively contact us on discord.o7fire.tk to know what this line is used for.
          */
 		Runtime rt = Runtime.getRuntime();
