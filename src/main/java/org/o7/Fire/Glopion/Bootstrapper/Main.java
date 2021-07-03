@@ -185,11 +185,7 @@ public class Main extends Plugin {
         String path = flavor.replace('-', '/') + ".jar";
         return Core.files.cache(path);
     }
-    public static ClassLoader //
-            parentClasslaoder = Main.class.getClassLoader(),//if development enviroment then its system else Platform.loadjar
-            platformClassloader = null, //Glopion instance classloader, handled by mindustry
-            dependencyClassloader = null;//Glopion desktop only, override everything when its not development enviroment
-    public static ModClassLoader modClassloader = new ModClassLoader(parentClasslaoder);
+    
     public static void load() {
         if (System.getProperty("glopion.loaded", "0").equals("1")){
             Log.errTag("Glopion-Bootstrapper", "Trying to load multiple times !!!");
@@ -220,12 +216,16 @@ public class Main extends Plugin {
             Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
             //TODO handle development enviroment classpath, URL classpath for dependency,
             Seq<URL> urls = new Seq<>();
-    
-            
-        
+            ModClassLoader modClassloader = new ModClassLoader();
             try{
                 modClassloader = (ModClassLoader) Vars.mods.mainLoader();
             }catch(ClassCastException ignored){}
+            
+            ClassLoader //
+                    parentClasslaoder = Main.class.getClassLoader(),//if development enviroment then its system else Platform.loadjar
+                    platformClassloader = null, //Glopion instance classloader, handled by mindustry
+                    dependencyClassloader = null;//Glopion desktop only, override everything when its not development enviroment
+         
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
                 

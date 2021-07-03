@@ -298,16 +298,14 @@ artifacts {
 
 //h
 //add progress bar
-static void downloadMindustry(URL url, File download){
-    download.getParentFile().mkdirs();
-    if(download.exists())return ;
-    System.out.println("Downloading: " + url.toString());
+static void downloadMindustry(URL u, File mindustry){
+    mindustry.getParentFile().mkdirs();
+    if(mindustry.exists())return ;
+    mindustry.createNewFile();
 
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-    BufferedInputStream input = new BufferedInputStream(con.getInputStream());
-    download.getAbsoluteFile().getParentFile().mkdirs();
-    RandomAccessFile output = new RandomAccessFile(download, "rw");
-
+    FileOutputStream output = new FileOutputStream(mindustry);
+    System.out.println("Downloading: " + u.toString());
+    InputStream input = u.openStream();
     int bytesRead;
     byte[] buffer = new byte[4096];
     long nextLog = System.currentTimeMillis() + 4000
