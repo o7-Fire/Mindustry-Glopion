@@ -80,6 +80,7 @@ public class VarsPatch extends ModsModule {
                 Vars.control.input = new DesktopInputPatched();
             }else Log.warn("Vars.control.input not patched");
         }
+        if(Vars.ui != null)
         try {
             menu = Reflect.getField(Vars.ui.menufrag.getClass(), "container", Vars.ui.menufrag);
         }catch(Throwable ignored){

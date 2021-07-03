@@ -35,6 +35,8 @@ dependencies {
     compileOnly(atomModule(":Desktop")) {
         because("runtime")
     }
+    compileOnly("com.github.Anuken.Mindustry:server:$mindustryHash")
+    compileOnly("com.github.Anuken.Arc:backend-headless:$arcHash")
     compileOnly(group: 'com.aparapi', name: 'aparapi', version: '2.0.0') { because("runtime") }
 
     //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}

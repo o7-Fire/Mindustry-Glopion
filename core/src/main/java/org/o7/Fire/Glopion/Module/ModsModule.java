@@ -35,6 +35,10 @@ public abstract class ModsModule extends Mod implements Module {
     
     protected boolean loaded = false;
     
+    public boolean disabled(){
+        return false;
+    }
+    
     public boolean isLoaded() {
         return loaded;
     }

@@ -49,7 +49,7 @@ public class MindustryLauncher {
                 if(a.startsWith("[GL] Version:")){
                     //Vars.platform == this
                     //patch time
-                    patchClassloader();
+                    patchClassloader(Vars.platform);
                     //return to original to avoid conflict
                     Log.logger = original;
                 }
@@ -60,8 +60,7 @@ public class MindustryLauncher {
     /**  patch after Vars.platform = this {@link ClientLauncher#setup()} to gain classloader control over mods
      * i use Intellij breakpoint evaluate or just do some dark magic
      * */
-    public static void patchClassloader(){
-        Platform inert = Vars.platform;
+    public static void patchClassloader(Platform inert){
        
         Vars.platform = new Platform() {
             @Override

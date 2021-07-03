@@ -73,6 +73,7 @@ public class GlopionCore extends Plugin implements Module {
     
     @Override
     public void init() {
+        //this tbh
         Translation.registerWords("machineVisualizeRenderSettings","Machine Recorder Visualization");
         try {
             moduleRegisterer.init();

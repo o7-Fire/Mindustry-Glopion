@@ -97,6 +97,8 @@ public class ModuleRegisterer implements Module {
             
                 if (enabled){
                     module = registerModule(unloaded);
+                    if(module.disabled())
+                        continue;
                     modules.put(unloaded, module);
                     ArrayList<Class<? extends ModsModule>> depend = module.dependency;
                     for (Class<? extends ModsModule> h : depend) {
