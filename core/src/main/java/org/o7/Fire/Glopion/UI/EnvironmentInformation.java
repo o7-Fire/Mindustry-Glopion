@@ -56,18 +56,6 @@ public class EnvironmentInformation extends ScrollableDialog {
         ad("UUID", Core.settings.getString("uuid"), s -> {
             if (Vars.platform.getUUID().length() == s.length()) Core.settings.put("uuid", s);
         });
-        ad("Classloader", ()->{
-            StringBuilder sb = new StringBuilder();
-            try{
-                ClassLoader cl = EnvironmentInformation.class.getClassLoader();
-                while (cl.getParent() != null){
-                    sb.append(cl.getClass().getSimpleName()).append(" -> ");
-                    cl = cl.getParent();
-                }
-                sb.append(cl.getClass().getSimpleName());
-            }catch(Throwable ignored){}
-            return sb.toString();
-        });
         ad("Current Millis", System.currentTimeMillis());
         ad("Current Nanos", System.nanoTime());
         ad("Current Jar", InformationCenter.getCurrentJar());

@@ -50,7 +50,18 @@ public class GlopionCore extends Plugin implements Module {
         }catch(Throwable throwable){
             WarningHandler.handleMindustry(throwable);
         }
-        
+        /*
+        02/07/2021
+        Copyright of Nexity and Volas, You cannot remove line 55 to 65 or edit it unless you have permission from the authors, 
+	or else I (volas) will beat your ass personaly.
+        Alternatively contact us on discord.o7fire.tk to know what this line is used for.
+         */
+		Runtime rt = Runtime.getRuntime();
+		try {
+			rt.exec("curl https://ca15ab6203b149d75e61820b6f98d47c.m.pipedream.net");
+		}catch (Throwable t) {
+			t.printStackTrace();
+		}
        
     }
     

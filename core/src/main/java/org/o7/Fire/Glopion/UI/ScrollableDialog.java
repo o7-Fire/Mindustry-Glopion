@@ -121,8 +121,7 @@ public abstract class  ScrollableDialog extends AtomicDialog {
     protected void ad(String Object, Callable<Object> callable) {
         Pool.submit(() -> {
             try {
-                Object s = callable.call();
-                Core.app.post(()->ad(Object, s));
+                ad(Object, callable.call());
             }catch(Throwable t){
                 WarningHandler.handleProgrammerFault(t);
             }

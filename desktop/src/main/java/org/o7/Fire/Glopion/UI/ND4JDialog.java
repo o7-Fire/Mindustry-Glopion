@@ -4,6 +4,7 @@ import Atom.Utility.Pool;
 import arc.graphics.Color;
 import arc.util.Strings;
 import org.nd4j.common.config.ND4JClassLoading;
+import org.nd4j.linalg.cpu.nativecpu.CpuBackend;
 import org.nd4j.linalg.factory.Environment;
 import org.nd4j.linalg.factory.Nd4jBackend;
 
