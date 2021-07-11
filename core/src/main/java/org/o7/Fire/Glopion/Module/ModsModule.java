@@ -44,7 +44,7 @@ public abstract class ModsModule extends Mod implements Module {
     }
     
     public <T extends ModsModule> T getModule(Class<T> c) {
-        return c.cast(ModuleRegisterer.modules.get(c));
+        return c.cast(ModuleRegisterer.modulesMods.get(c));
     }
     
     

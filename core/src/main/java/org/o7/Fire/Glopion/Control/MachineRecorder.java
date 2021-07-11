@@ -464,7 +464,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
                 resetArray();
             }
         }
-        if (stop) ModuleRegisterer.modulesSet.remove(this);
+        if (stop) ModuleRegisterer.remove(this);
         
     }
     
