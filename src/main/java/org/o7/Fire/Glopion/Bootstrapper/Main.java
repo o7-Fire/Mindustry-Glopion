@@ -333,7 +333,7 @@ public class Main extends Plugin {
             sb.append("Platform Classloader: ").append(platformClassloader).append("\n");
             sb.append("Dependency Classloader: ").append(dependencyClassloader).append("\n");
             sb.append("Atom Library: ").append(atomExist).append("\n");
-            if (dependencies.size() != 0){
+            if (urls.size != 0){
                 sb.append("Dependency: ").append("\n");
                 for (URL o : urls) {
                     sb.append(" ").append(o).append("\n");

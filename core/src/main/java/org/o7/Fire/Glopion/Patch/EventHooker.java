@@ -37,15 +37,14 @@ public class EventHooker extends ModsModule {
     
     
     public static void resets() {
-        for (Module m : ModuleRegisterer.modulesSet) {
+        ModuleRegisterer.invokeAll(m->{
             try {
                 m.reset();
             }catch(Throwable t){
                 WarningHandler.handleMindustry(t);
                 Interface.showError(t);
             }
-        }
-        
+        });
     }
     
     @Override

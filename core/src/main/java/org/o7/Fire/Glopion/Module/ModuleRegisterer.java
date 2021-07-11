@@ -9,6 +9,7 @@ import mindustry.game.EventType;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Commands.CommandsHandler;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
+import org.o7.Fire.Glopion.Control.MachineRecorder;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Overlay;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
@@ -29,10 +30,19 @@ import java.util.function.Consumer;
  * Handle all module creation and initialization, only invoked once
  */
 public class ModuleRegisterer implements Module {
-    public static HashSet<Module> modulesSet = new HashSet<>();
-    public static HashMap<Class<? extends ModsModule>, ModsModule> modules = new HashMap<>();
-    private static HashSet<Class<? extends ModsModule>> unloadedModules = new HashSet<>();
+    private static HashMap<Class<? extends Module>, Module> modulesSet = new HashMap<>();//contains modsmodule. used to invoke event
+    public static HashMap<Class<? extends ModsModule>, ModsModule> modulesMods = new HashMap<>();
+    private static HashSet<Class<? extends ModsModule>> unloadedModulesMods = new HashSet<>();
     private volatile static boolean init, preInit, postInit;
+    
+    public static Module remove(Class<? extends Module> module){
+        return modulesSet.remove(module);
+    }
+    
+    public static Module add(Module module){
+        Class<? extends Module> moduleClass = module.getClass();
+        return modulesSet.put(moduleClass,module);
+    }
     
     public static <T> void invokeAll(Class<T> tClass, Consumer<T> consumer) {
         invokeAll(module -> {
@@ -43,7 +53,7 @@ public class ModuleRegisterer implements Module {
     }
     
     public static void invokeAll(Consumer<Module> m) {
-        for (Module value : modulesSet) {
+        for (Module value : modulesSet.values()) {
             try {
                 m.accept(value);
             }catch(Throwable t){
@@ -53,40 +63,46 @@ public class ModuleRegisterer implements Module {
     }
     
     public static ModsModule registerModule(Class<? extends ModsModule> c) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        if (modules.containsKey(c))
-            return modules.get(c);
+        if (modulesMods.containsKey(c))
+            return modulesMods.get(c);
         ModsModule m = c.getDeclaredConstructor().newInstance();
-        modulesSet.add(m);
+        modulesSet.put(c, m);
         return m;
     }
     
-    public static boolean add(Module module) {
-        return modulesSet.add(module);
+    public static Module remove(Module module) {
+        return remove(module.getClass());
     }
     
+    public static Module get(Class<? extends Module> clz) {
+        return modulesSet.get(clz);
+    }
+    
+    
     public void core() {
-        unloadedModules.addAll(Arrays.asList(AtomicLogging.class, SchematicPool.class, VarsPatch.class, Overlay.class, EventHooker.class, Pathfinding.class, BlockWatcher.class, CommandsHandler.class, Translation.class, UIPatch.class, TilesOverlay.class, ModuleIcon.class));
+        unloadedModulesMods.addAll(Arrays.asList(AtomicLogging.class, SchematicPool.class, VarsPatch.class, Overlay.class, EventHooker.class, Pathfinding.class, BlockWatcher.class, CommandsHandler.class, Translation.class, UIPatch.class, TilesOverlay.class, ModuleIcon.class));
+        unloadedModulesMods.add(ModuleInformation.class);//added in 0.6.6
         if (!Vars.mobile){
-            unloadedModules.addAll(InformationCenter.getExtendedClass(ModsModule.class));
+            unloadedModulesMods.addAll(InformationCenter.getExtendedClass(ModsModule.class));
         }
     }
     
     public void preInit() {
         if (preInit) throw new RuntimeException("PreInit Already Loaded");
         preInit = true;
-        unloadedModules.remove(Module.class);
-        unloadedModules.remove(ModsModule.class);
+        unloadedModulesMods.remove(Module.class);
+        unloadedModulesMods.remove(ModsModule.class);
     
         HashSet<Class<? extends ModsModule>> loadedModules = new HashSet<>();
         Fi currentJar = new Fi(InformationCenter.getCurrentJar());
         Fi root = currentJar.parent();
         ModsModule stub = new ModsModule() {};
         int count = 0;
-        while (!unloadedModules.isEmpty()) {
-            Class<? extends ModsModule> unloaded = unloadedModules.iterator().next();
-            unloadedModules.remove(unloaded);
+        while (!unloadedModulesMods.isEmpty()) {
+            Class<? extends ModsModule> unloaded = unloadedModulesMods.iterator().next();
+            unloadedModulesMods.remove(unloaded);
             if (unloaded.getCanonicalName() == null) continue;//cryptic class/anon class
-            if (modules.containsKey(unloaded)) continue;
+            if (modulesMods.containsKey(unloaded)) continue;
             count++;
         
             try {
@@ -99,17 +115,17 @@ public class ModuleRegisterer implements Module {
                     module = registerModule(unloaded);
                     if(module.disabled())
                         continue;
-                    modules.put(unloaded, module);
+                    modulesMods.put(unloaded, module);
                     ArrayList<Class<? extends ModsModule>> depend = module.dependency;
                     for (Class<? extends ModsModule> h : depend) {
                         meta.dependencies.add(h.getCanonicalName().toLowerCase(Locale.ROOT).replace(" ", "-"));
-                        if (modules.containsKey(h)) continue;
+                        if (modulesMods.containsKey(h)) continue;
                         loadedModules.add(h);
-                        unloadedModules.add(h);
+                        unloadedModulesMods.add(h);
                     }
                 
                 }else{
-                    modules.put(unloaded, null);
+                    modulesMods.put(unloaded, null);
                 }
                 meta.name = qualifiedName;
                 meta.displayName = module == stub ? "Glopion-" + unloaded.getSimpleName() + "-Disabled" : module.getName();
@@ -141,30 +157,30 @@ public class ModuleRegisterer implements Module {
             }
         }
         Log.infoTag("Glopion-Module-Register", "Registered: " + count + " modules");
-        unloadedModules = loadedModules;
+        unloadedModulesMods = loadedModules;
     }
     
     @Override
     public void init() {
         if (init) throw new RuntimeException("Init Already Loaded");
         init = true;
-        int maxIteration = unloadedModules.size() * 10;
+        int maxIteration = unloadedModulesMods.size() * 10;
         int iteration = 0;
-        ArrayList<Class<? extends ModsModule>> remaining = new ArrayList<>(unloadedModules);
+        ArrayList<Class<? extends ModsModule>> remaining = new ArrayList<>(unloadedModulesMods);
         while (!remaining.isEmpty()) {
             iteration++;
             if (iteration > maxIteration) throw new RuntimeException("Maximum Iteration Reached, Something is wrong");
             Class<? extends ModsModule> unloaded = remaining.remove(0);
-            ModsModule module = modules.get(unloaded);
+            ModsModule module = modulesMods.get(unloaded);
             if (module == null || !module.thisLoaded.missingDependencies.isEmpty()){
-                modules.remove(unloaded);
-                unloadedModules.remove(unloaded);
+                modulesMods.remove(unloaded);
+                unloadedModulesMods.remove(unloaded);
                 continue;
             }
             if (module.isLoaded()) continue;
             boolean good = module.dependencySatisfied();
             if (module.missingDependency || module.circularDependency){
-                unloadedModules.remove(unloaded);
+                unloadedModulesMods.remove(unloaded);
                 StringBuilder reason = new StringBuilder();
                 if (module.missingDependency){
                     reason.append("Missing Dependency ");
@@ -212,7 +228,7 @@ public class ModuleRegisterer implements Module {
         postInit = true;
         StringBuilder sb = new StringBuilder();
         sb.append("ModsModule: [");
-        for (Class<? extends Module> c : unloadedModules) {
+        for (Class<? extends Module> c : unloadedModulesMods) {
             sb.append(c.getSimpleName()).append(".class").append(", ");
             /*
             try {

@@ -158,7 +158,7 @@ public class Translation extends ModsModule {
     public void start() {
         super.start();
         register();
-        for (Map.Entry<Class<? extends ModsModule>, ModsModule> s : ModuleRegisterer.modules.entrySet())
+        for (Map.Entry<Class<? extends ModsModule>, ModsModule> s : ModuleRegisterer.modulesMods.entrySet())
             registerWords(s.getValue().getName());
     }
     
