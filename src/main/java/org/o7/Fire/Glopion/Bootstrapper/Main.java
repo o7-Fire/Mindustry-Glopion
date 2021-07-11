@@ -260,7 +260,7 @@ public class Main extends Plugin {
             }catch(ClassCastException ignored){}
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
-                
+                if(!mobile)
                 while (parentClasslaoder.getParent() != null && parentClasslaoder.getClass() != ModClassLoader.class)
                     parentClasslaoder = parentClasslaoder.getParent();
                 if (parentClasslaoder instanceof ModClassLoader) modClassloader = (ModClassLoader) parentClasslaoder;

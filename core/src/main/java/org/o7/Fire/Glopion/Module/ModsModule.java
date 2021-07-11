@@ -30,7 +30,7 @@ public abstract class ModsModule extends Mod implements Module {
     
     @Override
     public String getName() {
-        return "Glopion-" + Module.super.getName();
+        return "Glopion-" + getClass().getName();
     }
     
     protected boolean loaded = false;
