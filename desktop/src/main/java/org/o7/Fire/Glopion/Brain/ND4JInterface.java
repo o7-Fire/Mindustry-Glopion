@@ -16,7 +16,6 @@ public class ND4JInterface extends ModsModule {
     }
     @Override
     public void init() {
-        
         ND4JClassLoading.setNd4jClassloader(GlopionDesktop.class.getClassLoader());
         if(!Vars.headless)
         ModsMenu.add(new ND4JDialog());
