@@ -17,7 +17,7 @@ public class PlayerRecorder implements Experimental {
         int i = 0;
         for(Player p : Groups.player){
             MachineRecorder machineRecorder = new MachineRecorder(p);
-            boolean b = ModuleRegisterer.add(machineRecorder);
+            boolean b = ModuleRegisterer.add(machineRecorder) == null;
             if(b){
                 Log.info("recording @", p.name);
                 i++;
