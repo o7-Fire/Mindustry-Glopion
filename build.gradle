@@ -52,7 +52,11 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'java-library'
     apply plugin: "org.sonarqube"
-
+sonarqube {
+  properties {
+    property "sonar.projectKey", "o7-Fire_Mindustry-Glopion"
+  }
+}
     repositories {
         mavenLocal()
         mavenCentral()
