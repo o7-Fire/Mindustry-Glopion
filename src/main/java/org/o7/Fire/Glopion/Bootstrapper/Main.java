@@ -30,7 +30,7 @@ import static mindustry.Vars.mobile;
 import static org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper.*;
 
 public class Main extends Plugin {
-    public static final ArrayList<Throwable> error = new ArrayList<>();
+    public static final List<Throwable> error = new ArrayList<>();
     public static String flavor = Core.settings.getString("glopion-flavor", "Release-" + Version.buildString());
     public static String baseURL = Core.settings.getString("glopion-url", "https://raw.githubusercontent.com/o7-Fire/Mindustry-Glopion/main/");
     public static ClassLoader mainClassloader;
@@ -39,65 +39,45 @@ public class Main extends Plugin {
     public static boolean downloadThing = false;
     public static BootstrapperUI bootstrapper;
     public static Fi jar;
-    public static Main main;
+    public static String GlopionBootstrapperText = "Glopion-Bootstrapper";
     public static String classpath = "org.o7.Fire.Glopion.";
     public static String info = "None";
+    public static String glopionLoadedString = "glopion.loaded";
     
+    static {
+        classpath = classpath + flavor.split("-")[0] + "Launcher";
+        if (!Vars.headless) bootstrapper = new BootstrapperUI();
+    }
     
     public Main() {
-        if (System.getProperty("glopion.loaded", "0").equals("1")){
-            Log.errTag("Glopion-Bootstrapper", "Trying to load multiple times !!!");
+        if (System.getProperty(glopionLoadedString, "0").equals("1")){
+            Log.errTag(GlopionBootstrapperText, "Trying to load multiple times !!!");
             Log.err(new RuntimeException("Trying to load Glopion multiple times !!!"));
             try {
                 Log.errTag("Glopion-Location", Main.class.getProtectionDomain().getCodeSource().getLocation().toString());
-            }catch(NullPointerException gay){}
+            }catch(Exception ignored){
+            
+            }
             return;
         }
-        classpath = classpath + flavor.split("-")[0] + "Launcher";
+        
         Log.infoTag("Mindustry-Version", Version.buildString());
         Log.infoTag("Mindustry-Version-Combined", Version.combined());
-        Log.infoTag("Glopion-Bootstrapper", "Flavor: " + flavor);
-        Log.infoTag("Glopion-Bootstrapper", "Classpath: " + classpath);
-        Log.infoTag("Platform",SharedBootstrapper.getPlatform());
+        Log.infoTag(GlopionBootstrapperText, "Flavor: " + flavor);
+        Log.infoTag(GlopionBootstrapperText, "Classpath: " + classpath);
+        Log.infoTag("Platform", SharedBootstrapper.getPlatform());
         try {
             load();
         }catch(Throwable t){
             handleException(t);
         }
-        main = this;
-        if(!Vars.headless)
-        bootstrapper = new BootstrapperUI();
+        
         if (unloaded != null){
             try {
                 loaded = unloaded.getDeclaredConstructor().newInstance();
-            }catch(Exception e){
+            }catch(Throwable e){
                 handleException(e);
             }
-        }
-    }
-    
-    public static void registerSharedCommands(CommandHandler handler, boolean console){
-    
-    }
-    @Override
-    public void registerClientCommands(CommandHandler handler) {
-        registerSharedCommands(handler, false);
-    }
-    
-    @Override
-    public void registerServerCommands(CommandHandler handler) {
-        handler.register("glopion-bootstrapper-info","Get Bootstrapper Information",s->{
-            Log.info(info);
-        });
-        registerSharedCommands(handler, true);
-    }
-    
-    public static void disable() {
-        Mods.LoadedMod mod = Vars.mods.getMod(Main.class);
-        if (mod != null){
-            Core.settings.put("mod-" + mod.name + "-enabled", false);
-            mod.state = Mods.ModState.disabled;
-            runOnUI(() -> Vars.ui.showInfo("Bootstrapper Disabled"));
         }
     }
     
@@ -132,10 +112,10 @@ public class Main extends Plugin {
                 sizeList.put(s.getKey(), size);
             }
             Log.info("Downloading: " + s.getKey());
-            if (!yesToAll) if (Core.settings.getString(s.getKey()) != null) continue;
+            if (!yesToAll && Core.settings.getString(s.getKey()) != null) continue;
             if (Vars.headless){
-                Log.infoTag("Downloader",s.getKey() + " " + (size == null ? "" : size));
-                BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> { }, Throwable::printStackTrace);
+                Log.infoTag("Downloader", s.getKey() + " " + size);
+                BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> { }, Main::handleException);
             }else{
                 Runnable run = () -> BootstrapperUI.downloadGUI(url.toExternalForm(), new Fi(s.getValue()), () -> {
                     downloadLibrary0(iterator, yesToAll);
@@ -163,80 +143,31 @@ public class Main extends Plugin {
         
     }
     
-    public static void forgetSkip(){
-        for (Map.Entry<String, File> s : downloadFile.entrySet())
-            Core.settings.remove(s.getKey());
-    }
-    
-    public static void downloadLibrary() {
-        long totalSize = 0, totalDownload = 0;
-        TreeMap<String, File> list = new TreeMap<>();
-        for (Map.Entry<String, File> s : downloadFile.entrySet()) {
-            if (!s.getValue().exists() && Core.settings.get(s.getKey(), null) == null){
-                list.put(s.getKey(), s.getValue());
-                Long l = sizeLongList.get(s.getKey());
-                if (l != null){
-                    totalSize = totalSize + l;
-                }
-                totalDownload++;
-            }
-        }
-        if(list.size() == 0)return;
-        String info = "Some library may platform dependent, you can skip it\n" + totalDownload + " Library Total\n Size Total: " + SharedBootstrapper.humanReadableByteCountSI(totalSize);
-        final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
-        if (Vars.headless){
-            Log.infoTag("Dependency-Downloader",info);
-            Core.app.post(() -> downloadLibrary0(iterator, true));
-        }else{
-            long finalTotalDownload = totalDownload;
-            long finalTotalSize = totalSize;
-            Main.runOnUI(() -> {
-                BaseDialog dialog = new BaseDialog("Download Library");
-                dialog.cont.add(info).width(mobile ? 400f : 500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
-                dialog.buttons.defaults().size(200f, 54f).pad(2f);
-                dialog.setFillParent(false);
-                dialog.buttons.button("Skip to all", () -> {
-                    while (iterator.hasNext()) Core.settings.put(iterator.next().getKey(), "skip");
-                    dialog.hide();
-                });
-                dialog.buttons.button("Yes", () -> {
-                    dialog.hide();
-                    Threads.daemon(() -> downloadLibrary0(iterator, false));
-                });
-                dialog.buttons.button("Yes to all", () -> {
-                    dialog.hide();
-                    Threads.daemon(() -> downloadLibrary0(iterator, true));
-                });
-                dialog.keyDown(KeyCode.escape, dialog::hide);
-                dialog.keyDown(KeyCode.back, dialog::hide);
-                dialog.show();
-            });
+    public static void disable() {
+        Mods.LoadedMod mod = Vars.mods.getMod(Main.class);
+        if (mod != null){
+            Core.settings.put("mod-" + mod.name + "-enabled", false);
+            mod.state = Mods.ModState.disabled;
+            runOnUI(() -> Vars.ui.showInfo("Bootstrapper Disabled"));
         }
     }
     
-    public static Fi getFlavorJar(String flavor) {
-        String path = flavor.replace('-', '/') + ".jar";
-        return Core.files.cache(path);
-    }
-    public static ClassLoader //
-            parentClasslaoder = Main.class.getClassLoader(),//if development enviroment then its system else Platform.loadjar
-            platformClassloader = null, //Glopion instance classloader, handled by mindustry
-            dependencyClassloader = null;//Glopion desktop only, override everything when its not development enviroment
-    public static ModClassLoader modClassloader = new ModClassLoader(parentClasslaoder);
     public static void load() {
-        if (System.getProperty("glopion.loaded", "0").equals("1")){
-            Log.errTag("Glopion-Bootstrapper", "Trying to load multiple times !!!");
+        if (System.getProperty(glopionLoadedString, "0").equals("1")){
+            Log.errTag(GlopionBootstrapperText, "Trying to load multiple times !!!");
             return;
         }
-        System.setProperty("glopion.loaded", "1");
+        System.setProperty(glopionLoadedString, "1");
         jar = getFlavorJar(flavor);
         SharedBootstrapper.parent = Core.files.cache("libs").file();
         boolean classExist = false;
-        try{
+        try {
             classExist = Main.class.getClassLoader().getResourceAsStream(classpath.replace('.', '/') + ".class") != null;
-        }catch(Throwable ignored){}
+        }catch(Exception ignored){
+        
+        }
         if (classExist){
-            Log.infoTag("Glopion-Bootstrapper", "Found in classpath, loading from classpath");
+            Log.infoTag(GlopionBootstrapperText, "Found in classpath, loading from classpath");
             InputStream is = Main.class.getClassLoader().getResourceAsStream("dependencies");
             if (is != null){
                 Log.info("found dependencies list");
@@ -249,22 +180,20 @@ public class Main extends Plugin {
             }
         }
         if (jar.exists() || classExist){
-            Log.infoTag("Glopion-Bootstrapper", "Loading: " + jar.absolutePath());
-            //TODO handle development enviroment classpath, URL classpath for dependency,
-            Seq<URL> urls = new Seq<>();
+            Log.infoTag(GlopionBootstrapperText, "Loading: " + jar.absolutePath());
     
-            
-        
-            try{
+            Seq<URL> urls = new Seq<>();
+            try {
                 modClassloader = (ModClassLoader) Vars.mods.mainLoader();
             }catch(ClassCastException ignored){}
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
-                if(!mobile)
-                while (parentClasslaoder.getParent() != null && parentClasslaoder.getClass() != ModClassLoader.class)
-                    parentClasslaoder = parentClasslaoder.getParent();
+                if (!mobile){
+                    while (parentClasslaoder.getParent() != null && parentClasslaoder.getClass() != ModClassLoader.class)
+                        parentClasslaoder = parentClasslaoder.getParent();
+                }
                 if (parentClasslaoder instanceof ModClassLoader) modClassloader = (ModClassLoader) parentClasslaoder;
-                if(!Vars.android){
+                if (!Vars.android){
                     //forbidden pacakage name "java", wait how bootstrapper (bootstrapper.jar) manage to load
                     platformClassloader = new URLClassLoader(new URL[]{jar.file().toURI().toURL()}, parentClasslaoder);
                 }else{
@@ -304,14 +233,14 @@ public class Main extends Plugin {
                         //modClassloader.addChild(dependencyClassloader);
                     }
                 }
-                Log.infoTag("Glopion-Bootstrapper", "Parent: " + parentClasslaoder.getClass().getSimpleName());
+                Log.infoTag(GlopionBootstrapperText, "Parent: " + parentClasslaoder.getClass().getSimpleName());
             }catch(Throwable e){
                 handleException(e);
             }
             
             if (mainClassloader != null) try {
                 modClassloader.addChild(mainClassloader);
-                Log.infoTag("Glopion-Bootstrapper", "Main: " + mainClassloader.getClass().getSimpleName());
+                Log.infoTag(GlopionBootstrapperText, "Main: " + mainClassloader.getClass().getSimpleName());
                 unloaded = (Class<? extends Mod>) Class.forName(classpath, true, mainClassloader);
             }catch(Throwable e){
                 handleException(e);
@@ -323,6 +252,7 @@ public class Main extends Plugin {
             }catch(Throwable e){
                 atomExist = e.getMessage();
             }
+    
             StringBuilder sb = new StringBuilder().append("Class: ").append(unloaded).append("\n");
             sb.append("Flavor: ").append(flavor).append("\n");
             sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
@@ -348,13 +278,83 @@ public class Main extends Plugin {
         
     }
     
+    public static void forgetSkip() {
+        for (Map.Entry<String, File> s : downloadFile.entrySet())
+            Core.settings.remove(s.getKey());
+    }
+    
+    public static void downloadLibrary() {
+        long totalSize = 0, totalDownload = 0;
+        TreeMap<String, File> list = new TreeMap<>();
+        for (Map.Entry<String, File> s : downloadFile.entrySet()) {
+            if (!s.getValue().exists() && Core.settings.get(s.getKey(), null) == null){
+                list.put(s.getKey(), s.getValue());
+                Long l = sizeLongList.get(s.getKey());
+                if (l != null){
+                    totalSize = totalSize + l;
+                }
+                totalDownload++;
+            }
+        }
+        if (list.size() == 0) return;
+        String info = "Some library may platform dependent, you can skip it\n" + totalDownload + " Library Total\n Size Total: " + SharedBootstrapper.humanReadableByteCountSI(totalSize);
+        final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
+        if (Vars.headless){
+            Log.infoTag("Dependency-Downloader", info);
+            Core.app.post(() -> downloadLibrary0(iterator, true));
+        }else{
+            long finalTotalDownload = totalDownload;
+            long finalTotalSize = totalSize;
+            Main.runOnUI(() -> {
+                BaseDialog dialog = new BaseDialog("Download Library");
+                dialog.cont.add(info).width(mobile ? 400f : 500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
+                dialog.buttons.defaults().size(200f, 54f).pad(2f);
+                dialog.setFillParent(false);
+                dialog.buttons.button("Skip to all", () -> {
+                    while (iterator.hasNext()) Core.settings.put(iterator.next().getKey(), "skip");
+                    dialog.hide();
+                });
+                dialog.buttons.button("Yes", () -> {
+                    dialog.hide();
+                    Threads.daemon(() -> downloadLibrary0(iterator, false));
+                });
+                dialog.buttons.button("Yes to all", () -> {
+                    dialog.hide();
+                    Threads.daemon(() -> downloadLibrary0(iterator, true));
+                });
+                dialog.keyDown(KeyCode.escape, dialog::hide);
+                dialog.keyDown(KeyCode.back, dialog::hide);
+                dialog.show();
+            });
+        }
+    }
+    
+    public static Fi getFlavorJar(String flavor) {
+        String path = flavor.replace('-', '/') + ".jar";
+        return Core.files.cache(path);
+    }
+    
+    public static ClassLoader //
+            parentClasslaoder = Main.class.getClassLoader(),//if development enviroment then its system else Platform.loadjar
+            platformClassloader = null, //Glopion instance classloader, handled by mindustry
+            dependencyClassloader = null;//Glopion desktop only, override everything when its not development enviroment
+    public static ModClassLoader modClassloader = new ModClassLoader(parentClasslaoder);
     
     public static void handleException(Throwable e) {
+        if (e instanceof VirtualMachineError) throw ((VirtualMachineError) e);
         e.printStackTrace();
         error.add(e);
-        Log.errTag("Glopion-Bootstrapper", e.toString());
+        Log.errTag(GlopionBootstrapperText, e.toString());
         runOnUI(() -> Vars.ui.showException("Glopion-Bootstrapper Failed To Load", e));
         
+        
+    }
+    
+    @Override
+    public void registerServerCommands(CommandHandler handler) {
+        handler.register("glopion-bootstrapper-info", "Get Bootstrapper Information", s -> {
+            Log.info(info);
+        });
         
     }
     
@@ -372,7 +372,7 @@ public class Main extends Plugin {
             bootstrapper.init();
         if (loaded != null) try {
             loaded.init();
-        }catch(Exception e){
+        }catch(Throwable e){
             handleException(e);
         }
     }
