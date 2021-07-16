@@ -48,7 +48,7 @@ static File getLatestFolder(File fe){
     return f.get(f.size() - 1);
 }
 
-allprojects
+allprojects{
 buildscript {
     repositories {//more than you need
         mavenLocal()
