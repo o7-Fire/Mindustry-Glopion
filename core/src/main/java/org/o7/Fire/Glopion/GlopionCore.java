@@ -1,17 +1,13 @@
 package org.o7.Fire.Glopion;
 
 import Atom.Reflect.Reflect;
-import Atom.String.WordGenerator;
 import Atom.Utility.Pool;
-import Atom.Utility.Utility;
 import arc.Core;
 import arc.util.Log;
-import mindustry.Vars;
 import mindustry.mod.Mod;
 import mindustry.mod.Plugin;
 import org.o7.Fire.Glopion.Control.GlopionControl;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
-import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
@@ -29,15 +25,17 @@ public class GlopionCore extends Plugin implements Module {
     public static boolean test;
     //public static CommandsListFrag commFrag;
     public static WorldInformation worldInformation;
-    public static boolean colorPatchSettings;
     public static Class<? extends Mod> mainClass = GlopionCore.class;
-    public static boolean blockDebugSettings;
+    public static boolean blockDebugSettings, machineVisualizeRenderSettings, colorPatchSettings, debugSettings;
     public static ModuleRegisterer moduleRegisterer;
     public static HudMenu glopionHud;
     public static AtomicDialog machineInformation;
-    public static boolean machineVisualizeRenderSettings;
-   
+    
     static {
+        if (debugSettings && Reflect.debug){
+            Reflect.DEBUG_TYPE = Reflect.DebugType.UserPreference;
+            Reflect.debug = true;
+        }
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);

@@ -1,6 +1,7 @@
+package org.o7.Fire.Glopion.Trash;
+
 import org.o7.Fire.Glopion.Brain.NeuralFunction;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class Sort {

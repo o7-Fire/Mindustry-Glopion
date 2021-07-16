@@ -21,14 +21,18 @@ import rhino.Context;
 public class MindustryLauncher {
   
     public static void main(String[] args) {
+        if (System.getProperty("dev-user") != null){
+            Reflect.DEBUG_TYPE = Reflect.DebugType.UserPreference;
+            Reflect.debug = true;
+        }
+    
         if (System.getProperty("dev") != null){
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
             Reflect.debug = true;
-            
         }
-      
-        if(Reflect.debug){
-            System.out.println("Mindustry Jar Classloader: "+MindustryLauncher.class.getClassLoader().getClass().getCanonicalName());
+    
+        if (Reflect.debug){
+            System.out.println("Mindustry Jar Classloader: " + MindustryLauncher.class.getClassLoader().getClass().getCanonicalName());
             System.out.println("Current Jar Classloader: " + ModClassLoader.class.getClassLoader().getClass().getCanonicalName());
             registerPatcher();
         }

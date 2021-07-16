@@ -1,9 +1,9 @@
+package org.o7.Fire.Glopion.Trash;
+
 import Atom.Reflect.UnThread;
 import Atom.Time.Time;
-import Atom.Utility.Meth;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
-import arc.math.Mathf;
 import com.google.gson.Gson;
 import org.o7.Fire.Glopion.Brain.TrainingJeneticData;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class test {
     public static final ArrayList<Time> measurement = new ArrayList<>();
+    
     public static void main(String[] args) throws Throwable{
         Time time = new Time(TimeUnit.MILLISECONDS);
         Runnable r = ()->{
