@@ -17,8 +17,8 @@ buildscript {
         }
     }
 
-    dependencies{
-        classpath ("com.github.Anuken.Arc:arc-core:$arcHash")//why not
+    dependencies {
+        classpath("com.github.Anuken.Arc:arc-core:$arcHash")//why not
     }
 
 }
@@ -27,16 +27,14 @@ apply plugin: 'java'
 apply plugin: 'java-library'
 
 
-
 sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_1_8
 
 
-
 //github CI don't sort folder by default
-static File getLatestFolder(File fe){
+static File getLatestFolder(File fe) {
     ArrayList<File> f = new ArrayList<>();
-    if(!fe.exists())throw new FileNotFoundException(fe.getAbsolutePath());
+    if (!fe.exists()) throw new FileNotFoundException(fe.getAbsolutePath());
     File[] files = fe.listFiles();
     f.addAll(Arrays.asList(files));
     f.sort(new Comparator<File>() {
@@ -48,25 +46,25 @@ static File getLatestFolder(File fe){
     return f.get(f.size() - 1);
 }
 
-allprojects{
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
-        maven { url 'https://jitpack.io' }
-        google()
-        maven {
-            url "https://plugins.gradle.org/m2/"
+allprojects {
+    buildscript {
+        repositories {
+            mavenLocal()
+            mavenCentral()
+            maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+            maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+            maven { url 'https://jitpack.io' }
+            google()
+            maven {
+                url "https://plugins.gradle.org/m2/"
+            }
         }
-    }
 
-    dependencies{
-        classpath ("com.github.Anuken.Arc:arc-core:$arcHash")//why not
-    }
+        dependencies {
+            classpath("com.github.Anuken.Arc:arc-core:$arcHash")//why not
+        }
 
-}
+    }
     apply plugin: 'java'
     apply plugin: 'java-library'
     plugins {
@@ -84,43 +82,46 @@ buildscript {
     ext.atomModule = { String module ->
         boolean b = new File(rootDir, '../Atom').exists()
         b = false
-        if(b){
-            return project(":Atom"+module)
+        if (b) {
+            return project(":Atom" + module)
         } else {
             return "com.github.o7-Fire.Atomic-Library$module:$atomHash"
         }
     }
     ext.aproj = { String module ->
-        if(findProject(module) != null){
+        if (findProject(module) != null) {
             return project(module)
-        }else{return project(":"+ modsNname + module)}
+        } else {
+            return project(":" + modsNname + module)
+        }
     }
     ext {
         try {
             System.properties.load(new FileReader("gradle.properties"))
             System.properties.load(new FileReader("local.properties"))
-        }catch(ignored){}
+        } catch (ignored) {
+        }
         //System.out.println(System.getProperty("modsNBE"))
         //automatically detect latest shit and skipping it if doesn't exists
         //export ANDROID_HOME=~/android-sdk
         isRunner = System.getProperty("user.name").equals("runner")
         sdkRoot = System.getenv("ANDROID_HOME")//or just replace it by direct path if you don't need github
-        if(sdkRoot == null)
+        if (sdkRoot == null)
             sdkRoot = new File("SDK").getAbsolutePath()
         sdkD8 = sdkRoot + "nope"
         sdkJar = sdkRoot + "nope"//nopped in case folder didn't exist
         sdkRootf = new File(sdkRoot)
-        if(sdkRootf.exists()) {
+        if (sdkRootf.exists()) {
             try {
                 sdkD8 = new File(getLatestFolder(new File(sdkRootf, 'build-tools/')), "d8").getAbsolutePath()
                 sdkJar = new File(getLatestFolder(new File(sdkRootf, "platforms/")), "android.jar").getAbsolutePath()
-            }catch(ignored){
+            } catch (ignored) {
                 //FileNotFoundException
             }
         }
-        if(!new File(sdkJar).exists())//redundant ?
+        if (!new File(sdkJar).exists())//redundant ?
             sdkJar = new File(sdkRoot, "nope").getAbsolutePath()
-        if(!new File(sdkD8).exists())
+        if (!new File(sdkD8).exists())
             sdkD8 = new File(sdkRoot, "nope").getAbsolutePath()
         mindustryExecutable = getMindustryFile()
         mindustryServerExecutable = getMindustryServerFile()
@@ -132,31 +133,30 @@ buildscript {
         modhjson += 'author: "' + modsNauthor + '"\n'
         modhjson += 'main: "' + modsNmain + '"\n'
         modhjson += 'minGameVersion: ' + modsNminMindustryVersion + '\n'
-        modhjson += "version: " + modsNversion +"\n"
+        modhjson += "version: " + modsNversion + "\n"
         modhjson += 'hidden: ' + modsNsupportVanillaServer + '\n'
         githubRepoExist = false
-        if(project.hasProperty("githubRepo"))//supplied by workflow runner (gradle.yml)  -PgithubRepo="$GITHUB_REPOSITORY"
+        if (project.hasProperty("githubRepo"))//supplied by workflow runner (gradle.yml)  -PgithubRepo="$GITHUB_REPOSITORY"
         {
             githubRepoExist = true
             modhjson += 'repo: \"' + githubRepo + '\" \n'
-        }
-        else
+        } else
             modhjson += 'repo: "' + modsNrepo + '"\n'
 
 
         //From Root to every project
-        dependencies{
+        dependencies {
             //
-            def be = System.getProperty("modsNBE")  != null && !System.getProperty("modsNBE").isEmpty()
-            if(be) {
+            def be = System.getProperty("modsNBE") != null && !System.getProperty("modsNBE").isEmpty()
+            if (be) {
                 downloadMindustry(getMindustryURL(), getMindustryFile());
             }
             File mindustry = file(mindustryExecutable)
-            if(be && mindustry.exists()) {
+            if (be && mindustry.exists()) {
                 compileOnly(files(mindustry))
                 //testCompileOnly(files(mindustry))
-               testImplementation(files(mindustry))
-            }else {//if you feel fancy remove this else
+                testImplementation(files(mindustry))
+            } else {//if you feel fancy remove this else
                 compileOnly("com.github.Anuken.Mindustry:desktop:$mindustryHash")
                 compileOnly("com.github.Anuken.Arc:arc-core:$arcHash")
                 compileOnly("com.github.Anuken.Arc:backend-sdl:$arcHash")
@@ -165,7 +165,7 @@ buildscript {
             compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
 
         }
-        tasks.withType(JavaCompile){
+        tasks.withType(JavaCompile) {
             options.encoding = "UTF-8"
             options.compilerArgs += ["-Xlint:deprecation", "-g"]
 
@@ -174,8 +174,8 @@ buildscript {
                     '--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED'
             ])
         }
-        tasks.withType(Javadoc){
-            options{
+        tasks.withType(Javadoc) {
+            options {
                 addStringOption('Xdoclint:none', '-quiet')
                 addStringOption('-release', '16')
             }
@@ -184,7 +184,7 @@ buildscript {
 }
 subprojects {
 
-    dependencies{
+    dependencies {
         testImplementation(files(mindustryExecutable))
         testImplementation(files(mindustryServerExecutable))
         testImplementation(rootProject)
@@ -193,7 +193,7 @@ subprojects {
     }
 
 }
-ext{
+ext {
     println System.getenv("ANDROID_HOME") == null ? "Android SDK doesn't exist" : "Android SDK exist"
     //rewrite mod.hjson everytime gradle rollin
     //println System.getenv("ANDROID_HOME")
@@ -205,9 +205,9 @@ ext{
     }
     File props = new File(projectDir, 'gradle.properties')
     File atom = new File(projectDir, '../Atom')
-    if(atom.exists() && props.exists()) {
+    if (atom.exists() && props.exists()) {
         String s = new String(Runtime.getRuntime().exec("git rev-parse HEAD", new String[0], atom).getInputStream().readAllBytes()).trim();
-        if(s != atomHash) {
+        if (s != atomHash) {
             Properties properties = new Properties()
             StringWriter writer = new StringWriter();
             properties.load(props.toURI().toURL().openStream());
@@ -225,11 +225,12 @@ dependencies {
 
 //make .class jar with executable main and MANIFEST.MF
 //your typical jar
-task base(type: Jar){
+task base(type: Jar) {
     archiveFileName = modsNname + ".jar"//Mindustry-Glopion,jar
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+//Runtime library only, compile library like arc won't get included
     }
     with jar//what is this
     manifest {
@@ -239,7 +240,7 @@ task base(type: Jar){
     }
 
 
-    from(rootDir){
+    from(rootDir) {
         include "mod.hjson"//assuming the rootdir is actually current folder
         include "icon.png"
     }
@@ -251,14 +252,16 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 //not jar task
 //just handle making dexed jar after making typical jar
-task baseJar(type: Jar){
+task baseJar(type: Jar) {
     dependsOn base//typical jar
 
     //collect dependencies needed for desugaring
-    if(new File(sdkD8).exists()) {
-        def files = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(sdkJar)])//all dependency go
+    if (new File(sdkD8).exists()) {
+        def files = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(sdkJar)])
+//all dependency go
         def dependencies = files.collect { "--classpath $it.path" }.join(" ")//argument builder
-        def cmd = "${sdkD8} $dependencies --min-api ${minAndroidApi} --output Dex.jar ${modsNname}.jar"//should output Dex.jar from Mindustry-Glopion.jar
+        def cmd = "${sdkD8} $dependencies --min-api ${minAndroidApi} --output Dex.jar ${modsNname}.jar"
+//should output Dex.jar from Mindustry-Glopion.jar
         def dir = new File(projectDir, "build/libs/");
         dir.mkdirs()//cuz sike, file not found exception
         doLast {
@@ -267,7 +270,7 @@ task baseJar(type: Jar){
                 Runtime.getRuntime().exec(cmd, new String[0], dir).waitForProcessOutput(System.out, System.err)
             }
         }
-    }else {
+    } else {
         println "No sdkD8 detected on ANDROID_HOME, skipping desugaring"//y not
     }
 }
@@ -278,14 +281,14 @@ tasks.withType(JavaCompile) {
 //here we combine typical jar and dex jar to make
 //typical-dex.jar
 //if android sdk exist
-task makeJar(type: Jar){
+task makeJar(type: Jar) {
     dependsOn baseJar//dex jar
     manifest {
         attributes(
                 'Main-Class': modsNJavaMain
         )
     }
-    if(new File(sdkD8).exists()) {//some people don't have android SDK
+    if (new File(sdkD8).exists()) {//some people don't have android SDK
         archiveFileName = modsNname + "-Dexed.jar"
 
         duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
@@ -294,7 +297,7 @@ task makeJar(type: Jar){
                 zipTree(new File(projectDir, "build/libs/Dex.jar"))//include Dex.jar
             }
         }
-    }else {
+    } else {
         println "No sdkD8 detected on ANDROID_HOME, skipping making Combined Dex-Class Jar"
     }
     from() {
@@ -331,9 +334,9 @@ artifacts {
 
 //h
 //add progress bar
-static void downloadMindustry(URL url, File download){
+static void downloadMindustry(URL url, File download) {
     download.getParentFile().mkdirs();
-    if(download.exists())return ;
+    if (download.exists()) return;
     System.out.println("Downloading: " + url.toString());
 
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -345,10 +348,10 @@ static void downloadMindustry(URL url, File download){
     byte[] buffer = new byte[4096];
     long nextLog = System.currentTimeMillis() + 4000
     long readed = 0;
-    while((bytesRead = input.read(buffer)) != -1){
+    while ((bytesRead = input.read(buffer)) != -1) {
         readed += bytesRead;
         output.write(buffer, 0, bytesRead);
-        if(System.currentTimeMillis() > nextLog) {
+        if (System.currentTimeMillis() > nextLog) {
             System.out.println(readed / 1_000_000)
             nextLog = System.currentTimeMillis() + 4000
         }
@@ -357,54 +360,55 @@ static void downloadMindustry(URL url, File download){
 
 }
 //don't crash
-static void copyToMindustry(File f){
+static void copyToMindustry(File f) {
     File target = new File(OS.getAppDataDirectoryString("Mindustry"))
     target = new File(target, "mods")
     target = new File(target, f.getName())
     target.getParentFile().mkdirs()
-    System.out.println("Copying: " + f.getAbsolutePath() + " to "+ target.getAbsolutePath());
+    System.out.println("Copying: " + f.getAbsolutePath() + " to " + target.getAbsolutePath());
     Files.copy(f.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 }
-static URL getMindustryServerURL(){
-    if(System.getProperty("modsNBE", null) != null) {
+
+static URL getMindustryServerURL() {
+    if (System.getProperty("modsNBE", null) != null) {
         String h = System.getProperty("modsNBE");
-        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/"+h+"/Mindustry-BE-Server-"+h+".jar")
+        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/" + h + "/Mindustry-BE-Server-" + h + ".jar")
     }
     return new URL("https://github.com/Anuken/Mindustry/releases/download/" + System.getProperty("mindustryHash") + "/server-release.jar");
 }
 
-static File getMindustryServerFile(){
+static File getMindustryServerFile() {
     URL u = getMindustryServerURL()
     File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
     return mindustry.getAbsoluteFile();
 }
 
-static URL getMindustryURL(){
-    if(System.getProperty("modsNBE", null) != null) {
+static URL getMindustryURL() {
+    if (System.getProperty("modsNBE", null) != null) {
         String h = System.getProperty("modsNBE");
-        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/"+h+"/Mindustry-BE-Desktop-"+h+".jar")
+        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/" + h + "/Mindustry-BE-Desktop-" + h + ".jar")
     }
     return new URL("https://github.com/Anuken/Mindustry/releases/download/" + System.getProperty("mindustryHash") + "/Mindustry.jar");
 }
 
-static File getMindustryFile(){
+static File getMindustryFile() {
     URL u = getMindustryURL()
     File mindustry = new File(new File(new File(OS.getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
     return mindustry.getAbsoluteFile();
 }
 
 //how lazy to download this
-task download(){
-    doLast{
+task download() {
+    doLast {
         downloadMindustry(getMindustryServerURL(), getMindustryServerFile());
         downloadMindustry(getMindustryURL(), getMindustryFile());
     }
 }
 //don't want open file manager
-task copyMods(){
+task copyMods() {
     dependsOn base//you don't need dex jar for pc
-    doLast{
-        copyToMindustry(new File(new File(projectDir.toString()), "build/libs/"+modsNname+".jar"))
+    doLast {
+        copyToMindustry(new File(new File(projectDir.toString()), "build/libs/" + modsNname + ".jar"))
     }
 }
 //java -jar Mindustry.jar
@@ -418,11 +422,11 @@ task run(type: JavaExec) {
     //classpath += sourceSets.main.runtimeClasspath//will append classpath to java
     main = "mindustry.desktop.DesktopLauncher"
 }
-task resolveDependencies{
-    doLast{
-        rootProject.allprojects{ project ->
+task resolveDependencies {
+    doLast {
+        rootProject.allprojects { project ->
             Set<Configuration> configurations = project.buildscript.configurations + project.configurations
-            configurations.findAll{c -> c.canBeResolved}.forEach{c -> c.resolve()}
+            configurations.findAll { c -> c.canBeResolved }.forEach { c -> c.resolve() }
         }
     }
 }
