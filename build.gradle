@@ -51,6 +51,9 @@ static File getLatestFolder(File fe){
 allprojects {
     apply plugin: 'java'
     apply plugin: 'java-library'
+    plugins {
+        id "org.sonarqube" version "3.3"
+    }
     repositories {
         mavenLocal()
         mavenCentral()
@@ -283,11 +286,23 @@ task makeJar(type: Jar){
 //TODO add more dependsOn
 //if you have multiple version of mods
 
+task runTest(type: JavaExec) {
+    File mindustry = getMindustryFile()
+    println(mindustry.getAbsolutePath())
+    classpath = files(mindustry.getAbsolutePath())
+    classpath += project.sourceSets.main.runtimeClasspath//will append classpath to java
+    main = "test"
+
+}
+
 task deploy {
     dependsOn makeJar
     dependsOn ":core:makeJar"
     dependsOn ":desktop:base"
     dependsOn ":desktop:unVersion"
+    dependsOn test
+    dependsOn ":core:test"
+    dependsOn ":desktop:test"
 }
 
 //need this for jitpack, so i can read mods source code without using browser

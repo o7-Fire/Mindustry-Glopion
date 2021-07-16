@@ -1,6 +1,11 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
+    branches:
+      - master # or the name of your main branch
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
  Build-Test-Release:
@@ -37,7 +42,11 @@ jobs:
       run: ./gradlew desktop:writeDependency
     #Build all mods
     - name: Build bootstrapper jar
-      run: ./gradlew deploy -PgithubRepo="$GITHUB_REPOSITORY"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      run: ./gradlew deploy sonarqube -PgithubRepo="$GITHUB_REPOSITORY" --info
 
     - name: Remove Old Release Drafts
       env:
