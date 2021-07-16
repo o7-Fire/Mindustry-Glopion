@@ -48,7 +48,25 @@ static File getLatestFolder(File fe){
     return f.get(f.size() - 1);
 }
 
-allprojects {
+allprojects
+buildscript {
+    repositories {//more than you need
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url 'https://jitpack.io' }
+        google()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies{
+        classpath ("com.github.Anuken.Arc:arc-core:$arcHash")//why not
+    }
+
+}
     apply plugin: 'java'
     apply plugin: 'java-library'
     plugins {
