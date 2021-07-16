@@ -7,6 +7,7 @@
 ![](https://img.shields.io/github/repo-size/o7-Fire/Mindustry-Glopion)
 ![](https://sonar.o7fire.ml/api/project_badges/measure?project=com.o7.Fire.Glopion%3AMindustry-Glopion&metric=alert_status)
 
+
 ~~ozone with extra/less step~~
 ### Breaking News: ~~Drama~~ Crime In Progress
 # Work In Progress (brb in 1 years)
