@@ -1,19 +1,17 @@
 package org.o7.Fire.Glopion;
 
+import Atom.Reflect.Reflect;
 import arc.Core;
-import arc.Events;
 import arc.util.Log;
-import arc.util.Time;
 import arc.util.async.Threads;
 import mindustry.Vars;
-import mindustry.game.EventType;
-import org.bytedeco.javacpp.Loader;
 import org.o7.Fire.Glopion.Patch.Translation;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
 
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GlopionDesktop extends GlopionCore {
@@ -35,17 +33,27 @@ public class GlopionDesktop extends GlopionCore {
                 Log.infoTag("DeepPatch", "Entering DeepPatch");
                 URL[] urls = ((URLClassLoader) GlopionDesktop.class.getClassLoader()).getURLs();
                 StringBuilder classPath = new StringBuilder(System.getProperty("java.class.path"));
-                for(URL u : urls)
+                for (URL u : urls)
                     classPath.append(File.pathSeparator).append(u.getFile());
                 File javaBin = new File(System.getProperty("java.home") + "/bin/java");
                 String java = "java";
                 if (javaBin.exists()) java = javaBin.getAbsolutePath();
-                String[] cmd = new String[]{java, "-Dglopion-deepPatch=1", "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Run" + (Vars.headless ? "$Server" : "")};
+                ArrayList<String> arg = new ArrayList<>();
+                arg.add(java);
+                if (Reflect.DEBUG_TYPE == Reflect.DebugType.UserPreference){
+                    arg.add("-Ddev-user=1");
+                }
+                arg.add("-Dglopion-deepPatch=1");
+                arg.add("-cr");
+                arg.add(classPath.toString());
+                arg.add("org.o7.Fire.Glopion.Premain.Run" + (Vars.headless ? "$Server" : ""));
+                String[] cmd = new String[5];
+                cmd = arg.toArray(cmd);
                 Log.info(Arrays.toString(cmd));
                 new ProcessBuilder(cmd).inheritIO().start();
-                Threads.daemon(()->{
+                Threads.daemon(() -> {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(1000);//wait until child process spawned
                     }catch(InterruptedException e){
                     }
                     Core.app.exit();

@@ -1,3 +1,5 @@
+package org.o7.Fire.Glopion.Trash;
+
 import Atom.Time.Time;
 import com.aparapi.Kernel;
 import com.aparapi.device.Device;
@@ -10,14 +12,16 @@ import java.util.concurrent.TimeUnit;
 public class Aparapi extends Kernel{
     public static int x = 5, y = 5;
     public static final int[][] matrix= new int[x][y], output = new int[x][y];
+    
     @Override
     public void run() {
         int x = getGlobalId(0);
         int y = getGlobalId(1);
         output[x][y] = matrix[x][y] * matrix[x][y] * matrix[x][y];
     }
+    
     public static void main(String[] args) {
-   
+        
         for (int[] vector: matrix){
             NeuralFunction.assignRandom(vector);
         }
