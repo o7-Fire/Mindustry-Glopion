@@ -50,7 +50,7 @@ static File getLatestFolder(File fe){
 
 allprojects{
 buildscript {
-    repositories {//more than you need
+    repositories {
         mavenLocal()
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
