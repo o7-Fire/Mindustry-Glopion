@@ -304,9 +304,7 @@ task deploy {
     dependsOn ":core:makeJar"
     dependsOn ":desktop:base"
     dependsOn ":desktop:unVersion"
-    dependsOn test
-    dependsOn ":core:test"
-    dependsOn ":desktop:test"
+
 }
 
 //need this for jitpack, so i can read mods source code without using browser
