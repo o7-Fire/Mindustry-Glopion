@@ -4,6 +4,7 @@
 ![](https://img.shields.io/github/v/release/Anuken/Mindustry?label=Mindustry-Latest)
 ![](https://img.shields.io/badge/java-11-orange)
 ![](https://img.shields.io/badge/Android%20API-14-blue)
+![](https://img.shields.io/github/repo-size/o7-Fire/Mindustry-Glopion)
 
 ~~ozone with extra/less step~~
 ### Breaking News: ~~Drama~~ Crime In Progress
