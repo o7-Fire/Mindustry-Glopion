@@ -4,6 +4,9 @@ on:
   release:
     types:
       - created
+      - published
+      - unpublished
+      - edited
   pull_request:
     types: [opened, synchronize, reopened]
 
