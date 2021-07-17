@@ -1,0 +1,50 @@
+name: Java CI
+
+on:
+  release:
+    types:
+      - created
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+ Build-Release:
+    runs-on: ubuntu-latest
+    steps:
+     # Check out current repository
+    - name: Fetch Sources
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Gradle Validation
+      uses: gradle/wrapper-validation-action@v1
+    - name: Set up JDK 16
+      uses: actions/setup-java@v1
+      with:
+        java-version: 16
+    #when you don't
+    - name: Change wrapper permissions
+      run: chmod +x ./gradlew
+
+    # Cache Gradle dependencies
+    - name: Setup Gradle Dependencies Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties') }}
+
+    # Cache Gradle Wrapper
+    - name: Setup Gradle Wrapper Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+
+
+    - name: Gradle Test Coverage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      run: ./gradlew deploy sonarqube -PgithubRepo="$GITHUB_REPOSITORY" --info
+
