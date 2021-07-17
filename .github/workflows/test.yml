@@ -27,8 +27,15 @@ jobs:
         java-version: 16
     #when you don't
     - name: Change wrapper permissions
-      run: chmod +x ./gradlew
-
+      run: chmod +x ./gradlew     
+    # Sonarqube Cache
+    - name: Cache SonarQube packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+        
     # Cache Gradle dependencies
     - name: Setup Gradle Dependencies Cache
       uses: actions/cache@v2
