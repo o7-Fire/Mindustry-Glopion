@@ -7,8 +7,9 @@ on:
       - published
       - unpublished
       - edited
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+
 
 jobs:
  Build-Release:
