@@ -64,10 +64,7 @@ public class Java {
         for (File f : SharedBootstrapper.getFiles())
             classPath.append(File.pathSeparator).append(f.getAbsolutePath());
         List<String> list = new ArrayList<>();
-        File javaBin = new File(System.getProperty("java.home") + "/bin/java");
-        String java = "java";
-        if (javaBin.exists()) java = javaBin.getAbsolutePath();
-        list.addAll(Arrays.asList(java, "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Headless"));
+        list.addAll(Arrays.asList(SharedBootstrapper.javaPath, "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Headless"));
         list.addAll(Arrays.asList(args));
         //if (training){ StartServer.run(); }
         System.exit(new ProcessBuilder(list.toArray(new String[0])).inheritIO().start().waitFor());
