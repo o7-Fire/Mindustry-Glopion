@@ -35,10 +35,10 @@ public class Testing extends ModsModule {
     @Override
     public void postInit() throws Throwable {
         Atom.Time.Time time = new Atom.Time.Time(TimeUnit.MILLISECONDS);
-        Time.run(2f, () -> {
+        Time.run(10f, () -> {
             Log.infoTag("TEST", time.elapsedS());
             Core.app.post(Core.app::exit);
-        
+    
         });
     }
 }

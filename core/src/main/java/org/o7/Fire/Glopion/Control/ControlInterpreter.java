@@ -3,7 +3,6 @@ package org.o7.Fire.Glopion.Control;
 import Atom.Utility.Random;
 import mindustry.Vars;
 import mindustry.world.Tile;
-import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Module.ModsModule;
 import org.o7.Fire.Glopion.Module.WorldModule;
 
@@ -29,6 +28,7 @@ public class ControlInterpreter extends ModsModule implements WorldModule {
     
     @Override
     public void onWorldLoad() {
+        if (Vars.headless) return;
         mainPlayerRecorder = new MachineRecorder(Vars.player);
         Tile[][] tiles = mainPlayerRecorder.getWorldData(MachineRecorder.maxView);
         int[][] visual = MachineRecorder.worldDataToVisual(tiles);
