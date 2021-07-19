@@ -52,11 +52,12 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'java-library'
     apply plugin: "org.sonarqube"
-sonarqube {
-  properties {
-    property "sonar.projectKey", "o7-Fire_Mindustry-Glopion"
-  }
-}
+    apply plugin: 'jacoco'
+    sonarqube {
+        properties {
+            property "sonar.projectKey", "o7-Fire_Mindustry-Glopion"
+        }
+    }
     repositories {
         mavenLocal()
         mavenCentral()
@@ -149,6 +150,7 @@ sonarqube {
                 compileOnly("com.github.Anuken.Arc:backend-sdl:$arcHash")
                 compileOnly("com.github.Anuken.Mindustry:core:$mindustryHash")
             }
+            testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
             compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
 
         }
@@ -207,6 +209,7 @@ ext {
 }
 //Root Module only
 dependencies {
+
 
 }
 
@@ -291,17 +294,7 @@ task makeJar(type: Jar) {
         zipTree(new File(projectDir, "build/libs/${modsNname}.jar"))//include YourModsName.jar or typical.jar
     }
 }
-//TODO add more dependsOn
-//if you have multiple version of mods
 
-task runTest(type: JavaExec) {
-    File mindustry = getMindustryFile()
-    println(mindustry.getAbsolutePath())
-    classpath = files(mindustry.getAbsolutePath())
-    classpath += project.sourceSets.main.runtimeClasspath//will append classpath to java
-    main = "test"
-
-}
 
 task deploy {
     dependsOn makeJar
