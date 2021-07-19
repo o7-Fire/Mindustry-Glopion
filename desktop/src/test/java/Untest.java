@@ -33,9 +33,9 @@ public class Untest {
         });
         kek.start();
         try {
-            kek.join(1000 * 60 * 5);//5 minute ??
+            kek.join(1000 * 60 * 2);//2 minute ??
         }catch(InterruptedException e){
-            e.printStackTrace();
+            ServerLauncher.exception.add(e);
         }
         System.out.println("Found: " + ServerLauncher.exception.size() + ", Exception");
         for (Throwable t : ServerLauncher.exception)
