@@ -437,8 +437,12 @@ task download() {
 task copyMods() {
     dependsOn base//you don't need dex jar for pc
     doLast {
-        copyToMindustry(new File(new File(projectDir.toString()), "build/libs/" + modsNname + ".jar"))
-        copyToMindustry(new File(projectDir.toString(), "config/mods/" + modsNname + ".jar"))
+        File srcJar = new File(new File(projectDir.toString()), "build/libs/" + modsNname + ".jar")
+        copyToMindustry(srcJar)
+        File target = new File(projectDir.toString(), "config/mods/" + modsNname + ".jar")
+        target.getParentFile().mkdirs()
+        System.out.println("Copying: " + f.getAbsolutePath() + " to " + target.getAbsolutePath());
+        Files.copy(srcJar.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 }
 //java -jar Mindustry.jar
