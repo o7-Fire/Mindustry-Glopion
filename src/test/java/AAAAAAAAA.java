@@ -12,13 +12,10 @@ public class AAAAAAAAA {
     
     @Test
     void changeGlobal() {
+        System.out.println("Flag setted");
         System.setProperty("Yeeeet", "1");
     }
     
-    @Test
-    void checkGlobal() {
-        assert System.getProperty("Yeeeet") == null;
-    }
     
     @Test
     void bootstrapperJavaTest() throws Throwable {

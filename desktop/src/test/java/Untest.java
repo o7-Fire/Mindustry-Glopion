@@ -14,10 +14,6 @@ public class Untest {
         }
     }
     
-    @Test
-    void premainTest() throws IOException {
-        org.o7.Fire.Glopion.Premain.Test.main(new String[]{});
-    }
     
     @Test
     void premainServerLauncher() throws IOException, NoSuchFieldException, IllegalAccessException {
@@ -32,11 +28,7 @@ public class Untest {
     
     @Test
     void changeGlobal() {
+        System.out.println("Flag setted");
         System.setProperty("Yeeeet", "1");
-    }
-    
-    @Test
-    void checkGlobal() {
-        assert System.getProperty("Yeeeet") == null;
     }
 }
