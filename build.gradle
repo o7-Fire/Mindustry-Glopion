@@ -64,9 +64,7 @@ allprojects {
         }
     }
     test.finalizedBy jacocoTestReport
-    tasks.named('sonarqube').configure {
-        dependsOn test
-    }
+
     repositories {
         mavenLocal()
         mavenCentral()
@@ -216,6 +214,11 @@ ext {
         }
     }
 }
+
+tasks.named('sonarqube').configure {
+    dependsOn test
+}
+
 //Root Module only
 dependencies {
 
