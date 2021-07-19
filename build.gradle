@@ -79,7 +79,8 @@ allprojects {
             showExceptions true
             showCauses true
             showStackTraces true
-
+            ignoreFailures true
+            setWorkingDir(rootDir)
             // set options for log level DEBUG and INFO
             debug {
                 events TestLogEvent.STARTED,
