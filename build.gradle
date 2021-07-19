@@ -202,6 +202,9 @@ allprojects {
             }
             testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
             testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+            testRuntimeOnly(files(mindustryExecutable))
+            testRuntimeOnly(files(mindustryServerExecutable))
+
             compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
 
         }
@@ -225,6 +228,7 @@ allprojects {
 subprojects {
 
     dependencies {
+
         testImplementation(files(mindustryExecutable))
         testImplementation(files(mindustryServerExecutable))
         testImplementation(rootProject)
@@ -461,3 +465,5 @@ task resolveDependencies {
         }
     }
 }
+
+test.dependsOn(download)
