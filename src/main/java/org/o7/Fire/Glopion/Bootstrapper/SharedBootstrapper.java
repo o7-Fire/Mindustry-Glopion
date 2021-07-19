@@ -14,16 +14,19 @@ import java.util.*;
 public class SharedBootstrapper {
     public static final long version = 28;
     public static String platform;
+    public static String javaPath;
+    
+    
     public static String getPlatform() {
-        if(platform != null)return platform;
+        if (platform != null) return platform;
         String jvmName = System.getProperty("java.vm.name", "").toLowerCase();
-        String osName  = System.getProperty("os.name", "").toLowerCase();
-        String osArch  = System.getProperty("os.arch", "").toLowerCase();
+        String osName = System.getProperty("os.name", "").toLowerCase();
+        String osArch = System.getProperty("os.arch", "").toLowerCase();
         String abiType = System.getProperty("sun.arch.abi", "").toLowerCase();
         String libPath = System.getProperty("sun.boot.library.path", "").toLowerCase();
-        if (jvmName.startsWith("dalvik") && osName.startsWith("linux")) {
+        if (jvmName.startsWith("dalvik") && osName.startsWith("linux")){
             osName = "android";
-        } else if (jvmName.startsWith("robovm") && osName.startsWith("darwin")) {
+        }else if (jvmName.startsWith("robovm") && osName.startsWith("darwin")){
             osName = "ios";
             osArch = "arm";
         } else if (osName.startsWith("mac os x") || osName.startsWith("darwin")) {
@@ -111,9 +114,12 @@ public class SharedBootstrapper {
         }
     }
    static {
-       if(System.getProperty("MindustryVersion", null) == null)
-           System.setProperty("MindustryVersion", "v127.2");
-       
+       File javaBin = new File(System.getProperty("java.home") + "/bin/java");
+       javaPath = "java";
+       if (javaBin.exists()) javaPath = javaBin.getAbsolutePath();
+    
+       if (System.getProperty("MindustryVersion", null) == null) System.setProperty("MindustryVersion", "v127.2");
+    
    }
     public static URL getMindustryURL() throws MalformedURLException {
         
