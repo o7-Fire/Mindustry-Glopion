@@ -441,7 +441,7 @@ task copyMods() {
         copyToMindustry(srcJar)
         File target = new File(projectDir.toString(), "config/mods/" + modsNname + ".jar")
         target.getParentFile().mkdirs()
-        System.out.println("Copying: " + f.getAbsolutePath() + " to " + target.getAbsolutePath());
+        System.out.println("Copying: " + srcJar.getAbsolutePath() + " to " + target.getAbsolutePath());
         Files.copy(srcJar.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 }
@@ -469,7 +469,6 @@ task deploy {
     dependsOn ":core:makeJar"
     dependsOn ":desktop:base"
     dependsOn ":desktop:unVersion"
-    dependsOn copyMods
 }
 test.dependsOn(download)
 test.dependsOn(copyMods)
