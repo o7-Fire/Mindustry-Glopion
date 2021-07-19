@@ -69,7 +69,7 @@ public class Java {
         list.addAll(Arrays.asList(SharedBootstrapper.javaPath, "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Headless"));
         list.addAll(Arrays.asList(args));
         //if (training){ StartServer.run(); }
-        if (test) return;
+        if (test) return;//TODO hook local glopion
         System.exit(new ProcessBuilder(list.toArray(new String[0])).inheritIO().start().waitFor());
     }
 }
