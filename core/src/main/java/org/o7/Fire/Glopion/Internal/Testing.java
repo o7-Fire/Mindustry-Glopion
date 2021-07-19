@@ -2,12 +2,21 @@ package org.o7.Fire.Glopion.Internal;
 
 import arc.Core;
 import arc.util.Log;
-import arc.util.Time;
+import mindustry.Vars;
 import org.o7.Fire.Glopion.Module.ModsModule;
+import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 public class Testing extends ModsModule {
+    static ArrayList<Boolean> sample = new ArrayList<>();
+    
+    public static boolean testCompleted() {
+        sample.clear();
+        ModuleRegisterer.invokeAll(ModsModule.class, s -> sample.add(s.isTestCompleted()));
+        if (sample.contains(false)) return false;
+        return true;
+    }
     
     public static boolean isTestMode() {
         return System.getProperty("test") != null;
@@ -15,7 +24,7 @@ public class Testing extends ModsModule {
     
     @Override
     public boolean disabled() {
-        return !isTestMode();
+        return !isTestMode();//isn't test mode
     }
     
     @Override
@@ -33,12 +42,14 @@ public class Testing extends ModsModule {
     }
     
     @Override
-    public void postInit() throws Throwable {
-        Atom.Time.Time time = new Atom.Time.Time(TimeUnit.MILLISECONDS);
-        Time.run(10f, () -> {
-            Log.infoTag("TEST", time.elapsedS());
-            Core.app.post(Core.app::exit);
+    public void update() {
+        if (!Vars.state.isPlaying()) return;
+        if (testCompleted()) Core.app.exit();
+        
+    }
     
-        });
+    @Override
+    public void postInit() throws Throwable {
+    
     }
 }

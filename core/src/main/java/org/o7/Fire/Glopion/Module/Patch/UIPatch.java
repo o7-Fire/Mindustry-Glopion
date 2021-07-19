@@ -88,7 +88,6 @@ public class UIPatch extends ModsModule {
                 titleFontColor = Pal.accent;
             }
         };
-        if (GlopionCore.test) return;
         //GlopionCore.commFrag = new CommandsListFrag();
         AtomicDialog.instance = new AtomicDialog() {{addCloseButton();}};
         ui.research.title.setText(Translation.get("techtree"));
