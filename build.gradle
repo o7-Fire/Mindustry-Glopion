@@ -58,6 +58,15 @@ allprojects {
             property "sonar.projectKey", "o7-Fire_Mindustry-Glopion"
         }
     }
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+        }
+    }
+    test.finalizedBy jacocoTestReport
+    tasks.named('sonarqube').configure {
+        dependsOn test
+    }
     repositories {
         mavenLocal()
         mavenCentral()
