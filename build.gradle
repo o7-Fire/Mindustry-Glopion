@@ -215,9 +215,6 @@ ext {
     }
 }
 
-tasks.named('sonarqube').configure {
-    dependsOn test
-}
 
 //Root Module only
 dependencies {
