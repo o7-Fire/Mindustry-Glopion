@@ -34,7 +34,6 @@ package org.o7.Fire.Glopion.Internal.Shared;
 import Atom.Reflect.Reflect;
 import arc.util.Log;
 import mindustry.Vars;
-import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ import java.util.function.Consumer;
 public class WarningHandler {
     public static ArrayList<WarningReport> listOfProblem = new ArrayList<>();
     public static HashSet<String> handled = new HashSet<>();
-    
+    public static final HashSet<Throwable> errorList = new HashSet<>();
     public static boolean isLoaded() {//safest class
         return System.getProperty("Mindustry.Ozone.Loaded") != null;
     }
@@ -89,6 +88,7 @@ public class WarningHandler {
      */
     public static void handleJava(Throwable t) {
         if (t instanceof VirtualMachineError) throw new RuntimeException(t);
+    
     }
     
     /**
@@ -96,14 +96,14 @@ public class WarningHandler {
      */
     public static void handleTest(Throwable t) {
         handleJava(t);
-        if (t instanceof RuntimeException) if (GlopionCore.test) throw (RuntimeException) t;
+        errorList.add(t);
     }
     
     /**
      * Skill Issue, e.g {@link NoSuchFieldError}
      */
     public static void handleProgrammerFault(Throwable t) {
-        handleJava(t);
+        handleTest(t);
         try {
             // Sentry.captureException(t);
         }catch(Throwable ignored){}

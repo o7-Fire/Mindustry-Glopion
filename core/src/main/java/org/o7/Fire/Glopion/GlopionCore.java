@@ -1,6 +1,7 @@
 package org.o7.Fire.Glopion;
 
 import Atom.Reflect.Reflect;
+import Atom.Time.Time;
 import Atom.Utility.Pool;
 import arc.Core;
 import arc.util.Log;
@@ -19,6 +20,7 @@ import org.o7.Fire.Glopion.UI.OptionsDialog;
 import org.o7.Fire.Glopion.UI.WorldInformation;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class GlopionCore extends Plugin implements Module {
     public static AtomicDialog modsMenu;
@@ -31,6 +33,8 @@ public class GlopionCore extends Plugin implements Module {
     public static ModuleRegisterer moduleRegisterer;
     public static HudMenu glopionHud;
     public static AtomicDialog machineInformation;
+    public static final Time startTime = new Time(TimeUnit.MILLISECONDS);
+    public static Time loadFinishedTime = null;
     
     static {
         if (debugSettings && Reflect.debug){
@@ -50,7 +54,13 @@ public class GlopionCore extends Plugin implements Module {
             WarningHandler.handleMindustry(throwable);
         }
         
-       
+        
+    }
+    
+    public Time getLoadingTime() {
+        Time finished = loadFinishedTime;
+        if (finished == null) finished = new Time(TimeUnit.MILLISECONDS);
+        return startTime.elapsed(finished);
     }
     
     @Override
@@ -60,7 +70,7 @@ public class GlopionCore extends Plugin implements Module {
         moduleRegisterer.core();
         OptionsDialog.classSettings.add(GlopionCore.class);
         if (Core.settings != null) OptionsDialog.load(k -> Core.settings.getString(k, null));
-    
+        
         Pool.parallelAsync = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
             Thread t = Executors.defaultThreadFactory().newThread(r);
             t.setName(t.getName() + "-Atomic-Executor");
