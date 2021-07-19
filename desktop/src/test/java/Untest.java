@@ -47,10 +47,6 @@ public class Untest {
         assert ServerLauncher.exception.size() == 0 : "Exception not empty";
     }
     
-    @Test
-    void failure() {
-        throw new RuntimeException("Intentional");
-    }
     
     @Test
     void changeGlobal() {
