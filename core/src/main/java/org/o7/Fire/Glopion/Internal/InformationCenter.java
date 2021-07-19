@@ -39,14 +39,25 @@ import mindustry.net.Net;
 import org.jetbrains.annotations.Nullable;
 import org.o7.Fire.Glopion.Gen.Callable;
 import org.o7.Fire.Glopion.GlopionCore;
+import org.o7.Fire.Glopion.Module.ModsModule;
 
 import java.io.File;
 import java.util.Set;
 
-public class InformationCenter {
+public class InformationCenter extends ModsModule {
     public static String currentServerIP = "";
     public static int currentServerPort = 0;
     public static Callable callable;
+    
+    {
+        testCompleted = false;
+    }
+    
+    @Override
+    public void test() {
+        getCallableMain();
+        assert getCurrentJar() != null : "Current Jar is null";
+    }
     
     public static Callable getCallableMain() {
         if (callable == null) callable = new Callable(Vars.net);

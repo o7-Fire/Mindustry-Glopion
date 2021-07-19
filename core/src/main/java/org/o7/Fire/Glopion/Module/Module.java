@@ -76,7 +76,9 @@ public interface Module extends Loadable, Disposable {
     default void postInit() throws Throwable {
     
     }
-    
+    /**
+     * Called after {@link Module#init} and if the enviroment is test
+     */
     default void test() {
     
     }

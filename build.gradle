@@ -117,7 +117,7 @@ allprojects {
         maven { url 'https://jitpack.io' }
     }
     group = 'com.o7.Fire.Glopion'
-    version = '0.1.0'
+    version = modsNversion
     ext.atomModule = { String module ->
         boolean b = new File(rootDir, '../Atom').exists()
         b = false
@@ -440,7 +440,7 @@ task copyMods() {
     doLast {
         File srcJar = new File(new File(projectDir.toString()), "build/libs/" + modsNname + ".jar")
         copyToMindustry(srcJar)
-        File target = new File(projectDir.toString(), "config/mods/" + modsNname + ".jar")
+        File target = new File(projectDir.toString(), "config/mods/" + modsNname + "-Glopion.jar")
         target.getParentFile().mkdirs()
         System.out.println("Copying: " + srcJar.getAbsolutePath() + " to " + target.getAbsolutePath());
         Files.copy(srcJar.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);

@@ -12,6 +12,7 @@ import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Internal.Testing;
 import org.o7.Fire.Glopion.Version;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public abstract class ModsModule extends Mod implements Module {
     protected ArrayList<Class<? extends ModsModule>> dependency = new ArrayList<>();
     protected Mods.LoadedMod thisLoaded = null;
     public HashSet<Class<? extends ModsModule>> missingClass = new HashSet<>(), circularClass = new HashSet<>();
+    protected boolean testCompleted = true;
     
     public String getDescription() {
         return "what";
@@ -33,10 +35,18 @@ public abstract class ModsModule extends Mod implements Module {
         return "Glopion-" + getClass().getName();
     }
     
+    public boolean isTestCompleted() {
+        return testCompleted;
+    }
+    
     protected boolean loaded = false;
     
-    public boolean disabled(){
+    public boolean disabled() {
         return false;
+    }
+    
+    protected boolean isTest() {
+        return Testing.isTestMode();
     }
     
     public boolean isLoaded() {
