@@ -9,6 +9,6 @@ public class Test {
     //JVM: 16
     
     public static void main(String[] args) throws IOException {
-        System.exit(0);//debug point
+        System.out.println("Kys");
     }
 }

@@ -1,11 +1,10 @@
 import Atom.Reflect.UnThread;
 import Atom.Utility.Pool;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
+
 public class Untest {
     @Test
     void sanityCheck() {
@@ -23,7 +22,7 @@ public class Untest {
             UnThread.sleep(1000 * 60 * 5);
             System.exit(0);
         });
-        org.o7.Fire.Glopion.Premain.ServerLauncher.main(new String[]{});
+        org.o7.Fire.Glopion.Premain.ServerLauncher.main(new String[]{"host", "Ancient_Caldera", "sandbox"});
     }
     
     @Test
