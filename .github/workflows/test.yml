@@ -7,6 +7,8 @@ on:
       - published
       - unpublished
       - edited
+  schedule:
+    - cron: '34 3 * * 2'
   workflow_dispatch:
 
 
