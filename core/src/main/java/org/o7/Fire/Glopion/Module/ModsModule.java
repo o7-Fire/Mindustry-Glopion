@@ -84,7 +84,7 @@ public abstract class ModsModule extends Mod implements Module {
     }
     
     /**
-     * Original Init
+     * Original Init, keep super.start()
      */
     public void start() {
         if (loaded) throw new RuntimeException("Already Loaded: " + thisLoaded.name);

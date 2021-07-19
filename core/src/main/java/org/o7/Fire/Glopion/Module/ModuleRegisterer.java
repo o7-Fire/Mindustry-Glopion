@@ -9,10 +9,10 @@ import mindustry.game.EventType;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Commands.CommandsHandler;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
-import org.o7.Fire.Glopion.Control.MachineRecorder;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Overlay;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Internal.Testing;
 import org.o7.Fire.Glopion.Internal.TilesOverlay;
 import org.o7.Fire.Glopion.Module.Patch.UIPatch;
 import org.o7.Fire.Glopion.Module.Patch.VarsPatch;
@@ -209,6 +209,7 @@ public class ModuleRegisterer implements Module {
             if (good){
                 try {
                     module.start();
+                    if (Testing.isTestMode()) module.test();
                     continue;
                 }catch(Throwable t){
                     try {module.handleError(t);}catch(Throwable ignored){}

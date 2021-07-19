@@ -13,9 +13,11 @@ import java.util.List;
 public class Java {
     public static URL stableGlopion;
     
+    public static boolean test;
+    
     static {
         try {
-            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/v4.6/Mindustry-Glopion-DeepPatch.jar");
+            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/v5.9.3/Mindustry-Glopion-DeepPatch.jar");
         }catch(MalformedURLException e){
             e.printStackTrace();
             System.out.println("impossible");
@@ -67,8 +69,7 @@ public class Java {
         list.addAll(Arrays.asList(SharedBootstrapper.javaPath, "-cp", classPath.toString(), "org.o7.Fire.Glopion.Premain.Headless"));
         list.addAll(Arrays.asList(args));
         //if (training){ StartServer.run(); }
+        if (test) return;
         System.exit(new ProcessBuilder(list.toArray(new String[0])).inheritIO().start().waitFor());
     }
-    
-    
 }

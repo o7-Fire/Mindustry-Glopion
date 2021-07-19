@@ -13,43 +13,19 @@ import java.util.*;
 //Java 8 only
 public class SharedBootstrapper {
     public static final long version = 28;
-    public static String platform;
-    public static String javaPath;
+    public final static String javaPath;
     
-    
-    public static String getPlatform() {
-        if (platform != null) return platform;
-        String jvmName = System.getProperty("java.vm.name", "").toLowerCase();
-        String osName = System.getProperty("os.name", "").toLowerCase();
-        String osArch = System.getProperty("os.arch", "").toLowerCase();
-        String abiType = System.getProperty("sun.arch.abi", "").toLowerCase();
-        String libPath = System.getProperty("sun.boot.library.path", "").toLowerCase();
-        if (jvmName.startsWith("dalvik") && osName.startsWith("linux")){
-            osName = "android";
-        }else if (jvmName.startsWith("robovm") && osName.startsWith("darwin")){
-            osName = "ios";
-            osArch = "arm";
-        } else if (osName.startsWith("mac os x") || osName.startsWith("darwin")) {
-            osName = "macosx";
-        } else {
-            int spaceIndex = osName.indexOf(' ');
-            if (spaceIndex > 0) {
-                osName = osName.substring(0, spaceIndex);
-            }
-        }
-        if (osArch.equals("i386") || osArch.equals("i486") || osArch.equals("i586") || osArch.equals("i686")) {
-            osArch = "x86";
-        } else if (osArch.equals("amd64") || osArch.equals("x86-64") || osArch.equals("x64")) {
-            osArch = "x86_64";
-        } else if (osArch.startsWith("aarch64") || osArch.startsWith("armv8") || osArch.startsWith("arm64")) {
-            osArch = "arm64";
-        } else if ((osArch.startsWith("arm")) && ((abiType.equals("gnueabihf")) || (libPath.contains("openjdk-armhf")))) {
-            osArch = "armhf";
-        } else if (osArch.startsWith("arm")) {
-            osArch = "arm";
-        }
-        return platform = osName + "-" + osArch;
+    static {
+        String javaPath1;
+        File javaBin = new File(System.getProperty("java.home") + "/bin/java");
+        javaPath1 = "java";
+        if (javaBin.exists()) javaPath1 = javaBin.getAbsolutePath();
+        
+        javaPath = javaPath1;
+        if (System.getProperty("MindustryVersion", null) == null) System.setProperty("MindustryVersion", "v127.2");
+        
     }
+    
     @NotNull
     public static File parent = new File("cache/");
     public static Properties dependencies = new Properties();
@@ -106,30 +82,58 @@ public class SharedBootstrapper {
         }
     
         public String getRelease(String version) {
-            return release.replace("VERSION",version);
+            return release.replace("VERSION", version);
         }
     
         public String getBE(String version) {
-            return BE.replace("VERSION",version);
+            return BE.replace("VERSION", version);
         }
     }
-   static {
-       File javaBin = new File(System.getProperty("java.home") + "/bin/java");
-       javaPath = "java";
-       if (javaBin.exists()) javaPath = javaBin.getAbsolutePath();
     
-       if (System.getProperty("MindustryVersion", null) == null) System.setProperty("MindustryVersion", "v127.2");
+    public static String getPlatform() {
+        String jvmName = System.getProperty("java.vm.name", "").toLowerCase();
+        String osName = System.getProperty("os.name", "").toLowerCase();
+        String osArch = System.getProperty("os.arch", "").toLowerCase();
+        String abiType = System.getProperty("sun.arch.abi", "").toLowerCase();
+        String libPath = System.getProperty("sun.boot.library.path", "").toLowerCase();
+        if (jvmName.startsWith("dalvik") && osName.startsWith("linux")){
+            osName = "android";
+        }else if (jvmName.startsWith("robovm") && osName.startsWith("darwin")){
+            osName = "ios";
+            osArch = "arm";
+        }else if (osName.startsWith("mac os x") || osName.startsWith("darwin")){
+            osName = "macosx";
+        }else{
+            int spaceIndex = osName.indexOf(' ');
+            if (spaceIndex > 0){
+                osName = osName.substring(0, spaceIndex);
+            }
+        }
+        if (osArch.equals("i386") || osArch.equals("i486") || osArch.equals("i586") || osArch.equals("i686")){
+            osArch = "x86";
+        }else if (osArch.equals("amd64") || osArch.equals("x86-64") || osArch.equals("x64")){
+            osArch = "x86_64";
+        }else if (osArch.startsWith("aarch64") || osArch.startsWith("armv8") || osArch.startsWith("arm64")){
+            osArch = "arm64";
+        }else if ((osArch.startsWith("arm")) && ((abiType.equals("gnueabihf")) || (libPath.contains("openjdk-armhf")))){
+            osArch = "armhf";
+        }else if (osArch.startsWith("arm")){
+            osArch = "arm";
+        }
+        return osName + "-" + osArch;
+    }
     
-   }
     public static URL getMindustryURL() throws MalformedURLException {
         
         return getMindustryURL(MindustryType.Desktop);
     }
+    
     public static File getMindustryFile(MindustryType type) throws MalformedURLException {
         return new File(getMindustryURL(type).getFile().substring(1));
     }
+    
     public static URL getMindustryURL(MindustryType type) throws MalformedURLException {
-        if(System.getProperty("BEVersion", null) != null) {
+        if (System.getProperty("BEVersion", null) != null){
             String h = System.getProperty("BEVersion");
             return new URL(type.getBE(h));
         }

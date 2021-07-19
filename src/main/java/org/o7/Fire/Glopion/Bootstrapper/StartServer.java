@@ -4,14 +4,16 @@ import java.io.File;
 import java.io.IOException;
 
 public class StartServer {
+    public static boolean test;
     public static void main(String[] args) throws IOException, InterruptedException {
-        System.exit(run().waitFor());
+        System.exit(run());
     }
     
-    public static Process run() throws IOException, InterruptedException {
+    public static int run() throws IOException, InterruptedException {
         File server = SharedBootstrapper.getMindustryFile(SharedBootstrapper.MindustryType.Server);
-        if(!server.exists())
+        if (!server.exists())
             SharedBootstrapper.download(SharedBootstrapper.getMindustryURL(SharedBootstrapper.MindustryType.Server), server).join();
-        return new ProcessBuilder(SharedBootstrapper.javaPath, "-jar", server.getAbsolutePath(), "host", "Ancient_Caldera", "sandbox").inheritIO().start();
+        if (test) return 0;
+        return new ProcessBuilder(SharedBootstrapper.javaPath, "-jar", server.getAbsolutePath(), "host", "Ancient_Caldera", "sandbox").inheritIO().start().waitFor();
     }
 }
