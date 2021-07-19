@@ -2,7 +2,10 @@ package org.o7.Fire.Glopion.Internal;
 
 import arc.Core;
 import arc.util.Log;
+import arc.util.Time;
 import org.o7.Fire.Glopion.Module.ModsModule;
+
+import java.util.concurrent.TimeUnit;
 
 public class Testing extends ModsModule {
     
@@ -31,6 +34,11 @@ public class Testing extends ModsModule {
     
     @Override
     public void postInit() throws Throwable {
-        Core.app.post(Core.app::exit);
+        Atom.Time.Time time = new Atom.Time.Time(TimeUnit.MILLISECONDS);
+        Time.run(2f, () -> {
+            Log.infoTag("TEST", time.elapsedS());
+            Core.app.post(Core.app::exit);
+        
+        });
     }
 }

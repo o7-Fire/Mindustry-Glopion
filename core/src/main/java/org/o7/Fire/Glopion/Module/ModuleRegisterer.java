@@ -1,5 +1,6 @@
 package org.o7.Fire.Glopion.Module;
 
+import Atom.Time.Time;
 import arc.Core;
 import arc.Events;
 import arc.files.Fi;
@@ -9,6 +10,7 @@ import mindustry.game.EventType;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Commands.CommandsHandler;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
+import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Overlay;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
@@ -24,6 +26,7 @@ import org.o7.Fire.Glopion.Watcher.BlockWatcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -245,6 +248,8 @@ public class ModuleRegisterer implements Module {
         }
         sb.append("]");
         Log.debug(sb.toString());
+        GlopionCore.loadFinishedTime = new Time(TimeUnit.MILLISECONDS);
+    
     }
     
     
