@@ -28,7 +28,7 @@ public class Java {
         
         boolean headless = GraphicsEnvironment.isHeadless() && System.console() != null;
         System.out.println("Headless: " + headless);
-        if (!headless){
+        if (!headless && !GraphicsEnvironment.isHeadless()){
             JOptionPane.showMessageDialog(null, "use console", "Note", JOptionPane.INFORMATION_MESSAGE);
         }
         boolean training = false;
