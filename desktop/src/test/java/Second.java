@@ -10,6 +10,7 @@ public class Second {
     
     @Test
     void checkGlobal() {
+        assert System.getProperty("Yeeeet") == null : "Impure enviroment";
         System.out.println(System.getProperty("Yeeeet") == null);
     }
 }

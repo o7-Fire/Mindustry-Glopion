@@ -1,6 +1,7 @@
 package org.o7.Fire.Glopion.Premain;
 
 import Atom.Reflect.Reflect;
+import arc.util.Log;
 import mindustry.mod.ModClassLoader;
 import org.o7.Fire.Glopion.Brain.AparapiBenchmark;
 import org.o7.Fire.Glopion.Brain.TrainingJeneticData;
@@ -20,7 +21,7 @@ public class Headless {
             try {
                 WebhookStandalone standalone = new WebhookStandalone(System.getenv("DiscordWebhook"));
                 System.setOut(standalone.asPrintStream());
-                System.out.println("Test");
+                System.out.println("webhook hooked");
             }catch(MalformedURLException e){
                 e.printStackTrace();
             }
@@ -40,8 +41,12 @@ public class Headless {
             }
         }else if(arg.contains("logging")){
             System.out.println("logging");
-        }else if(arg.contains("benchmark")){
+        }else if (arg.contains("benchmark")){
             AparapiBenchmark.main(args);
+        }else if (arg.contains("test")){
+            System.out.println("test yes");
+            Log.info("Testing");
+    
         }
     }
 }
