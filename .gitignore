@@ -4,6 +4,7 @@ config/
 # Log file
 *.log
 *.so
+
 # BlueJ files
 *.ctxt
 cache/

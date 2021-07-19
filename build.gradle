@@ -353,13 +353,7 @@ task makeJar(type: Jar) {
 }
 
 
-task deploy {
-    dependsOn makeJar
-    dependsOn ":core:makeJar"
-    dependsOn ":desktop:base"
-    dependsOn ":desktop:unVersion"
 
-}
 
 //need this for jitpack, so i can read mods source code without using browser
 artifacts {
@@ -444,6 +438,7 @@ task copyMods() {
     dependsOn base//you don't need dex jar for pc
     doLast {
         copyToMindustry(new File(new File(projectDir.toString()), "build/libs/" + modsNname + ".jar"))
+        copyToMindustry(new File(projectDir.toString(), "config/mods/" + modsNname + ".jar"))
     }
 }
 //java -jar Mindustry.jar
@@ -465,5 +460,12 @@ task resolveDependencies {
         }
     }
 }
-
+task deploy {
+    dependsOn makeJar
+    dependsOn ":core:makeJar"
+    dependsOn ":desktop:base"
+    dependsOn ":desktop:unVersion"
+    dependsOn copyMods
+}
 test.dependsOn(download)
+test.dependsOn(copyMods)
