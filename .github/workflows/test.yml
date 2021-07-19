@@ -1,14 +1,11 @@
 name: Sonar Gradle Test
 
 on:
-  release:
+  workflow_run:
+    workflows: [ "Java CI" ]
+    branches: [ main ]
     types:
-      - created
-      - published
-      - unpublished
-      - edited
-  schedule:
-    - cron: '34 3 * * 2'
+      - completed
   workflow_dispatch:
 
 

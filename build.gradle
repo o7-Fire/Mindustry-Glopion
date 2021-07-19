@@ -92,7 +92,11 @@ allprojects {
             }
             info.events = debug.events
             info.exceptionFormat = debug.exceptionFormat
-
+            maxParallelForks = 1
+            forkEvery = 1
+            beforeTest { descriptor ->
+                logger.lifecycle("Running test: " + descriptor)
+            }
             afterSuite { desc, result ->
                 if (!desc.parent) { // will match the outermost suite
                     def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)"
