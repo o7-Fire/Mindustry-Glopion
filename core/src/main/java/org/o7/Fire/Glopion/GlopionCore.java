@@ -9,6 +9,7 @@ import mindustry.mod.Plugin;
 import org.o7.Fire.Glopion.Control.GlopionControl;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Internal.Testing;
 import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import org.o7.Fire.Glopion.Patch.Translation;
@@ -22,7 +23,7 @@ import java.util.concurrent.Executors;
 public class GlopionCore extends Plugin implements Module {
     public static AtomicDialog modsMenu;
     public static GlopionControl glopionControl = new GlopionControl();
-    public static boolean test;
+    public static final boolean test = Testing.isTestMode();
     //public static CommandsListFrag commFrag;
     public static WorldInformation worldInformation;
     public static Class<? extends Mod> mainClass = GlopionCore.class;

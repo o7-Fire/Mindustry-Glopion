@@ -63,7 +63,8 @@ allprojects {
             xml.enabled true
         }
     }
-    test.finalizedBy jacocoTestReport
+    test.finalizedBy
+
 
     repositories {
         mavenLocal()

@@ -34,6 +34,7 @@ package org.o7.Fire.Glopion.Internal.Shared;
 import Atom.Reflect.Reflect;
 import arc.util.Log;
 import mindustry.Vars;
+import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
 
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class WarningHandler {
      */
     public static void handleTest(Throwable t) {
         handleJava(t);
-        //if (t instanceof RuntimeException) if (SharedBoot.test) throw (RuntimeException) t;
+        if (t instanceof RuntimeException) if (GlopionCore.test) throw (RuntimeException) t;
     }
     
     /**

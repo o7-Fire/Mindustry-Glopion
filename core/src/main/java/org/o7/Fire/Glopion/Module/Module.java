@@ -77,7 +77,11 @@ public interface Module extends Loadable, Disposable {
     
     }
     
-    default void onShutdown(){
+    default void test() {
+    
+    }
+    
+    default void onShutdown() {
     
     }
     
