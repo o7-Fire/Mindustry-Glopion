@@ -2,12 +2,10 @@ package org.o7.Fire.Glopion.Bootstrapper;
 
 import arc.Core;
 import arc.Events;
-import arc.Net;
 import arc.files.Fi;
 import arc.func.Boolp;
 import arc.func.Cons;
 import arc.func.Floatc;
-import arc.func.Intc;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
@@ -27,6 +25,7 @@ import org.o7.Fire.Glopion.Bootstrapper.UI.ProviderURLDialog;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -134,28 +133,35 @@ public class BootstrapperUI extends Mod {
         }catch(Exception e){
             ui.showException(e);
         }
-        
-        
+    
+    
     }
     
-    public void fetchRelease(Cons<Net.HttpResponse> succ) {
+    public void onReleaseFetched(InputStream is) throws IOException {
+        release.clear();
+        release.load(is);
+        if (release.getProperty(flavor) == null){
+            Log.warn("@ Flavor doesn't exist ", flavor);
+            runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
+            return;
+        }else{
+            runOnUI(() -> ui.showInfoFade("Fetched: [green]" + release.size() + " [white]Flavor"));
+        }
+    }
+    
+    public void fetchRelease(Runnable succ) {
         baseURL = baseURL.endsWith("/") ? baseURL : baseURL + "/";
-        Core.net.httpGet(baseURL + "release.properties", suc -> {
+        Thread t = new Thread(() -> {
             try {
-                release.clear();
-                release.load(suc.getResultAsStream());
-                if (release.getProperty(flavor) == null){
-                    Log.warn("@ Flavor doesn't exist @", flavor, release);
-                    runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
-                    return;
-                }else{
-                    runOnUI(() -> ui.showInfoFade("Fetched: [green]" + release.size() + " [white]Flavor"));
-                }
-                succ.get(suc);
+                URL u = new URL(baseURL + "release.properties");
+                onReleaseFetched(u.openConnection().getInputStream());
+                succ.run();
             }catch(IOException e){
                 handleException(e);
             }
-        }, Log::err);
+        });
+        t.setDaemon(true);
+        t.start();
     }
     
     public void tryDownload() {
@@ -200,7 +206,7 @@ public class BootstrapperUI extends Mod {
         providerURLDialog = new ProviderURLDialog(this);
         flavorDialog = new FlavorDialog(this);
         dependencyManager = new DependencyManager();
-        fetchRelease(suc -> tryDownload());
+        fetchRelease(this::tryDownload);
         tableCell = ui.settings.game.row().table().growX();
         t = tableCell.get();
         Main.runOnUI(this::buildUI);
@@ -218,7 +224,7 @@ public class BootstrapperUI extends Mod {
         t.button("Dependency", dependencyManager::show).growX().row();
         t.button("Refresh", () -> {
             buildUI();
-            fetchRelease(suc -> {
+            fetchRelease(() -> {
                 buildUI();
                 downloadIfNotExist();
             });

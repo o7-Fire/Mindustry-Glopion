@@ -1,8 +1,8 @@
-name: "Mindustry-Glopion"
-displayName: "Mindustry-Glopion"
+name: "Mindustry-Glopion-Core"
+displayName: "Mindustry-Glopion-Core"
 description: "Bottom Text"
 author: "o7-Fire"
-main: "org.o7.Fire.Glopion.Bootstrapper.Main"
+main: "org.o7.Fire.Glopion.ReleaseLauncher"
 minGameVersion: 127
 version: 0.6.0
 hidden: true
