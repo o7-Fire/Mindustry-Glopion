@@ -26,7 +26,7 @@ public class Untest {
             try {
                 System.setProperty("test", "1");
                 System.setProperty("dev", "1");
-                ServerLauncher.main(new String[]{"host", "Ancient_Caldera", "sandbox"});
+                ServerLauncher.main(new String[]{"host"});
             }catch(Throwable t){
                 if (t instanceof VirtualMachineError) throw (VirtualMachineError) t;
                 ServerLauncher.exception.add(t);
@@ -35,7 +35,7 @@ public class Untest {
         });
         kek.start();
         try {
-            kek.join(1000 * 60 * 2);//2 minute ??
+            kek.join(1000 * 60 * 1);//1 minute ??
         }catch(InterruptedException e){
             ServerLauncher.exception.add(e);
         }

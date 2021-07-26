@@ -6,6 +6,7 @@ import arc.backend.headless.HeadlessApplication;
 import arc.func.Cons;
 import mindustry.Vars;
 import mindustry.core.Platform;
+import mindustry.net.Administration;
 import mindustry.net.Net;
 
 import java.lang.reflect.Field;
@@ -24,6 +25,7 @@ public class ServerLauncher {
         if (System.getProperty("dev") != null){
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
             Reflect.debug = true;
+            Administration.Config.debug.set(true);
         }
         
         Field fargs = mindustry.server.ServerLauncher.class.getDeclaredField("args");

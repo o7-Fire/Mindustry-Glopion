@@ -9,7 +9,7 @@ import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import java.util.ArrayList;
 
 public class Testing extends ModsModule {
-    static ArrayList<Boolean> sample = new ArrayList<>();
+    protected static final ArrayList<Boolean> sample = new ArrayList<>();
     
     public static boolean testCompleted() {
         sample.clear();
@@ -43,9 +43,9 @@ public class Testing extends ModsModule {
     
     @Override
     public void update() {
-        if (!Vars.state.isPlaying()) return;
-        if (testCompleted()) Core.app.exit();
-        
+    
+        if (Vars.state.isPlaying() && testCompleted()) Core.app.exit();
+    
     }
     
     @Override
