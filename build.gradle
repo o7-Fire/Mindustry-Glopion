@@ -65,11 +65,13 @@ allprojects {
             xml.enabled true
         }
     }
-    if (hasProperty('buildScan')) {
+    try {
         buildScan {
             termsOfServiceUrl = 'https://gradle.com/terms-of-service'
             termsOfServiceAgree = 'yes'
         }
+    } catch (e){
+
     }
     tasks.withType(Test) {
         useJUnitPlatform()
