@@ -65,7 +65,12 @@ allprojects {
             xml.enabled true
         }
     }
-
+    if (hasProperty('buildScan')) {
+        buildScan {
+            termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+            termsOfServiceAgree = 'yes'
+        }
+    }
     tasks.withType(Test) {
         useJUnitPlatform()
         finalizedBy(jacocoTestReport)
