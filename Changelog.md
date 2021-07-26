@@ -1,5 +1,5 @@
 * Android Support
-* v127.2
+* v128.1
 * Java 11 for Desktop Flavor
 * Java 8  for Core Flavor
 * Minimum Android API 19\
