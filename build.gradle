@@ -58,6 +58,7 @@ allprojects {
     sonarqube {
         properties {
             property "sonar.projectKey", "o7-Fire_Mindustry-Glopion"
+            property "sonar.organization", "o7-ire"
         }
     }
     jacocoTestReport {
