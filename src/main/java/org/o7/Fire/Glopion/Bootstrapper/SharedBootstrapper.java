@@ -9,11 +9,20 @@ import java.net.URL;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 //Java 8 only
 public class SharedBootstrapper {
-    public static final long version = 28;
+    public static final long version = 30;
     public final static String javaPath;
+    public static final ExecutorService executors = Executors.newCachedThreadPool(r -> {
+        Thread t = Executors.defaultThreadFactory().newThread(r);
+        t.setName(t.getName() + "-Cached-Pool");
+        t.setDaemon(true);
+        return t;
+    });
     
     static {
         String javaPath1;
@@ -88,6 +97,18 @@ public class SharedBootstrapper {
         public String getBE(String version) {
             return BE.replace("VERSION", version);
         }
+    }
+    
+    public static void httpGet(String url, Consumer<HttpURLConnection> connected, Consumer<Exception> died) {
+        executors.submit(() -> {
+            try {
+                URL u = new URL(url);
+                HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+                connected.accept(connection);
+            }catch(Exception e){
+                died.accept(e);
+            }
+        });
     }
     
     public static String getPlatform() {

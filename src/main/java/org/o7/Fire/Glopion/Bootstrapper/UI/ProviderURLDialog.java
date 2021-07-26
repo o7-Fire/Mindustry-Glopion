@@ -3,6 +3,7 @@ package org.o7.Fire.Glopion.Bootstrapper.UI;
 import arc.Core;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.Bootstrapper.BootstrapperUI;
+import org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -28,18 +29,18 @@ public class ProviderURLDialog extends BaseDialog {
         s = s.endsWith("/") ? s : s + "/";
         ui.loadfrag.show("Checking");
         String finalS = s;
-        Core.net.httpGet(s + "release.properties", suc -> {
+        SharedBootstrapper.httpGet(s + "release.properties", suc -> {
             ui.loadfrag.hide();
             Properties temp = new Properties();
             try {
-                temp.load(suc.getResultAsStream());
+                temp.load(suc.getInputStream());
             }catch(IOException e){
                 ui.showException(e);
                 e.printStackTrace();
                 return;
             }
             if (temp.size() < 2){
-                ui.showErrorMessage("Empty/None/404 ??\n" + temp + " \n" + suc.getResultAsString());
+                ui.showErrorMessage("Empty/None/404 ??\n" + temp);
                 return;
             }
             ui.showInfoFade("Loaded: " + temp.size() + " flavor");
