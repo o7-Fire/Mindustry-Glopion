@@ -193,7 +193,7 @@ task base(type: Jar, dependsOn: ":core:compileJava") {
     archiveFileName = "desktop.jar"
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest.attributes('Main-Class': modsNJavaMain)//what
-    from files(aproj(":core").sourceSets.main.output)//Include core project class, gradle is shit
+    from files(aproj(":core").sourceSets.main.output)//Include core project class, cuz gradle is shit
     with jar
     from {
         configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
