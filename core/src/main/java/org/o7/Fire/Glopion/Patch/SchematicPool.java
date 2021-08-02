@@ -16,8 +16,8 @@
 
 package org.o7.Fire.Glopion.Patch;
 
+import Atom.Encoding.Encoder;
 import Atom.Utility.Cache;
-import Atom.Utility.Encoder;
 import Atom.Utility.Pool;
 import mindustry.Vars;
 import mindustry.game.Schematic;

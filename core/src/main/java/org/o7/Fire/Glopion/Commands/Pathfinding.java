@@ -31,7 +31,7 @@
 
 package org.o7.Fire.Glopion.Commands;
 
-import Atom.Utility.Meth;
+import Atom.Math.Meth;
 import Atom.Utility.Random;
 import arc.Events;
 import arc.graphics.Color;

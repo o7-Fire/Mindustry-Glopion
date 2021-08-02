@@ -31,8 +31,8 @@
 
 package org.o7.Fire.Glopion.Internal;
 
+import Atom.Encoding.Encoder;
 import Atom.File.RepoInternal;
-import Atom.Utility.Encoder;
 import Atom.Utility.Pool;
 import arc.graphics.Pixmap;
 import arc.util.Log;

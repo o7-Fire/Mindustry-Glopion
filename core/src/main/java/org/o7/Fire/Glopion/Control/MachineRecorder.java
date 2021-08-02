@@ -1,12 +1,11 @@
 package org.o7.Fire.Glopion.Control;
 
 import Atom.File.FileUtility;
+import Atom.Math.Meth;
 import Atom.Struct.PoolObject;
-import Atom.Utility.Meth;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import Atom.Utility.Utility;
-import arc.Core;
 import arc.func.Floatp;
 import arc.struct.Seq;
 import arc.util.Log;
@@ -16,7 +15,6 @@ import arc.util.io.Writes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import mindustry.Vars;
-import mindustry.ctype.ContentType;
 import mindustry.gen.Entityc;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;

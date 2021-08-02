@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import Atom.Encoding.Encoder;
 import Atom.File.FileUtility;
-import Atom.Utility.Encoder;
 import Atom.Utility.Utility;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;

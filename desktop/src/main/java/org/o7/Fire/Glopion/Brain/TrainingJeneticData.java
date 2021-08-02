@@ -1,8 +1,8 @@
 package org.o7.Fire.Glopion.Brain;
 
 import Atom.File.FileUtility;
+import Atom.Math.Meth;
 import Atom.Time.Time;
-import Atom.Utility.Meth;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import com.aparapi.Kernel;
@@ -12,12 +12,6 @@ import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.Limits;
 import io.jenetics.util.Factory;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.weights.WeightInit;
-import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.learning.config.Sgd;
 import org.o7.Fire.Glopion.Control.MachineRecorder;
 
 import java.awt.*;

@@ -117,6 +117,6 @@ public class InformationCenter extends ModsModule {
         if (OS.isAndroid || OS.isIos){//Dalvik bad
             throw new RuntimeException("Mobile doesn't support Reflect.getExtendedClass()");
         }
-        return Reflect.getExtendedClass(GlopionCore.class.getPackage().getName(), c, InformationCenter.class.getClassLoader());
+        return Atom.Reflect.ExternalReflection.getExtendedClass(GlopionCore.class.getPackage().getName(), c, InformationCenter.class.getClassLoader());
     }
 }
