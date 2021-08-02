@@ -6,6 +6,8 @@ on:
     branches: [ main ]
     types:
       - completed
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 
@@ -55,6 +57,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: ./gradlew clean test sonarqube -PgithubRepo="$GITHUB_REPOSITORY" --info --scan
 
