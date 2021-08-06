@@ -37,8 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
-
-public class RepoCached extends Repo {
+@Deprecated
+public class RepoCached extends Repository {
     public static HashMap<String, Pixmap> pixmapCache = new HashMap<>();
     
     public URL getResource(String s) {
@@ -52,7 +52,7 @@ public class RepoCached extends Repo {
     
     @Override
     public void init() throws Throwable {
-        Repo rc = Repo.getRepo();
+        Repository rc = Repository.getRepo();
         assert rc != null;
         repos.addAll(rc.getRepos());
     }

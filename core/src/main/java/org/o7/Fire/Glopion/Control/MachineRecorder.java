@@ -21,10 +21,10 @@ import mindustry.gen.Player;
 import mindustry.type.Item;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.AirBlock;
+import org.o7.Fire.Glopion.Internal.TextManager;
 import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 import org.o7.Fire.Glopion.Module.WorldModule;
-import org.o7.Fire.Glopion.Patch.Translation;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +78,7 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     
     public static void visualizeColorized(int[] vector, StringBuilder sb) {
         for (int y : vector) {
-            if (!color.containsKey(y)) color.put(y, Translation.getRandomHexColor());
+            if (!color.containsKey(y)) color.put(y, TextManager.getRandomHexColor());
             sb.append(color.get(y)).append("■");
         }
         sb.append("[white]\n");

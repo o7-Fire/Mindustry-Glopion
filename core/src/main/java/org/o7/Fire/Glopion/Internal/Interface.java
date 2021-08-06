@@ -59,14 +59,13 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Sorter;
 import mindustry.world.blocks.sandbox.ItemSource;
 import org.jetbrains.annotations.NotNull;
-import org.o7.Fire.Glopion.GlopionCore;
 
 import java.util.*;
 import java.util.concurrent.Future;
 
+import static arc.Core.settings;
 import static mindustry.Vars.player;
 import static mindustry.Vars.ui;
-import static org.o7.Fire.Glopion.Patch.Translation.getRandomHexColor;
 
 public class Interface {
     @Deprecated
@@ -181,23 +180,9 @@ public class Interface {
         runOnUI(() -> Vars.ui.showErrorMessage(title + "\n" + description));
     }
     
+    @Deprecated
     public static String getBundle(String key, String def) {
-        if (bundle.containsKey(key))
-            return bundle.get(key);
-        if (Core.bundle.getOrNull(key) != null) return Core.bundle.get(key);
-        if(def != null)return def;
-        try {
-            Class<?> s = Interface.class.getClassLoader().loadClass(key);
-            if (Reflect.debug && Reflect.DEBUG_TYPE != Reflect.DebugType.UserPreference)
-                registerWords(s.getName(), "["+s.getSimpleName()+"]-"+s.getCanonicalName());
-            else registerWords(s.getName(), s.getSimpleName());
-            return bundle.get(key);
-        }catch(Throwable ignored){}
-        if (!key.contains(".")){
-            registerWords(key, key);
-            return bundle.get(key);
-        }
-        return Core.bundle.get(key);
+        return TextManager.get(key, def);
     }
     
     public static void dropItem() {
@@ -250,8 +235,7 @@ public class Interface {
     }
     @Deprecated
     public synchronized static void registerWords(String key, String value) {
-        if (GlopionCore.colorPatchSettings) value = getRandomHexColor() + value + "[white]";
-        bundle.put(key, value);
+        TextManager.registerWords(key, value);
     }
     @Deprecated
     public synchronized static void registerWords(String key) {
@@ -358,6 +342,25 @@ public class Interface {
         return list;
     }
     
+    public static Locale getLocale() {
+        Locale locale;
+        String loc = settings.getString("locale");
+        if (loc.equals("default")){
+            locale = Locale.getDefault();
+        }else{
+            Locale lastLocale;
+            if (loc.contains("_")){
+                String[] split = loc.split("_");
+                lastLocale = new Locale(split[0], split[1]);
+            }else{
+                lastLocale = new Locale(loc);
+            }
+            
+            locale = lastLocale;
+        }
+        return locale;
+    }
+    
     public static Future<ArrayList<Tile>> getTiles(Filter<Tile> filter) {
         if (!Vars.state.getState().equals(GameState.State.playing)) return null;
         return Pool.submit(() -> getTilesSync(filter));
@@ -389,6 +392,14 @@ public class Interface {
         Core.settings.getBoolOnce(Reflect.getCallerClassStackTrace().toString(), () -> {
             showInfo(h);
         });
+    }
+    
+    public static Class<?> getClass(String key) {
+        try {
+            return Class.forName(key, false, Interface.class.getClassLoader());
+        }catch(ClassNotFoundException e){
+            return null;
+        }
     }
     
     

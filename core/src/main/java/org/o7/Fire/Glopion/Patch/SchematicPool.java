@@ -22,7 +22,7 @@ import Atom.Utility.Pool;
 import mindustry.Vars;
 import mindustry.game.Schematic;
 import mindustry.game.Schematics;
-import org.o7.Fire.Glopion.Internal.Repo;
+import org.o7.Fire.Glopion.Internal.Repository;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Internal.Shared.WarningReport;
 import org.o7.Fire.Glopion.Module.ModsModule;
@@ -37,7 +37,7 @@ public class SchematicPool extends ModsModule {
     
     @Override
     public void loadAsync() {
-        Repo rc = Repo.getRepo();
+        Repository rc = Repository.getRepo();
         assert rc != null;
         URL u = rc.getResource("src/schematic-pool.txt");
         if (u == null){

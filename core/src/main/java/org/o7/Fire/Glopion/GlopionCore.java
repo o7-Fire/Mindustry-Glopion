@@ -11,9 +11,9 @@ import org.o7.Fire.Glopion.Control.GlopionControl;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Internal.Testing;
+import org.o7.Fire.Glopion.Internal.TextManager;
 import org.o7.Fire.Glopion.Module.Module;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
-import org.o7.Fire.Glopion.Patch.Translation;
 import org.o7.Fire.Glopion.UI.AtomicDialog;
 import org.o7.Fire.Glopion.UI.HudMenu;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
@@ -29,7 +29,8 @@ public class GlopionCore extends Plugin implements Module {
     //public static CommandsListFrag commFrag;
     public static WorldInformation worldInformation;
     public static Class<? extends Mod> mainClass = GlopionCore.class;
-    public static boolean blockDebugSettings, machineVisualizeRenderSettings, colorPatchSettings, debugSettings;
+    public static boolean blockDebugSettings, machineVisualizeRenderSettings, colorPatchSettings, debugSettings, translateChatSettings,//kys
+            interceptChatThenTranslateSettings, rebroadcastTranslatedMessageSettings;
     public static ModuleRegisterer moduleRegisterer;
     public static HudMenu glopionHud;
     public static AtomicDialog machineInformation;
@@ -83,7 +84,10 @@ public class GlopionCore extends Plugin implements Module {
     @Override
     public void init() {
         //this tbh
-        Translation.registerWords("machineVisualizeRenderSettings","Machine Recorder Visualization");
+        TextManager.registerWords("machineVisualizeRenderSettings", "Machine Recorder Visualization");
+        TextManager.registerWords("translateChatSettings", "Translate Chat (Client GUI Only, async, unglyph, uncolorized, duplicating, skip already translated)");
+        TextManager.registerWords("interceptChatThenTranslateSettings", "Intercept Player Message Then Translate It (Server Only, may cause lag, send to everyone)");
+        TextManager.registerWords("rebroadcastTranslatedMessageSettings", "Translate message, then send it again to all player (same as Translate Chat except for Server Only, and resend to everyone)");
         try {
             moduleRegisterer.init();
         }catch(Throwable t){
@@ -91,7 +95,7 @@ public class GlopionCore extends Plugin implements Module {
         }
         Log.infoTag("Glopion", "Loaded From " + InformationCenter.getCurrentJar());
         Log.infoTag("Glopion", "Class: " + this.getClass().getCanonicalName());
-        
-        
+    
+    
     }
 }

@@ -27,7 +27,6 @@ import mindustry.graphics.LoadRenderer;
 import mindustry.graphics.Pal;
 import mindustry.input.DesktopInput;
 import mindustry.input.MobileInput;
-import org.o7.Fire.Glopion.Control.GlopionControl;
 import org.o7.Fire.Glopion.Gen.Callable;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
@@ -67,7 +66,7 @@ public class VarsPatch extends ModsModule {
             try {
                 Vars.ui.chatfrag.addMessage("gay", "no");
             }catch(NoSuchMethodError t){
-                System.setProperty("Client-Foo", "1");
+                System.setProperty("gay-shit-no-offense", "1");
             }
         }
         

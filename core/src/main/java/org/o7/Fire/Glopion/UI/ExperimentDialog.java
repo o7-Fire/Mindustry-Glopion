@@ -22,9 +22,12 @@ import mindustry.gen.Icon;
 import org.o7.Fire.Glopion.Experimental.*;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
-import org.o7.Fire.Glopion.Patch.Translation;
+import org.o7.Fire.Glopion.Internal.TextManager;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.TreeSet;
 
 public class ExperimentDialog extends ScrollableDialog {
     {
@@ -54,16 +57,15 @@ public class ExperimentDialog extends ScrollableDialog {
     protected void setup() {
         try {
             for (Class<? extends Experimental> c : experimental) {
-                table.button(Translation.get(c.getName()), () -> {
+                table.button(TextManager.get(c.getName()), () -> {
                     try {
-                        if(cache.containsKey(c)){
+                        if (cache.containsKey(c)){
                             cache.get(c).run();
                         }
-                        
+            
                         Experimental e = c.getDeclaredConstructor().newInstance();
                         e.run();
-                        if(e.reusable())
-                            cache.put(c,e);
+                        if (e.reusable()) cache.put(c, e);
                     }catch(Throwable t){
                         Vars.ui.showException(t);
                         WarningHandler.handleMindustry(t);

@@ -14,42 +14,92 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.o7.Fire.Glopion.Patch;
+package org.o7.Fire.Glopion.Internal;
 
+import Atom.Exception.GetRealException;
 import Atom.Reflect.Reflect;
 import Atom.Utility.Random;
+import arc.Core;
 import arc.struct.ObjectMap;
+import arc.util.Log;
 import arc.util.Strings;
 import org.o7.Fire.Glopion.GlopionCore;
-import org.o7.Fire.Glopion.Internal.InformationCenter;
-import org.o7.Fire.Glopion.Internal.Interface;
+import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModsModule;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.o7.Fire.Glopion.Internal.Interface.registerWords;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 
 //TODO decentralize text id translation
-public class Translation extends ModsModule {
-    public static final ObjectMap<String, String> bundle = new ObjectMap<>();
-    public static final ArrayList<String> normalSinglet = new ArrayList<>(Arrays.asList("Run"));
-    public static final ArrayList<String> singlet1 = new ArrayList<>(Arrays.asList("String", "Integer", "Float", "Long", "Boolean", "Commands", "Settings"));
-    public static final HashMap<String, String> generalSettings = new HashMap<>();
-    public static final HashMap<String, String> commands = new HashMap<>();
+public class TextManager extends ModsModule {
+    
+    public static final Map<String, String> bundle = Collections.synchronizedMap(new TreeMap<>());
+    public static final List<String> normalSinglet = new ArrayList<>(Arrays.asList("Run"));
+    public static final List<String> singlet1 = new ArrayList<>(Arrays.asList("String", "Integer", "Float", "Byte", "Double", "Short", "Char", "Long", "Boolean", "Commands", "Settings"));
+    public static final Map<String, String> generalSettings = new HashMap<>();
+    public static final Map<String, String> commands = new HashMap<>();
+    
+    static {
+        try {
+            Log.debug("Searching for @.properties", totalPrefix());
+            Log.debug("Locale @", Interface.getLocale().getLanguage());
+            loadBundle(Repository.readProperties(totalPrefix() + ".properties"));
+        }catch(Exception e){
+            WarningHandler.handleProgrammerFault(e);
+        }
+    }
     
     {
         try {
-            dependency.addAll(InformationCenter.getExtendedClass(Translation.class));
-        }catch(Throwable ignored){}
+            dependency.addAll(InformationCenter.getExtendedClass(TextManager.class));
+            
+        }catch(GetRealException ignored){
+        
+        }catch(Throwable t){
+            WarningHandler.handleMindustry(t);
+        }
     }
     
-    @Override
-    public String getDescription() {
-        return "Colorize the word, don't actually do translate ";
+    public static File dumpBundle() throws IOException {
+        Properties properties = new Properties();
+        for (Map.Entry<String, String> s : bundle.entrySet()) {
+            properties.setProperty(s.getKey(), s.getValue());
+        }
+        return dumpBundle(prefix(), properties);
+    }
+    
+    public static File dumpBundle(String prefix, Properties properties) throws IOException {
+        File where = new File(prefix + "_" + Interface.getLocale().getLanguage() + ".properties");
+        properties.store(new FileWriter(where), Interface.getLocale().getLanguage() + " Turn off colorization if needed");
+        Log.infoTag("Glopion-TextManager", "Bundle dumped " + where.getAbsolutePath());
+        return where;
+    }
+    
+    public static void loadBundle(Properties properties) throws IOException {
+        for (Object s : properties.keySet()) {
+            if (s instanceof String){
+                String ss = (String) s;
+                registerWords(ss, properties.getProperty(ss, ss));
+            }
+        }
+    }
+    
+    /**
+     * Convert string to current {@link Interface#getLocale()}
+     *
+     * @return "Colorize the word to" -> "Colorize verbum"
+     */
+    public static String translate(String val) {
+        String key = val.toLowerCase().replace(' ', '-').trim();
+        if (bundle.containsKey(key)) return bundle.get(key);
+        if (Core.bundle != null && Core.bundle.getOrNull(key) != null){
+            return Core.bundle.get(key);
+        }
+        registerWords(key, val);
+        return bundle.get(key);
     }
     
     public static String getRandomHexColor() {
@@ -60,16 +110,39 @@ public class Translation extends ModsModule {
         return Strings.stripColors(s).length() != s.length();
     }
     
-    
+    public static String get(String key, String def) {
+        if (bundle.containsKey(key)) return bundle.get(key);
+        if (Core.bundle != null && Core.bundle.getOrNull(key) != null){
+            return Core.bundle.get(key);
+        }
+        if (def != null){
+            return def;
+        }
+        Class<?> s = Interface.getClass(key);
+        if (s != null){
+            if (Reflect.debug && Reflect.DEBUG_TYPE != Reflect.DebugType.UserPreference)
+                registerWords(s.getName(), "[" + s.getSimpleName() + "]-" + s.getCanonicalName());
+            else registerWords(s.getName(), s.getSimpleName());
+            return bundle.get(key);
+        }
+        if (!key.contains(".")){
+            registerWords(key, key);
+            return bundle.get(key);
+        }
+        return Core.bundle == null ? key : Core.bundle.get(key);
+    }
     
     public static String get(String key) {
-        
-        return Interface.getBundle(key, null);
+        return get(key, null);
+    }
+    
+    public static void registerWords(String key, String value) {
+        value = colorized(value);
+        bundle.put(key, value);
     }
     
     public static String colorized(String s) {
         if (!GlopionCore.colorPatchSettings) return s;
-        if (isColorized(s)) return s;
         return getRandomHexColor() + s + "[white]";
     }
     
@@ -77,16 +150,9 @@ public class Translation extends ModsModule {
         String s = Thread.currentThread().getStackTrace()[2].getClassName() + text.toLowerCase().replaceAll(" ", ".");
         registerWords(s, text);
         s = text;
-        if (GlopionCore.colorPatchSettings) s = getRandomHexColor() + s + "[white]";
         return s;
     }
     
-    public static void registerWords(String s, String s1){
-        Interface.registerWords(s, s1);
-    }
-    public static void registerWords(String s){
-       registerWords(s,s);
-    }
     public static void register() {
         registerWords("Ozone");
         registerWords("Glopion");
@@ -118,20 +184,39 @@ public class Translation extends ModsModule {
         for (Map.Entry<String, String> s : commands.entrySet()) {
             registerWords("ozone.commands." + s.getKey(), s.getValue());
         }
-        
+    
         for (Map.Entry<String, String> s : generalSettings.entrySet()) {
             registerWords("setting." + s.getKey() + ".name", s.getValue());
         }
-
-        
         for (String s : singlet1) registerWords(s, "[" + s + "]");
         for (String s : normalSinglet) registerWords(s);
+        try {
         
+            loadBundle(Repository.readProperties(totalPrefix() + ".properties"));
+        }catch(Exception e){
+            WarningHandler.handleProgrammerFault(e);
+        }
+    }
+    
+    public static void registerWords(String s) {
+        registerWords(s, s);
+    }
+    
+    private static String totalPrefix() {
+        return prefix() + "_" + Interface.getLocale().getLanguage();
+    }
+    
+    private static String prefix() {
+        return "glopion-bundle";
+    }
+    
+    @Override
+    public String getDescription() {
+        return ">Load bundle\n>Colorize the word\n>Crash\n>Leave";
     }
     
     public static String add(String text) {
         return add(Thread.currentThread().getStackTrace()[2].toString() + text.toLowerCase().replaceAll(" ", "."), text);
-        
     }
     
     public static void addSettings(Map<String, String> map) {
@@ -142,13 +227,9 @@ public class Translation extends ModsModule {
     @Override
     public void postInit() throws Throwable {
         ObjectMap<String, String> modified = arc.Core.bundle.getProperties();
-        for (ObjectMap.Entry<String, String> s : modified.entries())
-            if (GlopionCore.colorPatchSettings) modified.put(s.key, getRandomHexColor() + s.value + "[white]");
-        
-        for (ObjectMap.Entry<String, String> s : Interface.bundle) {
-            modified.put(s.key, s.value);
+        for (ObjectMap.Entry<String, String> s : modified.entries()) {
+            modified.put(s.key, colorized(s.value));
         }
-        
         arc.Core.bundle.setProperties(modified);
         //for (Map.Entry<String, CommandsCenter.Command> c : CommandsCenter.commandsList.entrySet())
         //   c.getValue().description = CommandsCenter.getTranslation(c.getKey());

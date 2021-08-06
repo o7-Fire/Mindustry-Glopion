@@ -22,6 +22,12 @@ import arc.struct.ObjectMap;
 import mindustry.Vars;
 import mindustry.gen.Icon;
 import org.o7.Fire.Glopion.Internal.Interface;
+import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Internal.TextManager;
+
+import java.io.IOException;
+import java.util.Properties;
+import java.util.function.Consumer;
 
 public class BundleViewer extends ScrollableDialog {
     String see = "";
@@ -31,14 +37,35 @@ public class BundleViewer extends ScrollableDialog {
     }
     
     @Override
+    public void showSetup() {
+        super.showSetup();
+        addNavButton(TextManager.translate("Save To File"), Icon.save, () -> {
+            try {
+                Vars.ui.showInfo(TextManager.dumpBundle().getAbsolutePath());
+            }catch(IOException e){
+                WarningHandler.handleMindustryUserFault(e);
+            }
+            try {
+                Properties properties = new Properties();
+                for (ObjectMap.Entry<String, String> s : Core.bundle.getProperties().entries()) {
+                    properties.setProperty(s.key, s.value);
+                }
+                Vars.ui.showInfo(TextManager.dumpBundle("bundle", properties).getAbsolutePath());
+            }catch(IOException e){
+                WarningHandler.handleMindustryUserFault(e);
+            }
+        });
+    }
+    
+    @Override
     protected void setup() {
         cont.table(t -> {
             t.button(Icon.cancel, () -> {
                 see = "";
                 init();
-            }).tooltip("Clear");
+            }).tooltip(TextManager.translate("Clear"));
             t.button(Icon.zoom, () -> {
-                Vars.ui.showTextInput("Search", "", see, s -> {
+                Vars.ui.showTextInput(TextManager.translate("Search"), "", see, s -> {
                     try {
                         see = s;
                         init();
@@ -46,7 +73,7 @@ public class BundleViewer extends ScrollableDialog {
                         Vars.ui.showException(te);
                     }
                 });
-            }).tooltip("Search");//refresh button in disguise
+            }).tooltip(TextManager.translate("Search"));//refresh button in disguise
         }).growX();
         cont.row();
         ad(Interface.bundle);
@@ -54,13 +81,16 @@ public class BundleViewer extends ScrollableDialog {
     }
     
     void ad(ObjectMap<String, String> map) {
-        for (ObjectMap.Entry<String, String> s : map.entries())
+        for (ObjectMap.Entry<String, String> s : map.entries()) {
             if (see.isEmpty() || (see.contains(s.key.toLowerCase()) || see.contains(s.value.toLowerCase()))){
-                ad(s.key, s.value, map);
+                ad(s.key, s.value, ss -> {
+                    map.put(s.key, ss);
+                });
             }
+        }
     }
     
-    protected void ad(Object title, Object value, ObjectMap<String, String> bund) {
+    protected void ad(Object title, Object value, Consumer<String> changed) {
         if (value == null) value = "null";
         //if (BaseSettings.colorPatch) title = "[" + Random.getRandomHexColor() + "]" + title;
         Label l = new Label(title + ":");
@@ -70,13 +100,13 @@ public class BundleViewer extends ScrollableDialog {
         Object finalTitle = title;
         table.button(finalValue, () -> {
             try {
-                Vars.ui.showTextInput("Change to", String.valueOf(finalTitle), finalValue, s -> {
-                    bund.put(String.valueOf(finalTitle), s);
+                Vars.ui.showTextInput(TextManager.translate("Change to"), String.valueOf(finalTitle), finalValue, s -> {
+                    changed.accept(s);
                 });
             }catch(Throwable t){
-                Vars.ui.showException(t);
+                WarningHandler.handleMindustryUserFault(t);
             }
-        }).growX().tooltip("Raw");
+        }).growX().tooltip(TextManager.translate("Raw"));
         table.row();
     }
 }

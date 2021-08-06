@@ -30,6 +30,7 @@
 
 package org.o7.Fire.Glopion.Internal;
 
+import Atom.Exception.GetRealException;
 import Atom.Reflect.OS;
 import Atom.Reflect.Reflect;
 import arc.net.Client;
@@ -115,7 +116,7 @@ public class InformationCenter extends ModsModule {
     
     public static <T> Set<Class<? extends T>> getExtendedClass(Class<T> c) {
         if (OS.isAndroid || OS.isIos){//Dalvik bad
-            throw new RuntimeException("Mobile doesn't support Reflect.getExtendedClass()");
+            throw new GetRealException("Mobile doesn't support Reflect.getExtendedClass()");
         }
         return Atom.Reflect.ExternalReflection.getExtendedClass(GlopionCore.class.getPackage().getName(), c, InformationCenter.class.getClassLoader());
     }

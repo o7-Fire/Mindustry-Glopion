@@ -5,7 +5,7 @@ import arc.Core;
 import arc.util.Log;
 import arc.util.async.Threads;
 import mindustry.Vars;
-import org.o7.Fire.Glopion.Patch.Translation;
+import org.o7.Fire.Glopion.Internal.TextManager;
 import org.o7.Fire.Glopion.UI.OptionsDialog;
 
 import java.io.File;
@@ -69,7 +69,7 @@ public class GlopionDesktop extends GlopionCore {
     
     @Override
     public void init() {
-        Translation.registerWords("enableDeepPatchSettings", "Deep Patch");
+        TextManager.registerWords("enableDeepPatchSettings", "Deep Patch");
         
         super.init();
     }

@@ -13,6 +13,7 @@ import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Internal.Testing;
+import org.o7.Fire.Glopion.Internal.TextManager;
 import org.o7.Fire.Glopion.Version;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public abstract class ModsModule extends Mod implements Module {
     protected boolean testCompleted = true;
     
     public String getDescription() {
-        return "what";
+        return TextManager.translate(">Do nothing\n>Crashed\n>Refuse to elaborate further\n>Leave\n:gigachad:");
     }
     
     @Override

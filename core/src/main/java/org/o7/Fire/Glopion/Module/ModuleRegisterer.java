@@ -11,17 +11,14 @@ import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Commands.CommandsHandler;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
 import org.o7.Fire.Glopion.GlopionCore;
-import org.o7.Fire.Glopion.Internal.InformationCenter;
-import org.o7.Fire.Glopion.Internal.Overlay;
+import org.o7.Fire.Glopion.Internal.*;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
-import org.o7.Fire.Glopion.Internal.Testing;
-import org.o7.Fire.Glopion.Internal.TilesOverlay;
 import org.o7.Fire.Glopion.Module.Patch.UIPatch;
 import org.o7.Fire.Glopion.Module.Patch.VarsPatch;
 import org.o7.Fire.Glopion.Patch.AtomicLogging;
 import org.o7.Fire.Glopion.Patch.EventHooker;
 import org.o7.Fire.Glopion.Patch.SchematicPool;
-import org.o7.Fire.Glopion.Patch.Translation;
+import org.o7.Fire.Glopion.Patch.TranslateChat;
 import org.o7.Fire.Glopion.Watcher.BlockWatcher;
 
 import java.lang.reflect.InvocationTargetException;
@@ -60,6 +57,7 @@ public class ModuleRegisterer implements Module {
             try {
                 m.accept(value);
             }catch(Throwable t){
+                Log.err(value.getName());
                 WarningHandler.handleProgrammerFault(t);
             }
         }
@@ -83,8 +81,9 @@ public class ModuleRegisterer implements Module {
     
     
     public void core() {
-        unloadedModulesMods.addAll(Arrays.asList(AtomicLogging.class, SchematicPool.class, VarsPatch.class, Overlay.class, EventHooker.class, Pathfinding.class, BlockWatcher.class, CommandsHandler.class, Translation.class, UIPatch.class, TilesOverlay.class, ModuleIcon.class));
+        unloadedModulesMods.addAll(Arrays.asList(AtomicLogging.class, SchematicPool.class, VarsPatch.class, Overlay.class, EventHooker.class, Pathfinding.class, BlockWatcher.class, CommandsHandler.class, TextManager.class, UIPatch.class, TilesOverlay.class, ModuleIcon.class));
         unloadedModulesMods.add(ModuleInformation.class);//added in 0.6.6
+        unloadedModulesMods.add(TranslateChat.class);//added in 0.7.0
         if (!Vars.mobile){
             unloadedModulesMods.addAll(InformationCenter.getExtendedClass(ModsModule.class));
         }
@@ -116,8 +115,12 @@ public class ModuleRegisterer implements Module {
             
                 if (enabled){
                     module = registerModule(unloaded);
-                    if(module.disabled())
+                    if (module.disabled()){
+                        modulesMods.remove(unloaded);
+                        modulesSet.remove(unloaded);
                         continue;
+        
+                    }
                     modulesMods.put(unloaded, module);
                     ArrayList<Class<? extends ModsModule>> depend = module.dependency;
                     for (Class<? extends ModsModule> h : depend) {

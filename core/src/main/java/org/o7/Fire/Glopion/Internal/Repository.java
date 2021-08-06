@@ -33,26 +33,28 @@ package org.o7.Fire.Glopion.Internal;
 
 import Atom.Encoding.Encoder;
 import Atom.File.RepoInternal;
-import Atom.Utility.Pool;
+import Atom.Struct.InstantFuture;
 import arc.graphics.Pixmap;
 import arc.util.Log;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.Module;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.concurrent.Future;
 
-public class Repo extends Atom.File.Repo implements Module {
-    private static Repo INSTANCE = null;
+public class Repository extends Atom.File.Repo implements Module {
+    private static Repository INSTANCE = null;
     
-    public static Repo getRepo() {
+    public static Repository getRepo() {
         if (INSTANCE == null){
             try {
-                new Repo().init();
+                new Repository().init();
             }catch(Throwable throwable){
                 WarningHandler.handleMindustry(throwable);
             }
@@ -60,19 +62,33 @@ public class Repo extends Atom.File.Repo implements Module {
         return INSTANCE;
     }
     
+    
+    public static ArrayList<String> readStringSequence(String path, String delimiter) throws IOException {
+        return getRepo().readArrayString(path, delimiter);
+    }
+    
+    public static Properties readProperties(String path) throws IOException {
+        return getRepo().readProperty(path);
+    }
+    
     @Override
     protected ArrayList<Future<URL>> parallelSearch(String s) {
         ArrayList<Future<URL>> a = super.parallelSearch(s);
-        a.add(Pool.submit(() -> RepoInternal.class.getClassLoader().getResource(s)));
-        a.add(Pool.submit(() -> ClassLoader.getSystemResource(s)));
+        a.add((InstantFuture) () -> RepoInternal.class.getClassLoader().getResource(s));
+        a.add((InstantFuture) () -> ClassLoader.getSystemResource(s));
         return a;
     }
     
     @Override
     public void init() throws Throwable {
         try {
-            for (String s : readString("src/repos.txt").split("\n"))
-                if (!s.startsWith("#")) addRepo(new URL(s));
+            for (Object s : readProperty("src/repos.properties").values()) {
+                try {
+                    addRepo(new URL((String) s));
+                }catch(MalformedURLException malformedURLException){
+                    WarningHandler.handleProgrammerFault(malformedURLException);
+                }
+            }
         }catch(Exception t){
             WarningHandler.handleMindustry(t);
         }

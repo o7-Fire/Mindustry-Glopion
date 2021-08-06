@@ -26,8 +26,8 @@ import org.o7.Fire.Glopion.Event.EventExtended;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
-import org.o7.Fire.Glopion.Module.*;
 import org.o7.Fire.Glopion.Module.Module;
+import org.o7.Fire.Glopion.Module.*;
 
 import java.util.ArrayList;
 
@@ -72,9 +72,9 @@ public class EventHooker extends ModsModule {
             });
             Core.settings.getBoolOnce("CrashReport1", () -> Vars.ui.showConfirm("Anonymous Data Reporter", "We collect your anonymous data e.g crash-log, to make your experience much worse", () -> {
             }));
-            if (System.getProperty("Glopion-Foo") != null){
-                Core.settings.getBoolOnce("GlopionFoo", () -> {
-                    Vars.ui.showText("[royal]Glopion[white]-[red]Warning", "Foo client with ozone ????, are you a savage");
+            if (System.getProperty("gay-shit-no-offense") != null){
+                Core.settings.getBoolOnce("gay-shit-no-offense", () -> {
+                    Vars.ui.showText("[royal]Glopion[white]-[red]Warning", "something wrong, i can feel it");
                 });
             }
             //GlopionCore.moduleRegisterer.postInit();

@@ -77,7 +77,7 @@ public class WarningHandler {
         }
         s = t.getClass().getSimpleName();
         handleTest(t);
-        handleStealthMindustry(t, s);
+        tryLogViaMindustry(t, s);
         try {
             Vars.ui.showException(t);
         }catch(Throwable ignored){}
@@ -87,7 +87,10 @@ public class WarningHandler {
      * JVM Related don't try to catch it, e.g {@link OutOfMemoryError}
      */
     public static void handleJava(Throwable t) {
-        if (t instanceof VirtualMachineError) throw new RuntimeException(t);
+        while (t.getCause() != null) {
+            if (t instanceof VirtualMachineError) throw (VirtualMachineError) t;
+            t = t.getCause();
+        }
     
     }
     
@@ -111,7 +114,7 @@ public class WarningHandler {
             if(Reflect.debug || Vars.headless || Vars.mobile)
                 t.printStackTrace();
             if (Reflect.debug){
-                handleStealthMindustry(t, "Glopion-Debug");
+                tryLogViaMindustry(t, "Glopion-Debug");
             }
         }catch(Throwable ignored){}
         
@@ -120,7 +123,7 @@ public class WarningHandler {
     /**
      * Try log it, don't care much
      */
-    public static void handleStealthMindustry(Throwable t, String s) {
+    public static void tryLogViaMindustry(Throwable t, String s) {
         try {
             Log.errTag(s, t.getMessage());
         }catch(Throwable ignored){}

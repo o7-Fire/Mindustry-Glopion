@@ -10,7 +10,7 @@ import arc.util.Log;
 import mindustry.Vars;
 import mindustry.gen.Icon;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
-import org.o7.Fire.Glopion.Patch.Translation;
+import org.o7.Fire.Glopion.Internal.TextManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -73,10 +73,9 @@ public class OptionsDialog extends ScrollableDialog {
     protected void setup() {
         for (Field f : getSettingsField()) {
             if (f.getType() == boolean.class){
-                
                 try {
                     boolean b = f.getBoolean(null);
-                    table.check(Translation.get(f.getName()), b, be -> {
+                    table.check(TextManager.get(f.getName()), b, be -> {
                         try {
                             f.set(null, be);
                             saveSettings.get(getQualifiedName(f), String.valueOf(be));
@@ -84,7 +83,7 @@ public class OptionsDialog extends ScrollableDialog {
                             WarningHandler.handleProgrammerFault(e);
                             Vars.ui.showException(e);
                         }
-                    }).growX().row();
+                    }).row();
                 }catch(Exception e){
                     table.add(e.toString()).growX().color(Color.red).row();
                     WarningHandler.handleProgrammerFault(e);
@@ -92,7 +91,7 @@ public class OptionsDialog extends ScrollableDialog {
                 
             }else{
                 table.table(t -> {
-                    t.add(Translation.get(f.getName())).growX().row();
+                    t.add(TextManager.get(f.getName())).growX().row();
                     
                     try {
                         temp.put(getQualifiedName(f), f.get(null) + "");

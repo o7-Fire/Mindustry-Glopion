@@ -28,13 +28,10 @@ import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.Styles;
 import org.o7.Fire.Glopion.Experimental.Evasion.Identification;
-import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
-import org.o7.Fire.Glopion.Patch.Translation;
+import org.o7.Fire.Glopion.Internal.TextManager;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.TreeSet;
 
 public class ModsMenu extends ScrollableDialog {
     static Seq<Dialog> dialogs = new Seq<>();
@@ -95,8 +92,8 @@ public class ModsMenu extends ScrollableDialog {
             table.button(dialog.getTitle(), dialog.icon, textButtonStyle, dialog::show).growX();
         }else{
             String title = d.title.getText().toString();
-            if (title.isEmpty()) title = Translation.get(d.getClass().getCanonicalName());
-            else title = Translation.get(title);
+            if (title.isEmpty()) title = TextManager.get(d.getClass().getCanonicalName());
+            else title = TextManager.get(title);
             table.button(title, dialogDrawableHashMap.get(d, Icon.book), d::show).growX();
         }
         table.row();

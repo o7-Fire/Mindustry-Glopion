@@ -11,7 +11,7 @@ import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
-import org.o7.Fire.Glopion.Patch.Translation;
+import org.o7.Fire.Glopion.Internal.TextManager;
 
 public class AtomicDialog extends BaseDialog {
     public static AtomicDialog instance;
@@ -73,8 +73,7 @@ public class AtomicDialog extends BaseDialog {
     }
     
     protected String getTitle() {
-        if(title.getText().toString().equals("Null"))
-            title.setText(Translation.get(this.getClass().getName()));
+        if(title.getText().toString().equals("Null")) title.setText(TextManager.get(this.getClass().getName()));
         return title.getText().toString();
     }
 }

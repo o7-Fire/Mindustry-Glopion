@@ -24,8 +24,8 @@ import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.GlopionCore;
+import org.o7.Fire.Glopion.Internal.TextManager;
 import org.o7.Fire.Glopion.Module.Patch.UIPatch;
-import org.o7.Fire.Glopion.Patch.Translation;
 
 public class HudMenu extends AtomicDialog {
     
@@ -75,21 +75,21 @@ public class HudMenu extends AtomicDialog {
     }
     
     void ad(Table t, BaseDialog baseDialog, Drawable d) {
-        t.button(Translation.get(baseDialog.getClass().getName()), d, () -> {
+        t.button(TextManager.get(baseDialog.getClass().getName()), d, () -> {
             hide();
             baseDialog.show();
         }).growX();
     }
     
     void ad(BaseDialog baseDialog, Drawable d) {
-        tB.button(Translation.get(baseDialog.getClass().getName()), d, () -> {
+        tB.button(TextManager.get(baseDialog.getClass().getName()), d, () -> {
             hide();
             baseDialog.show();
         }).growX();
     }
     
     void ad(BaseDialog baseDialog) {
-        tB.button(Translation.get(baseDialog.getClass().getName()), () -> {
+        tB.button(TextManager.get(baseDialog.getClass().getName()), () -> {
             hide();
             baseDialog.show();
         }).growX();

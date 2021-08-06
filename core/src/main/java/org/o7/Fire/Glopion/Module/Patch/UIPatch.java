@@ -34,8 +34,8 @@ import mindustry.ui.Styles;
 import mindustry.ui.fragments.MenuFragment;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
+import org.o7.Fire.Glopion.Internal.TextManager;
 import org.o7.Fire.Glopion.Module.ModsModule;
-import org.o7.Fire.Glopion.Patch.Translation;
 import org.o7.Fire.Glopion.UI.*;
 
 import static mindustry.Vars.ui;
@@ -45,7 +45,7 @@ public class UIPatch extends ModsModule {
     public static Table settingsTable;
     {
         dependency.add(VarsPatch.class);
-        dependency.add(Translation.class);
+        dependency.add(TextManager.class);
     }
     
     private void onResize() {
@@ -56,10 +56,10 @@ public class UIPatch extends ModsModule {
             }catch(Throwable ignored){}
             if (Vars.mobile || Vars.testMobile){
                 if (Core.graphics.isPortrait()) VarsPatch.menu.row();
-                VarsPatch.menu.add(new MobileButton(Icon.info, Translation.get("Glopion-Menu"), () -> GlopionCore.modsMenu.show()));
+                VarsPatch.menu.add(new MobileButton(Icon.info, TextManager.get("Glopion-Menu"), () -> GlopionCore.modsMenu.show()));
             }else{
-                
-                VarsPatch.menu.button(Translation.get("Glopion-Menu"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
+    
+                VarsPatch.menu.button(TextManager.get("Glopion-Menu"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
             }
         }
         if(settingsTable != null){
@@ -67,10 +67,10 @@ public class UIPatch extends ModsModule {
             settingsTable.add("Glopion").growX().center().row();
             if (Vars.mobile || Vars.testMobile){
                 if (Core.graphics.isPortrait()) settingsTable.row();
-                settingsTable.add(new MobileButton(Icon.info, Translation.get("Glopion-Menu"), () -> GlopionCore.modsMenu.show()));
+                settingsTable.add(new MobileButton(Icon.info, TextManager.get("Glopion-Menu"), () -> GlopionCore.modsMenu.show()));
             }else{
     
-                settingsTable.button(Translation.get("Glopion-Menu"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
+                settingsTable.button(TextManager.get("Glopion-Menu"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
             }
         }
     }
@@ -90,7 +90,7 @@ public class UIPatch extends ModsModule {
         };
         //GlopionCore.commFrag = new CommandsListFrag();
         AtomicDialog.instance = new AtomicDialog() {{addCloseButton();}};
-        ui.research.title.setText(Translation.get("techtree"));
+        ui.research.title.setText(TextManager.get("techtree"));
         ModsMenu.add(ui.database, Icon.book);
         ModsMenu.add(ui.research, Icon.tree);
         ModsMenu.add(new BundleViewer());
