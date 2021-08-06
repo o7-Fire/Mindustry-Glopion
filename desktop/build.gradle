@@ -50,8 +50,6 @@ dependencies {
     def nd4jVersion = "1.0.0-M1"
     //DL4J and its cult
     compileOnly (group: 'org.deeplearning4j', name: 'rl4j-core', version: nd4jVersion){
-        exclude group: 'org.bytedeco', module: 'opencv-platform'
-        exclude group: 'org.bytedeco', module: 'open-cv'
         exclude group: 'org.bytedeco', module: 'leptonica-platform'
         exclude group: 'org.bytedeco', module: 'hdf5-platform'
         exclude group: 'org.bytedeco', module: 'ffmpeg-platform'
@@ -104,7 +102,7 @@ dependencies {
     }
 
 }
-//native don't get included
+//implementation don't get included
 task writeDependency() {
     File txt = new File(projectDir, "src/main/resources/dependencies")
     txt.parentFile.mkdirs()
@@ -119,11 +117,16 @@ task writeDependency() {
         HashSet<String> exist = new HashSet<>()
         configurations.runtimeClasspath.getResolvedConfiguration().getResolvedArtifacts().each {
             ModuleVersionIdentifier dep = it.getModuleVersion().getId()
-            exist.add("$dep.group:$dep.name")
+            String name = "$dep.group:$dep.name:$dep.version";
+            if(it.classifier != null) {
+                name = name + ":" + it.classifier;
+            }
+            exist.add(name)
         }
-        def conf = configurations.compileClasspath
+        println configurations
+        def conf = configurations.compileClasspath.getResolvedConfiguration().getResolvedArtifacts() + configurations.runtimeClasspath.getResolvedConfiguration().getResolvedArtifacts()
         def skip = ["com.github.Anuken", "annotations", "android", "ios", "macos"]
-        conf.getResolvedConfiguration().getResolvedArtifacts().each {
+        conf.each {
             ModuleVersionIdentifier dep = it.getModuleVersion().getId()
             if (exist.contains("$dep.group:$dep.name")) return;
             String name = "$dep.group:$dep.name:$dep.version";
