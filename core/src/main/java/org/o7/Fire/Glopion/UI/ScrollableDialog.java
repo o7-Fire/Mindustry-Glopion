@@ -17,7 +17,6 @@
 package org.o7.Fire.Glopion.UI;
 
 import Atom.Utility.Pool;
-import Atom.Utility.Random;
 import arc.Core;
 import arc.graphics.Color;
 import arc.scene.style.Drawable;
@@ -26,9 +25,9 @@ import arc.scene.ui.ScrollPane;
 import arc.scene.ui.layout.Table;
 import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
-import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Internal.TextManager;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -140,8 +139,7 @@ public abstract class  ScrollableDialog extends AtomicDialog {
     
     protected void ad(Object title, Object value, Consumer<String> cs) {
         value = String.valueOf(value);
-        title = String.valueOf(title);
-        if (GlopionCore.colorPatchSettings) title = "[" + Random.getRandomHexColor() + "]" + title;
+        title = TextManager.translate(String.valueOf(title));
         Label l = new Label(title + ":");
         table.add(l).growX();
         String finalValue = String.valueOf(value);

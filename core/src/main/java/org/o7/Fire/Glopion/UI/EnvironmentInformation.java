@@ -28,6 +28,7 @@ import arc.scene.ui.TextButton;
 import arc.scene.ui.TextField;
 import arc.struct.ObjectMap;
 import mindustry.Vars;
+import mindustry.core.Version;
 import mindustry.gen.Icon;
 import mindustry.gen.Sounds;
 import mindustry.ui.Styles;
@@ -51,16 +52,40 @@ public class EnvironmentInformation extends ScrollableDialog {
 
     }
     
+    //non async function first
     protected void setup() {
+    
         ad("Player Name", Vars.player.name);
+        table.table(t -> {
+            t.add("Version.build:" + Version.build).left();
+            t.button("-", () -> {
+                Version.build--;
+                init();
+            }).growX();
+            t.button("+", () -> {
+                Version.build++;
+                init();
+            }).growX();
+        }).growX().row();
+        table.table(t -> {
+            t.add("Version.revision:" + Version.revision).left();
+            t.button("-", () -> {
+                Version.revision--;
+                init();
+            }).growX();
+            t.button("+", () -> {
+                Version.revision++;
+                init();
+            }).growX();
+        }).growX().row();
         ad("UUID", Core.settings.getString("uuid"), s -> {
             if (Vars.platform.getUUID().length() == s.length()) Core.settings.put("uuid", s);
         });
-        ad("Classloader", ()->{
+        ad("Classloader", () -> {
             StringBuilder sb = new StringBuilder();
-            try{
+            try {
                 ClassLoader cl = EnvironmentInformation.class.getClassLoader();
-                while (cl.getParent() != null){
+                while (cl.getParent() != null) {
                     sb.append(cl.getClass().getSimpleName()).append(" -> ");
                     cl = cl.getParent();
                 }

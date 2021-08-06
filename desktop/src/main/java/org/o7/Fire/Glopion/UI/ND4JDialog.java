@@ -7,7 +7,10 @@ import org.nd4j.common.config.ND4JClassLoading;
 import org.nd4j.linalg.factory.Environment;
 import org.nd4j.linalg.factory.Nd4jBackend;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
 public class ND4JDialog extends ScrollableDialog {
     List<Nd4jBackend> backends = new ArrayList<>();

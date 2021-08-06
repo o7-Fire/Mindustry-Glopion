@@ -394,9 +394,9 @@ public class Interface {
         });
     }
     
-    public static Class<?> getClass(String key) {
+    public static <T> Class<T> getClass(String key) {
         try {
-            return Class.forName(key, false, Interface.class.getClassLoader());
+            return (Class<T>) Class.forName(key, false, Interface.class.getClassLoader());
         }catch(ClassNotFoundException e){
             return null;
         }
