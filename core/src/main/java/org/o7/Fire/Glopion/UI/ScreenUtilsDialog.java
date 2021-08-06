@@ -3,29 +3,30 @@ package org.o7.Fire.Glopion.UI;
 import Atom.Time.Time;
 import arc.Core;
 import arc.files.Fi;
-import arc.graphics.*;
+import arc.graphics.Color;
+import arc.graphics.Pixmap;
+import arc.graphics.PixmapIO;
+import arc.graphics.Texture;
 import arc.graphics.g2d.TextureRegion;
-import arc.graphics.gl.PixmapTextureData;
 import arc.scene.Action;
 import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.Label;
+import arc.scene.ui.layout.Scl;
 import arc.util.ScreenUtils;
-import mindustry.gen.Icon;
+import mindustry.gen.Tex;
+import mindustry.graphics.Pal;
+import mindustry.ui.BorderImage;
+import org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper;
 
 import java.util.concurrent.TimeUnit;
 
 public class ScreenUtilsDialog extends ScrollableDialog {
     boolean flipY = false;
-    volatile boolean bullshitInProgress = false;
-    int x = 0, y = 0, h = 0, w = 0;
+    int x = 0, y = 0, h = Core.graphics.getHeight(), w = Core.graphics.getWidth();
     float xF, yF, wF = 1, hF = 1;
-  
+    
     Texture texture = null;
-    @Override
-    protected void init() {
-        if (bullshitInProgress) return;
-        super.init();
-    }
+    BorderImage borderImage = null;
     
     @Override
     protected void setup() {
@@ -62,25 +63,46 @@ public class ScreenUtilsDialog extends ScrollableDialog {
                 sb.setText("Width: " + w);
             }).growX();
         }).growX().row();
-        
         table.table(t -> {
-        
             if(texture != null){
                 texture.dispose();
                 texture = null;
             }
+    
             Time time = new Time(TimeUnit.MILLISECONDS);
             Pixmap pixmap = null;
             pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h, flipY);
             Fi f = new Fi("test.png");
             f.delete();
-            PixmapIO.writePng(f,pixmap);
-            pixmap.dispose();
-            texture = new Texture(f);
-            t.image(new TextureRegionDrawable(new TextureRegion(texture))).growX().growY().row();
-            t.add(time.elapsedS()).growX();
-        }).growX().growY().color(Color.gray);
+            PixmapIO.writePng(f, pixmap);
+            texture = new Texture(pixmap);
+            texture.setFilter(Texture.TextureFilter.linear);
+            final TextureRegionDrawable region = new TextureRegionDrawable(new TextureRegion(texture));
+            if (borderImage != null){
+                borderImage.invalidateHierarchy();
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("Screenshot Time: ");
+            sb.append(time.elapsedS()).append("\n");
+            sb.append("Byte Length: ").append(w * h * 4).append(" (").append(SharedBootstrapper.humanReadableByteCountSI(w * h * 4)).append(")");
+            t.add(sb.toString()).growX().row();
+            t.add(borderImage = new BorderImage() {
+                {
+                    border(Pal.accent);
+                    setDrawable(Tex.nomap);
+                    pad = Scl.scl(4f);
+                }
         
+                @Override
+                public void draw() {
+                    super.draw();
+                    setDrawable(region);
+                }
+            }).row();
+    
+            pixmap.dispose();
+        }).growX().growY().color(Color.gray);
+        borderImage.clear();
     }
     
     

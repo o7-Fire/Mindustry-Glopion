@@ -20,17 +20,24 @@ public class AtomicDialog extends BaseDialog {
     public AtomicDialog(String title, DialogStyle style) {
         super(title, style);
         showSetup();
-        
+    
     }
-    public void showSetup(){
+    
+    public void showSetup() {
         onResize(this::setup);
         shown(this::setup);
         addRefreshAndClose();
     }
-    public void addRefreshAndClose(){
+    
+    public void addRefreshAndClose() {
         addCloseButton();
         addNavButton("Refresh", Icon.refresh, this::setup);
     }
+    
+    protected void addRefreshButton() {
+        addNavButton("Refresh", Icon.refresh, this::setup);
+    }
+    
     public AtomicDialog(String title) {
         this(title, Core.scene.getStyle(DialogStyle.class));
     }
@@ -39,9 +46,6 @@ public class AtomicDialog extends BaseDialog {
         this("Null");
     }
     
-    protected void addRefreshButton() {
-        addNavButton("Refresh", Icon.refresh, this::setup);
-    }
     
     protected void setup()  {
     

@@ -134,7 +134,6 @@ public class WarningHandler {
      * @see #handleMindustry(Throwable)
      */
     public static void handleMindustry(Throwable t, String stacktrace) {
-        handleTest(t);
         handleProgrammerFault(t);
         
     }

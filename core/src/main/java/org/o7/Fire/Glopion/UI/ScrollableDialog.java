@@ -82,6 +82,7 @@ public abstract class  ScrollableDialog extends AtomicDialog {
         }catch(VirtualMachineError v){
             throw new RuntimeException(v);
         }catch(Throwable t){
+            WarningHandler.handleMindustry(t);
             table.add(t.toString()).growX().growY().color(Color.red);
             
         }
