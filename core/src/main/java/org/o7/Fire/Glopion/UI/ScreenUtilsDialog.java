@@ -72,9 +72,7 @@ public class ScreenUtilsDialog extends ScrollableDialog {
             Time time = new Time(TimeUnit.MILLISECONDS);
             Pixmap pixmap = null;
             pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h, flipY);
-            Fi f = new Fi("test.png");
-            f.delete();
-            PixmapIO.writePng(f, pixmap);
+    
             texture = new Texture(pixmap);
             texture.setFilter(Texture.TextureFilter.linear);
             final TextureRegionDrawable region = new TextureRegionDrawable(new TextureRegion(texture));
@@ -92,14 +90,16 @@ public class ScreenUtilsDialog extends ScrollableDialog {
                     setDrawable(Tex.nomap);
                     pad = Scl.scl(4f);
                 }
-        
+    
                 @Override
                 public void draw() {
                     super.draw();
                     setDrawable(region);
                 }
             }).row();
-    
+            Fi f = new Fi("test.png");
+            f.delete();
+            PixmapIO.writePng(f, pixmap);
             pixmap.dispose();
         }).growX().growY().color(Color.gray);
         borderImage.clear();
