@@ -23,7 +23,7 @@ public class AtomicLogging extends ModsModule {
     public static String[] stags = {"&lc&fb[D]", "&lb&fb[I]", "&ly&fb[W]", "&lr&fb[E]", ""};
     
     public void preInit() {
-        
+        Log.info("Changing to AtomicLogging");
         if (Reflect.debug) Log.level = Log.LogLevel.debug;
         if (writer != null){
             try {

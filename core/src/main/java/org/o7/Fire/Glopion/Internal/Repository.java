@@ -39,6 +39,7 @@ import arc.util.Log;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.Module;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -89,6 +90,7 @@ public class Repository extends Atom.File.Repo implements Module {
                     WarningHandler.handleProgrammerFault(malformedURLException);
                 }
             }
+        }catch(FileNotFoundException ignored){
         }catch(Exception t){
             WarningHandler.handleMindustry(t);
         }

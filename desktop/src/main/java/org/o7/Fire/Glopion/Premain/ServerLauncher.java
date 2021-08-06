@@ -4,6 +4,7 @@ import Atom.Reflect.Reflect;
 import arc.ApplicationListener;
 import arc.backend.headless.HeadlessApplication;
 import arc.func.Cons;
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.core.Platform;
 import mindustry.net.Administration;
@@ -17,30 +18,44 @@ import java.util.List;
 import static arc.util.Log.logger;
 import static mindustry.Vars.platform;
 
-public class ServerLauncher {
+public class ServerLauncher extends mindustry.server.ServerLauncher {
     public static final List<Throwable> exception = Collections.synchronizedList(new ArrayList<>());
     public static HeadlessApplicationWithExtraModification application;
     
-    public static void main(String[] args) throws NoSuchFieldException, IllegalAccessException {
+    public static void main(String[] args) {
         if (System.getProperty("dev") != null){
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
             Reflect.debug = true;
-            Administration.Config.debug.set(true);
         }
         
-        Field fargs = mindustry.server.ServerLauncher.class.getDeclaredField("args");
-        fargs.setAccessible(true);
-        fargs.set(null, args);
+        
+        try {
+            Field fargs = null;
+            fargs = mindustry.server.ServerLauncher.class.getDeclaredField("args");
+            fargs.setAccessible(true);
+            fargs.set(null, args);
+        }catch(ReflectiveOperationException e){
+            e.printStackTrace();
+            Log.err("Failed to hack args");
+        }
+        
         MindustryLauncher.patchClassloader(new Platform() {});
         Vars.net = new Net(platform.getNet());
         logger = (level1, text) -> {
             System.out.println(text);
         };
-        application = new HeadlessApplicationWithExtraModification(new mindustry.server.ServerLauncher(), t -> {
+        application = new HeadlessApplicationWithExtraModification(new ServerLauncher(), t -> {
             if (t instanceof VirtualMachineError) throw (VirtualMachineError) t;
             exception.add(t);
             t.printStackTrace();
         });
+    }
+    
+    @Override
+    public void init() {
+        if (System.getProperty("dev") != null) Administration.Config.debug.set(true);
+        super.init();
+        
     }
     
     public static class HeadlessApplicationWithExtraModification extends HeadlessApplication {
