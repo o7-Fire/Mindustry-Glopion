@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class Testing extends ModsModule {
     protected static final ArrayList<Boolean> sample = new ArrayList<>();
+    protected static volatile int preInit = 0, init = 0, postInit = 0;
     
     public static boolean testCompleted() {
         sample.clear();
@@ -32,6 +33,7 @@ public class Testing extends ModsModule {
         Log.info("TEST MODE");
         Log.warn("TEST MODE");
         Log.err("TEST MODE");
+        preInit++;
     }
     
     @Override
@@ -39,17 +41,23 @@ public class Testing extends ModsModule {
         Log.info("TEST MODE");
         Log.warn("TEST MODE");
         Log.err("TEST MODE");
+        init++;
     }
     
     @Override
     public void update() {
-    
-        if (Vars.state.isPlaying() && testCompleted()) Core.app.exit();
+        if (Vars.state.isPlaying() && testCompleted()){
+            String stat = "preInit: " + preInit + ", Init: " + init + ", postInit: " + postInit;
+            Core.app.post(Core.app::exit);
+            if (init != 1 || preInit != 1 || postInit != 0){
+                throw new RuntimeException("Runned more than once or not runned:\n" + stat);
+            }
+        }
     
     }
     
     @Override
     public void postInit() throws Throwable {
-    
+        postInit++;
     }
 }
