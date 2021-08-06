@@ -29,6 +29,7 @@ import org.o7.Fire.Glopion.Module.ModsModule;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -43,13 +44,8 @@ public class TextManager extends ModsModule {
     public static final Map<String, String> commands = new HashMap<>();
     
     static {
-        try {
-            Log.debug("Searching for @.properties", totalPrefix());
-            Log.debug("Locale @", Interface.getLocale().getLanguage());
-            loadBundle(Repository.readProperties(totalPrefix() + ".properties"));
-        }catch(Exception e){
-            WarningHandler.handleProgrammerFault(e);
-        }
+        Log.debug("Searching for @.properties", totalPrefix());
+        loadBundle();
     }
     
     {
@@ -190,9 +186,14 @@ public class TextManager extends ModsModule {
         }
         for (String s : singlet1) registerWords(s, "[" + s + "]");
         for (String s : normalSinglet) registerWords(s);
+        loadBundle();
+    }
+    
+    public static void loadBundle() {
         try {
-        
             loadBundle(Repository.readProperties(totalPrefix() + ".properties"));
+        }catch(FileNotFoundException e){
+            Log.warn(e.getMessage());
         }catch(Exception e){
             WarningHandler.handleProgrammerFault(e);
         }
