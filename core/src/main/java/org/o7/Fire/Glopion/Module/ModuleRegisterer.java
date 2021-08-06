@@ -1,12 +1,11 @@
 package org.o7.Fire.Glopion.Module;
 
+import Atom.Struct.UnstableConsumer;
 import Atom.Time.Time;
 import arc.Core;
-import arc.Events;
 import arc.files.Fi;
 import arc.util.Log;
 import mindustry.Vars;
-import mindustry.game.EventType;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Commands.CommandsHandler;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
@@ -24,7 +23,6 @@ import org.o7.Fire.Glopion.Watcher.BlockWatcher;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * Handle all module creation and initialization, only invoked once
@@ -44,7 +42,7 @@ public class ModuleRegisterer implements Module {
         return modulesSet.put(moduleClass,module);
     }
     
-    public static <T> void invokeAll(Class<T> tClass, Consumer<T> consumer) {
+    public static <T> void invokeAll(Class<T> tClass, UnstableConsumer<T> consumer) {
         invokeAll(module -> {
             if (tClass.isInstance(module)){
                 consumer.accept((T) module);
@@ -52,12 +50,12 @@ public class ModuleRegisterer implements Module {
         });
     }
     
-    public static void invokeAll(Consumer<Module> m) {
+    public static void invokeAll(UnstableConsumer<Module> m) {
         for (Module value : modulesSet.values()) {
             try {
                 m.accept(value);
             }catch(Throwable t){
-                Log.err(value.getName());
+                Log.err(value.getClass().getCanonicalName());
                 WarningHandler.handleProgrammerFault(t);
             }
         }
@@ -226,7 +224,7 @@ public class ModuleRegisterer implements Module {
             remaining.add(remaining.size(), unloaded);
         }
         Log.debug("Glopion-Module-Registerer: took " + iteration + " to start");
-        Events.on(EventType.ClientLoadEvent.class, s -> postInit());
+    
     }
     
     @Override

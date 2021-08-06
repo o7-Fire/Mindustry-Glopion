@@ -77,6 +77,7 @@ public class EventHooker extends ModsModule {
                     Vars.ui.showText("[royal]Glopion[white]-[red]Warning", "something wrong, i can feel it");
                 });
             }
+            ModuleRegisterer.invokeAll(Module::postInit);
             //GlopionCore.moduleRegisterer.postInit();
             //SharedBoot.finishStartup();
             // setGlopionLogger();

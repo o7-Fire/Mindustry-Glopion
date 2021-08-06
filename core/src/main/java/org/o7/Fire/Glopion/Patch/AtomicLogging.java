@@ -17,11 +17,11 @@ import java.io.Writer;
 
 public class AtomicLogging extends ModsModule {
     public static Writer writer;
-    public static final Seq<String> logBuffer = new Seq<>();
+    public static final Seq<String> logBuffer = new Seq<>(8000);
     public static String[] tags = {"[green][D][]", "[royal][I][]", "[yellow][W][]", "[scarlet][E][]", ""};
     public static String[] color = {"[green]", "[royal]", "[yellow]", "[scarlet]", "[white]"};
     public static String[] stags = {"&lc&fb[D]", "&lb&fb[I]", "&ly&fb[W]", "&lr&fb[E]", ""};
-    
+    public static Log.LogHandler handler = new Log.DefaultLogHandler();
     public void preInit() {
         Log.info("Changing to AtomicLogging");
         if (Reflect.debug) Log.level = Log.LogLevel.debug;
@@ -31,7 +31,8 @@ public class AtomicLogging extends ModsModule {
                 writer = Core.settings.getDataDirectory().child(Utility.getDate().replace(' ', '/') + "-Atomic-Logger.txt").writer(false);
             }catch(Exception ignored){}
         }
-        Log.logger = (level, text) -> {
+    
+        handler = (level, text) -> {
             String raw = text + "";
             int i = Reflect.callerOffset() + 3;
             StackTraceElement st = null;
@@ -67,12 +68,13 @@ public class AtomicLogging extends ModsModule {
                 writer.write("[" + Character.toUpperCase(level.name().charAt(0)) + "] " + Log.removeColors(text) + System.getProperty("line.separator"));
                 writer.flush();
             }catch(Exception ignored){ }
-            
+        
             String result = text;
             String rawText = Log.format(stags[level.ordinal()] + "&fr " + text);
             System.out.println(rawText);
-            
+        
             result = tags[level.ordinal()] + " " + result;
+            if (logBuffer.size > 7000) logBuffer.clear();
             logBuffer.add(result);
             Events.fire(EventExtended.Log.class, new EventExtended.Log(result));
             if (!OS.isWindows){
@@ -80,7 +82,7 @@ public class AtomicLogging extends ModsModule {
                     result = result.replace(code, "");
                 }
             }
-            
+        
             if (Vars.ui != null && Vars.ui.scriptfrag != null){
                 Vars.ui.scriptfrag.addMessage(Log.removeColors(result));
             }
@@ -89,10 +91,15 @@ public class AtomicLogging extends ModsModule {
         Events.on(EventType.ClientLoadEvent.class, e -> {
             logBuffer.each(a -> {
                 if (Vars.ui != null && Vars.ui.scriptfrag != null) Vars.ui.scriptfrag.addMessage(a);
-                
+            
             });
         });
-        
+        Log.logger = handler;
+    }
+    
+    @Override
+    public void postInit() throws Throwable {
+        Log.logger = handler;
     }
     
     @Override

@@ -3,7 +3,6 @@ package org.o7.Fire.Glopion.Module;
 import Atom.Reflect.Reflect;
 import arc.files.Fi;
 import arc.graphics.Texture;
-import arc.util.Log;
 import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.ctype.Content;
@@ -11,7 +10,6 @@ import mindustry.ctype.ContentType;
 import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
-import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Internal.Testing;
 import org.o7.Fire.Glopion.Internal.TextManager;
 import org.o7.Fire.Glopion.Version;
@@ -85,13 +83,7 @@ public abstract class ModsModule extends Mod implements Module {
      */
     @Override
     public void init() {
-        try {
-            postInit();
-        }catch(Throwable e){
-            handleError(e);
-            WarningHandler.handleMindustry(e);
-            Log.errTag("Glopion-Module-Post-Init", "Failed: " + this.getClass().getCanonicalName());
-        }
+    
     }
     
     /**
