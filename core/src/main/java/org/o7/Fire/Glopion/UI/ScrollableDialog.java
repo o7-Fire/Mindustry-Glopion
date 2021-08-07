@@ -23,6 +23,7 @@ import arc.scene.style.Drawable;
 import arc.scene.ui.Label;
 import arc.scene.ui.ScrollPane;
 import arc.scene.ui.layout.Table;
+import mindustry.Vars;
 import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.Internal.Interface;
@@ -57,6 +58,7 @@ public abstract class  ScrollableDialog extends AtomicDialog {
         addCloseButton();
         addNavButton("Refresh", Icon.refresh, this::init);
     }
+    
     public ScrollableDialog(String title) {
         this(title, Core.scene.getStyle(DialogStyle.class));
     }
@@ -65,6 +67,9 @@ public abstract class  ScrollableDialog extends AtomicDialog {
         onInit.add(r);
     }
     
+    public void refreshDesktop() {
+        if (!Vars.mobile) init();
+    }
     
     protected abstract void setup();
     

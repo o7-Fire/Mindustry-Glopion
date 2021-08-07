@@ -3,7 +3,7 @@ package org.o7.Fire.Glopion.Brain;
 import org.nd4j.common.config.ND4JClassLoading;
 import org.o7.Fire.Glopion.GlopionDesktop;
 import org.o7.Fire.Glopion.Module.ModsModule;
-import org.o7.Fire.Glopion.Module.Patch.UIPatch;
+import org.o7.Fire.Glopion.Patch.UIPatch;
 
 public class ND4JInterface extends ModsModule {
     {

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.o7.Fire.Glopion.Module.Patch;
+package org.o7.Fire.Glopion.Patch;
 
 import Atom.Reflect.FieldTool;
 import Atom.Reflect.Reflect;

@@ -53,6 +53,7 @@ public class ExperimentDialog extends ScrollableDialog {
         Log.debug(sb.toString());
     }
     
+    
     @Override
     protected void setup() {
         try {

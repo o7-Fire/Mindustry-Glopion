@@ -12,12 +12,7 @@ import org.o7.Fire.Glopion.Commands.Pathfinding;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.*;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
-import org.o7.Fire.Glopion.Module.Patch.UIPatch;
-import org.o7.Fire.Glopion.Module.Patch.VarsPatch;
-import org.o7.Fire.Glopion.Patch.AtomicLogging;
-import org.o7.Fire.Glopion.Patch.EventHooker;
-import org.o7.Fire.Glopion.Patch.SchematicPool;
-import org.o7.Fire.Glopion.Patch.TranslateChat;
+import org.o7.Fire.Glopion.Patch.*;
 import org.o7.Fire.Glopion.Watcher.BlockWatcher;
 
 import java.lang.reflect.InvocationTargetException;

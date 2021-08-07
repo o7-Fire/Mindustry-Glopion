@@ -17,10 +17,11 @@ import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
 import mindustry.ui.BorderImage;
 import org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper;
+import org.o7.Fire.Glopion.Experimental.Experimental;
 
 import java.util.concurrent.TimeUnit;
 
-public class ScreenUtilsDialog extends ScrollableDialog {
+public class ScreenUtilsDialog extends ScrollableDialog implements Experimental {
     boolean flipY = false;
     int x = 0, y = 0, h = Core.graphics.getHeight(), w = Core.graphics.getWidth();
     float xF, yF, wF = 1, hF = 1;
@@ -106,13 +107,17 @@ public class ScreenUtilsDialog extends ScrollableDialog {
     }
     
     
-    
     @Override
     public void hide(Action action) {
-        if(texture != null){
+        if (texture != null){
             texture.dispose();
             texture = null;
         }
         super.hide(action);
+    }
+    
+    @Override
+    public void run() {
+        show();
     }
 }

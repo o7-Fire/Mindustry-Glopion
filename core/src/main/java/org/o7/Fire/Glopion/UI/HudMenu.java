@@ -25,7 +25,7 @@ import mindustry.gen.Icon;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.TextManager;
-import org.o7.Fire.Glopion.Module.Patch.UIPatch;
+import org.o7.Fire.Glopion.Patch.UIPatch;
 
 public class HudMenu extends AtomicDialog {
     

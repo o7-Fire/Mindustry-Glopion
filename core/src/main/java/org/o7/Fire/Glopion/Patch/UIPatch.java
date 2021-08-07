@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.o7.Fire.Glopion.Module.Patch;
+package org.o7.Fire.Glopion.Patch;
 
 import Atom.Reflect.Reflect;
 import Atom.Utility.Digest;
@@ -100,7 +100,7 @@ public class UIPatch extends ModsModule {
         ModsMenu.add(new LogView());
         ModsMenu.add(new ExperimentDialog());
         ModsMenu.add(new OptionsDialog());
-        ModsMenu.add(new ScreenUtilsDialog());
+    
         GlopionCore.modsMenu = new ModsMenu();
         GlopionCore.glopionHud = new HudMenu();
         Cell<Table> h = ui.settings.game.row().table().growX();
@@ -115,10 +115,10 @@ public class UIPatch extends ModsModule {
                     int hash = src.hashCode();
                     long lhash = Digest.longHash(src);
                     table.button(hash + "", () -> {
-                        Interface.copy(hash + "");
+                        Interface.copyToClipboard(hash + "");
                     }).tooltip("Copy").growY();
                     table.button(lhash + "", () -> {
-                        Interface.copy(lhash + "");
+                        Interface.copyToClipboard(lhash + "");
                     }).tooltip("Copy").growY();
                 }
             }.show();

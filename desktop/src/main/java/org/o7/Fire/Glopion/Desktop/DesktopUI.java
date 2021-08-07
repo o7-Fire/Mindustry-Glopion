@@ -2,7 +2,7 @@ package org.o7.Fire.Glopion.Desktop;
 
 import mindustry.Vars;
 import org.o7.Fire.Glopion.Module.ModsModule;
-import org.o7.Fire.Glopion.Module.Patch.UIPatch;
+import org.o7.Fire.Glopion.Patch.UIPatch;
 import org.o7.Fire.Glopion.UI.ModsMenu;
 import org.o7.Fire.Glopion.UI.ND4JDialog;
 import org.o7.Fire.Glopion.UI.OpenCVDialog;

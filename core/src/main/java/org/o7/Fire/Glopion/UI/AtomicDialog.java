@@ -1,12 +1,14 @@
 package org.o7.Fire.Glopion.UI;
 
 import arc.Core;
+import arc.func.Cons;
 import arc.scene.Action;
 import arc.scene.Scene;
 import arc.scene.style.Drawable;
 import arc.scene.ui.Dialog;
 import arc.scene.ui.TextButton;
 import arc.scene.ui.layout.Cell;
+import arc.scene.ui.layout.Table;
 import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.gen.Icon;
@@ -32,6 +34,26 @@ public class AtomicDialog extends BaseDialog {
     public void addRefreshAndClose() {
         addCloseButton();
         addNavButton("Refresh", Icon.refresh, this::setup);
+    }
+    
+    public void inputField(String title, String value, Cons<String> s) {
+        inputField(cont, title, value, s);
+    }
+    
+    public void inputField(Table table, String title, String value, Cons<String> s) {
+        table.add(TextManager.translate(title)).left().row();
+        table.field(value, e -> {
+            try {
+                s.get(e);
+            }catch(NumberFormatException ex){
+                //what to do with it
+            }
+            
+        }).growX().row();
+    }
+    
+    public void refreshDesktop() {
+        if (!Vars.mobile) setup();
     }
     
     protected void addRefreshButton() {
