@@ -54,12 +54,15 @@ jobs:
 
 
     - name: Gradle Test Coverage
+      uses: GabrielBB/xvfb-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      run: ./gradlew clean test sonarqube download copyMods -PgithubRepo="$GITHUB_REPOSITORY" --info --scan
+      with:
+       run: ./gradlew clean test sonarqube download copyMods -PgithubRepo="$GITHUB_REPOSITORY" --info --scan
+       
     - name: Download mindustry
       run: |
        wget -O - https://github.com/o7-Fire/Static-Mindustry-Package/releases/download/v130/mindustry-linux-64-bit.zip > v130.zip
