@@ -76,7 +76,6 @@ allprojects {
     }
 
     tasks.withType(Test) {
-        options.failOnError(false)
         useJUnitPlatform()
         finalizedBy(jacocoTestReport)
         testLogging {
