@@ -112,6 +112,7 @@ allprojects {
                     def startItem = '|  ', endItem = '  |'
                     def repeatLength = startItem.length() + output.length() + endItem.length()
                     println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+                    if(result.failedTestCount > 0)throw new Exception("Fail")
                 }
             }
         }

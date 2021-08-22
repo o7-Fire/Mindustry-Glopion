@@ -40,16 +40,15 @@ public class Testing extends ModsModule {
         return !isTestMode();//isn't test mode
     }
     
-    @Override
-    public void onShutdown() {
-        System.err.println(WarningHandler.errorList.size() + " Errors found");
-        System.err.println(WarningHandler.errorList.size() + " Errors found");
+    
+    public void onFinish() {
+        System.err.println("--------------------");
         System.err.println(WarningHandler.errorList.size() + " Errors found");
         for (Throwable t : WarningHandler.errorList) {
             t.printStackTrace();
             System.out.println();
         }
-    
+        
     }
     
     @Override
@@ -73,10 +72,13 @@ public class Testing extends ModsModule {
     public void update() {
         if (testCompleted()){
             String stat = "preInit: " + preInit + ", Init: " + init + ", postInit: " + postInit;
-            Core.app.post(Core.app::exit);
+    
             if (init != 1 || preInit != 1 || postInit != 1){
                 throw new RuntimeException("Runned more than once or not runned:\n" + stat);
             }
+            onFinish();
+            assert WarningHandler.errorList.size() == 0 : "There is error";
+            Core.app.exit();
         }
     
     }
