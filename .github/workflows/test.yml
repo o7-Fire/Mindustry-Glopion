@@ -59,15 +59,16 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      run: ./gradlew clean test sonarqube -PgithubRepo="$GITHUB_REPOSITORY" --info --scan
-      
+      run: ./gradlew clean test sonarqube download copyMods -PgithubRepo="$GITHUB_REPOSITORY" --info --scan
+    - name: Download mindustry
+      run: |
+       wget -O - https://github.com/o7-Fire/Static-Mindustry-Package/releases/download/v130/mindustry-linux-64-bit.zip > v130.zip
+       unzip -d v130 v130.zip
     - name: Run headless test
       uses: GabrielBB/xvfb-action@v1
       with:
-        run: ./gradlew run
+        run: |
+         java -Dtest="1" -jar v130/jre/desktop.jar
         working-directory: ./ #optional
         options: #optional
         
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
