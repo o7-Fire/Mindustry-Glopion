@@ -51,14 +51,6 @@ jobs:
       with:
         path: ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-        
-    - name: Virtual sink
-      run: |
-        sudo apt-get install libasound2 libasound2-plugins alsa-utils alsa-oss
-        sudo apt-get install alsa-base pulseaudio && sudo alsa force-reload
-        pulseaudio -D
-        pactl load-module module-null-sink sink_name=vspeaker sink_properties=device.description=virtual_speaker
-        pacmd list-sinks
 
     - name: Gradle Test Coverage
       uses: GabrielBB/xvfb-action@v1
