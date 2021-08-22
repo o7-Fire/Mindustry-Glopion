@@ -1,7 +1,6 @@
 package org.o7.Fire.Glopion.Internal;
 
 import Atom.Time.Timer;
-import arc.Core;
 import arc.util.Log;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModsModule;
@@ -78,7 +77,7 @@ public class Testing extends ModsModule {
             }
             onFinish();
             assert WarningHandler.errorList.size() == 0 : "There is error";
-            Core.app.exit();
+            System.exit(0);
         }
     
     }
