@@ -30,7 +30,7 @@
 
 package org.o7.Fire.Glopion.Internal;
 
-import Atom.Annotation.ParamClamp;
+import Atom.Annotation.MethodFuzzer;
 import Atom.Exception.GetRealException;
 import Atom.Reflect.OS;
 import Atom.Reflect.Reflect;
@@ -54,7 +54,7 @@ public class InformationCenter extends ModsModule {
     public static Callable callable;
     
     
-    @ParamClamp(skip = true)
+    @MethodFuzzer(skip = true)
     public static <T> Set<Class<? extends T>> getExtendedClass(Class<T> c) {
         if (OS.isAndroid || OS.isIos){//Dalvik bad
             throw new GetRealException("Mobile doesn't support Reflect.getExtendedClass()");
@@ -117,7 +117,7 @@ public class InformationCenter extends ModsModule {
     }
     
     @Override
-    @ParamClamp(skip = true)
+    @MethodFuzzer(skip = true)
     public void test() {
         testCompleted = false;
         getCallableMain();
