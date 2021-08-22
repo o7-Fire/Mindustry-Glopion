@@ -42,7 +42,7 @@ public class OpenCVDialog extends ScrollableDialog {
                         t.add(s).row();
                     }
                 }catch(Exception e){
-                    WarningHandler.handleMindustry(e);
+                    WarningHandler.handleMindustry(e, true);
                     t.add(Strings.getFinalMessage(e));
                 }
             }).growX().row();

@@ -42,7 +42,9 @@ public class Testing extends ModsModule {
     
     @Override
     public void onShutdown() {
-        Log.err("@ Errors found", WarningHandler.errorList.size());
+        System.err.println(WarningHandler.errorList.size() + " Errors found");
+        System.err.println(WarningHandler.errorList.size() + " Errors found");
+        System.err.println(WarningHandler.errorList.size() + " Errors found");
         for (Throwable t : WarningHandler.errorList) {
             t.printStackTrace();
             System.out.println();
@@ -72,6 +74,11 @@ public class Testing extends ModsModule {
         if (testCompleted()){
             String stat = "preInit: " + preInit + ", Init: " + init + ", postInit: " + postInit;
             Core.app.post(Core.app::exit);
+            Core.app.post(() -> {
+                onShutdown();
+                assert WarningHandler.errorList.size() == 0;
+                System.exit(0);
+            });
             if (init != 1 || preInit != 1 || postInit != 1){
                 throw new RuntimeException("Runned more than once or not runned:\n" + stat);
             }
