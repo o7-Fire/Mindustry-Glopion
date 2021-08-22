@@ -106,7 +106,7 @@ public class Main extends Plugin {
             if (size == null){
                 try {//blocking
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    size = SharedBootstrapper.humanReadableByteCountSI(connection.getContentLengthLong());
+                    size = SharedBootstrapper.humanReadableByteCountSI(Long.parseLong(connection.getHeaderField("content-length")));
                     size = "(" + size + ")";
                     connection.disconnect();
                 }catch(IOException e){
@@ -116,9 +116,13 @@ public class Main extends Plugin {
             }
             Log.info("Downloading: " + s.getKey());
             if (!yesToAll && Core.settings.getString(s.getKey()) != null) continue;
-            if (Vars.headless){
+            if (Vars.headless || test){
                 Log.infoTag("Downloader", s.getKey() + " " + size);
-                BootstrapperUI.download(seq.random().toExternalForm(), new Fi(s.getValue()), () -> { }, Main::handleException);
+                try {
+                    SharedBootstrapper.download(seq.random(), s.getValue()).join();
+                }catch(InterruptedException e){
+                    Log.err(e);
+                }
             }else{
                 Runnable run = () -> BootstrapperUI.downloadGUI(url.toExternalForm(), new Fi(s.getValue()), () -> {
                     downloadLibrary0(iterator, yesToAll);
@@ -191,12 +195,15 @@ public class Main extends Plugin {
             }catch(ClassCastException ignored){}
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
-                if (test && !jar.exists()){
+                if ((test || Vars.headless) && !jar.exists()){
                     Log.info("Downloading now");
                     fetchRelease(baseURL);
                     String flavor = getFlavorThatExist();
                     Log.info("Flavor: " + flavor);
-                    tryDownload(release.getProperty(flavor), flavor);
+                    String path = flavor.replace('-', '/') + ".jar";
+                    String url = release.getProperty(flavor);
+                    jar = Core.files.cache(path);
+                    SharedBootstrapper.download(new URL(url), jar.file()).join();
                     classpath = "org.o7.Fire.Glopion." + flavor.split("-")[0] + "Launcher";
                 }
                 if (!mobile){
@@ -222,9 +229,8 @@ public class Main extends Plugin {
                 }
                 
                 if (!Vars.mobile && somethingMissing()){
-                    if (test){
-                        SharedBootstrapper.downloadAll();
-                    }else downloadLibrary();
+    
+                    downloadLibrary();
                 }
                 mainClassloader = modClassloader;
                 
@@ -313,9 +319,9 @@ public class Main extends Plugin {
         if (list.size() == 0) return;
         String info = "Some library may platform dependent, you can skip it\n" + totalDownload + " Library Total\n Size Total: " + SharedBootstrapper.humanReadableByteCountSI(totalSize);
         final Iterator<Map.Entry<String, File>> iterator = new HashMap<>(downloadFile).entrySet().iterator();
-        if (Vars.headless){
+        if (Vars.headless || test){
             Log.infoTag("Dependency-Downloader", info);
-            Core.app.post(() -> downloadLibrary0(iterator, true));
+            downloadLibrary0(iterator, true);
         }else{
             long finalTotalDownload = totalDownload;
             long finalTotalSize = totalSize;
