@@ -80,7 +80,7 @@ jobs:
       with:
         run: |
          java -Dtest="1" -jar v130/jre/desktop.jar
-          java -Dtest="1" -jar v130-server/server.jar
+         java -Dtest="1" -jar v130-server/server.jar
         working-directory: ./ #optional
         options: #optional
         
