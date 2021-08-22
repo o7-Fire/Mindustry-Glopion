@@ -27,7 +27,7 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
+import com.github.javaparser.printer.configuration.PrettyPrinterConfiguration;
 import mindustry.gen.Call;
 
 import java.io.File;
