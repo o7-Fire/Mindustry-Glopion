@@ -67,4 +67,7 @@ jobs:
         run: ./gradlew run
         working-directory: ./ #optional
         options: #optional
-
+        
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
