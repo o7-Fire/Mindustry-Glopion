@@ -1,6 +1,5 @@
 package org.o7.Fire.Glopion.Bootstrapper;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -28,9 +27,7 @@ public class Java {
         
         boolean headless = GraphicsEnvironment.isHeadless() && System.console() != null;
         System.out.println("Headless: " + headless);
-        if (!headless && !GraphicsEnvironment.isHeadless()){
-            JOptionPane.showMessageDialog(null, "use console", "Note", JOptionPane.INFORMATION_MESSAGE);
-        }
+    
         boolean training = false;
         if (args.length != 0){
             if (Arrays.asList(args).contains("training")){
