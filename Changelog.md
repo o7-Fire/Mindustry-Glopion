@@ -1,5 +1,5 @@
 * Android Support
-* v128.1
+* v130
 * Java 11 for Desktop Flavor
 * Java 8  for Core Flavor
 * Still beta
