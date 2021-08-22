@@ -144,7 +144,7 @@ public class Main extends Plugin {
                     }
                 });
             }
-            break;
+            if (!(Vars.headless || test)) break;
         }
         
         
