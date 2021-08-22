@@ -42,10 +42,23 @@ public class ModsMenu extends ScrollableDialog {
         super("Mods Menu");
         textButtonStyle = Styles.clearPartialt;
         
-     
+        
     }
     
+    protected void test(Seq<Dialog> dialoggg, Runnable finalRun) {
+        if (dialoggg.size == 0){
+            finalRun.run();
+            return;
+        }
+        Dialog d = dialoggg.remove(0);
+        AtomicDialog.showTest(d, () -> test(dialoggg, finalRun));
+    }
     
+    @Override
+    protected void test(Runnable after) {
+        Seq<Dialog> d = new Seq<>(dialogs);
+        test(d, after);
+    }
     
     public static void add(Dialog dialog) {
         dialogs.add(dialog);

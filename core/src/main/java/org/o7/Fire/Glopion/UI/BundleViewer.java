@@ -21,7 +21,6 @@ import arc.scene.ui.Label;
 import arc.struct.ObjectMap;
 import mindustry.Vars;
 import mindustry.gen.Icon;
-import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Internal.TextManager;
 
@@ -76,7 +75,7 @@ public class BundleViewer extends ScrollableDialog {
             }).tooltip(TextManager.translate("Search"));//refresh button in disguise
         }).growX();
         cont.row();
-        ad(Interface.bundle);
+        ad(TextManager.bundle);
         ad(Core.bundle.getProperties());
     }
     

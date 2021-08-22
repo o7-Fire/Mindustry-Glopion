@@ -6,7 +6,7 @@ import java.util.concurrent.Future
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_16
 tasks.withType(JavaCompile) {
-    options.compilerArgs.addAll(['--release', '11'])//android 4.4 like java 8
+    options.compilerArgs.addAll(['--release', '11'])//jenetic, dl4j
 }
 
 static String getHttp(String jarUrl, String qualified) {

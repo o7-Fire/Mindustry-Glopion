@@ -197,6 +197,7 @@ public class Main extends Plugin {
                     String flavor = getFlavorThatExist();
                     Log.info("Flavor: " + flavor);
                     tryDownload(release.getProperty(flavor), flavor);
+                    classpath = "org.o7.Fire.Glopion." + flavor.split("-")[0] + "Launcher";
                 }
                 if (!mobile){
                     while (parentClasslaoder.getParent() != null && parentClasslaoder.getClass() != ModClassLoader.class)
@@ -221,7 +222,9 @@ public class Main extends Plugin {
                 }
                 
                 if (!Vars.mobile && somethingMissing()){
-                    downloadLibrary();
+                    if (test){
+                        SharedBootstrapper.downloadAll();
+                    }else downloadLibrary();
                 }
                 mainClassloader = modClassloader;
                 

@@ -23,7 +23,7 @@ public abstract class ModsModule extends Mod implements Module {
     protected ArrayList<Class<? extends ModsModule>> dependency = new ArrayList<>();
     protected Mods.LoadedMod thisLoaded = null;
     public HashSet<Class<? extends ModsModule>> missingClass = new HashSet<>(), circularClass = new HashSet<>();
-    protected boolean testCompleted = true;
+    protected volatile boolean testCompleted = true;
     
     public String getDescription() {
         return TextManager.translate(">Do nothing\n>Crashed\n>Refuse to elaborate further\n>Leave\n:gigachad:");

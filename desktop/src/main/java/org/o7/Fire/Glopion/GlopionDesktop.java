@@ -27,9 +27,9 @@ public class GlopionDesktop extends GlopionCore {
         OptionsDialog.classSettings.add(GlopionDesktop.class);
        
         super.preInit();
-        if (!deepPatch && enableDeepPatchSettings){
-         
-            if(GlopionDesktop.class.getClassLoader() instanceof URLClassLoader){
+        if (!deepPatch && enableDeepPatchSettings && !test){
+    
+            if (GlopionDesktop.class.getClassLoader() instanceof URLClassLoader){
                 Log.infoTag("DeepPatch", "Entering DeepPatch");
                 URL[] urls = ((URLClassLoader) GlopionDesktop.class.getClassLoader()).getURLs();
                 StringBuilder classPath = new StringBuilder(System.getProperty("java.class.path"));

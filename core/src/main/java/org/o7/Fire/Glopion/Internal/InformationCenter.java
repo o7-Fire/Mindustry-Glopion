@@ -30,9 +30,12 @@
 
 package org.o7.Fire.Glopion.Internal;
 
+import Atom.Annotation.ParamClamp;
 import Atom.Exception.GetRealException;
 import Atom.Reflect.OS;
 import Atom.Reflect.Reflect;
+import Atom.Utility.TestingUtility;
+import arc.Core;
 import arc.net.Client;
 import mindustry.Vars;
 import mindustry.net.ArcNetProvider;
@@ -50,14 +53,13 @@ public class InformationCenter extends ModsModule {
     public static int currentServerPort = 0;
     public static Callable callable;
     
-    {
-        testCompleted = false;
-    }
     
-    @Override
-    public void test() {
-        getCallableMain();
-        assert getCurrentJar() != null : "Current Jar is null";
+    @ParamClamp(skip = true)
+    public static <T> Set<Class<? extends T>> getExtendedClass(Class<T> c) {
+        if (OS.isAndroid || OS.isIos){//Dalvik bad
+            throw new GetRealException("Mobile doesn't support Reflect.getExtendedClass()");
+        }
+        return Atom.Reflect.ExternalReflection.getExtendedClass(GlopionCore.class.getPackage().getName(), c, InformationCenter.class.getClassLoader());
     }
     
     public static Callable getCallableMain() {
@@ -110,14 +112,25 @@ public class InformationCenter extends ModsModule {
             if (!(n instanceof ArcNetProvider)) return null;
             ArcNetProvider arc = (ArcNetProvider) n;
             return Reflect.getField(arc.getClass(), "client", arc);
-        }catch(Throwable ignored){ }
+        }catch(Throwable ignored){}
         return null;
     }
     
-    public static <T> Set<Class<? extends T>> getExtendedClass(Class<T> c) {
-        if (OS.isAndroid || OS.isIos){//Dalvik bad
-            throw new GetRealException("Mobile doesn't support Reflect.getExtendedClass()");
+    @Override
+    @ParamClamp(skip = true)
+    public void test() {
+        testCompleted = false;
+        getCallableMain();
+        assert getCurrentJar() != null : "Current Jar is null";
+        
+        try {
+            TestingUtility.methodFuzzer(this, this.getClass().getDeclaredMethods(), true);
+        }catch(Exception e){
+            throw new RuntimeException(e);
         }
-        return Atom.Reflect.ExternalReflection.getExtendedClass(GlopionCore.class.getPackage().getName(), c, InformationCenter.class.getClassLoader());
+        Core.app.post(() -> {
+            testCompleted = true;
+        });
+        
     }
 }

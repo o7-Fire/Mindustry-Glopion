@@ -27,7 +27,6 @@ public class Java {
         
         boolean headless = GraphicsEnvironment.isHeadless() && System.console() != null;
         System.out.println("Headless: " + headless);
-    
         boolean training = false;
         if (args.length != 0){
             if (Arrays.asList(args).contains("training")){

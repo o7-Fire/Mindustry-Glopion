@@ -4,11 +4,14 @@ import arc.Core;
 import arc.func.Cons;
 import arc.scene.Action;
 import arc.scene.Scene;
+import arc.scene.event.EventListener;
+import arc.scene.event.VisibilityListener;
 import arc.scene.style.Drawable;
 import arc.scene.ui.Dialog;
 import arc.scene.ui.TextButton;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
+import arc.util.Log;
 import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.gen.Icon;
@@ -22,7 +25,38 @@ public class AtomicDialog extends BaseDialog {
     public AtomicDialog(String title, DialogStyle style) {
         super(title, style);
         showSetup();
+    }
     
+    public static void showTest(Dialog d, Runnable afterShown) {
+        Log.debug("Testing Dialog: @", d.title.getText());
+        EventListener eventListener = new VisibilityListener() {
+            @Override
+            public boolean shown() {
+                Core.app.post(() -> d.removeListener(this));
+                Runnable r = () -> Core.app.post(() -> {
+                    Core.app.post(() -> {
+                        d.hide();
+                        Core.app.post(afterShown::run);
+                    });
+                });
+                
+                if (d instanceof AtomicDialog){
+                    //probaly have hidden agenda
+                    AtomicDialog atomicDialog = (AtomicDialog) d;
+                    Core.app.post(() -> atomicDialog.test(r));
+                }else{
+                    r.run();
+                }
+                
+                return false;
+            }
+        };
+        d.addListener(eventListener);
+        d.show();
+    }
+    
+    protected void test(Runnable after) {
+        after.run();//no hidden agenda
     }
     
     public void showSetup() {
