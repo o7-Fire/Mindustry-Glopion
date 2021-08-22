@@ -3,6 +3,7 @@ package org.o7.Fire.Glopion.Internal;
 import Atom.Time.Timer;
 import arc.Core;
 import arc.util.Log;
+import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModsModule;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
 
@@ -29,6 +30,7 @@ public class Testing extends ModsModule {
         if (sample.contains(false)) return false;
         return true;
     }
+    
     public static boolean isTestMode() {
         return System.getProperty("test") != null;
     }
@@ -36,6 +38,16 @@ public class Testing extends ModsModule {
     @Override
     public boolean disabled() {
         return !isTestMode();//isn't test mode
+    }
+    
+    @Override
+    public void onShutdown() {
+        Log.err("@ Errors found", WarningHandler.errorList.size());
+        for (Throwable t : WarningHandler.errorList) {
+            t.printStackTrace();
+            System.out.println();
+        }
+        assert WarningHandler.errorList.size() == 0;
     }
     
     @Override

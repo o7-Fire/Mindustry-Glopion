@@ -46,7 +46,7 @@ public class UIPatch extends ModsModule {
     {
         dependency.add(VarsPatch.class);
         dependency.add(TextManager.class);
-        testCompleted = false;
+    
     }
     
     private void onResize() {
@@ -133,6 +133,8 @@ public class UIPatch extends ModsModule {
     
     @Override
     public void test() {
+        if (Vars.ui == null) return;
+        testCompleted = false;
         AtomicDialog.showTest(GlopionCore.modsMenu, () -> {
             testCompleted = true;
         });

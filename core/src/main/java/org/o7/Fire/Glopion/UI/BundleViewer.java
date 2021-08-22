@@ -26,6 +26,7 @@ import org.o7.Fire.Glopion.Internal.TextManager;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public class BundleViewer extends ScrollableDialog {
@@ -75,7 +76,7 @@ public class BundleViewer extends ScrollableDialog {
             }).tooltip(TextManager.translate("Search"));//refresh button in disguise
         }).growX();
         cont.row();
-        ad(TextManager.bundle);
+        ad(new TreeMap<>(TextManager.bundle));
         ad(Core.bundle.getProperties());
     }
     

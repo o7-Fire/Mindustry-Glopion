@@ -32,8 +32,10 @@
 package org.o7.Fire.Glopion.Internal.Shared;
 
 import Atom.Reflect.Reflect;
+import Atom.Struct.FunctionalPoolObject;
 import arc.util.Log;
 import mindustry.Vars;
+import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
 
 import java.util.ArrayList;
@@ -57,26 +59,34 @@ public class WarningHandler {
         c.accept(t);
     }
     
+    public static void handleMindustry(Throwable t) {
+        handleMindustry(t, false);
+    }
+    
     /**
      * Mindustry or Runtime Related Error e.g {@link RuntimeException}, {@link java.io.IOException}
      */
-    public static void handleMindustry(Throwable t) {
+    public static void handleMindustry(Throwable t, boolean ignoreTest) {
         String s = "Glopion-Handler";
-        try { s = Reflect.getCallerClassStackTrace().toString(); }catch(Throwable ignored){}
-        handleMindustry(t, s);
+        try {s = Reflect.getCallerClassStackTrace().toString();}catch(Throwable ignored){}
+        handleMindustry(t, s, ignoreTest);
+    }
+    
+    public static void handleMindustryUserFault(Throwable t) {
+        handleMindustryUserFault(t, false);
     }
     
     /**
      * User Related Error e.g {@link NumberFormatException}
      */
-    public static void handleMindustryUserFault(Throwable t) {
+    public static void handleMindustryUserFault(Throwable t, boolean ignoreTest) {
         String s;
         if (t instanceof RuntimeException){
             while (t.getCause() != null) t = t.getCause();
             t = new Throwable(t);//idiot outcry
         }
         s = t.getClass().getSimpleName();
-        handleTest(t);
+        if (!ignoreTest) handleTest(t);
         tryLogViaMindustry(t, s);
         try {
             Vars.ui.showException(t);
@@ -102,17 +112,20 @@ public class WarningHandler {
         errorList.add(t);
     }
     
+    public static void handleProgrammerFault(Throwable t) {
+    
+    }
+    
     /**
      * Skill Issue, e.g {@link NoSuchFieldError}
      */
-    public static void handleProgrammerFault(Throwable t) {
-        handleTest(t);
+    public static void handleProgrammerFault(Throwable t, boolean ignoreTest) {
+        if (!ignoreTest) handleTest(t);
         try {
             // Sentry.captureException(t);
         }catch(Throwable ignored){}
         try {
-            if(Reflect.debug || Vars.headless || Vars.mobile)
-                t.printStackTrace();
+            if (Reflect.debug || Vars.headless || Vars.mobile) t.printStackTrace();
             if (Reflect.debug){
                 tryLogViaMindustry(t, "Glopion-Debug");
             }
@@ -130,12 +143,34 @@ public class WarningHandler {
         
     }
     
+    public static StackTraceElement[] getStacktrace() {
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        int offset = Reflect.callerOffset() + 2;
+        StackTraceElement[] real = new StackTraceElement[elements.length - offset];
+        for (int i = offset; i < elements.length; i++) {
+            real[i - offset] = elements[offset];
+        }
+        return real;
+    }
+    
+    public static String getStacktrace(StackTraceElement[] elements) {
+        StringBuilder sb = FunctionalPoolObject.StringBuilder.obtain();
+        for (StackTraceElement e : elements)
+            sb.append(e).append("\n");
+        
+        String s = sb.toString();
+        FunctionalPoolObject.StringBuilder.free(sb);
+        return s;
+    }
+    
     /**
      * @see #handleMindustry(Throwable)
      */
-    public static void handleMindustry(Throwable t, String stacktrace) {
-        handleProgrammerFault(t);
-        
+    public static void handleMindustry(Throwable t, String stacktrace, boolean ignoreTest) {
+        handleProgrammerFault(t, ignoreTest);
+        try {
+            if (GlopionCore.test) Log.err("Called from: \n" + getStacktrace(getStacktrace()));
+        }catch(Throwable ignored){}
     }
     
     //what is this

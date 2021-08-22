@@ -51,6 +51,7 @@ public class AtomicDialog extends BaseDialog {
                 return false;
             }
         };
+    
         d.addListener(eventListener);
         d.show();
     }
