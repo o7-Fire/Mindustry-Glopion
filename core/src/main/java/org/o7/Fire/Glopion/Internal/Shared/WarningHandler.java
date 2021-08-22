@@ -147,9 +147,7 @@ public class WarningHandler {
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
         int offset = Reflect.callerOffset() + 2;
         StackTraceElement[] real = new StackTraceElement[elements.length - offset];
-        for (int i = offset; i < elements.length; i++) {
-            real[i - offset] = elements[offset];
-        }
+        System.arraycopy(elements, offset, real, 0, elements.length - offset);
         return real;
     }
     
@@ -169,7 +167,8 @@ public class WarningHandler {
     public static void handleMindustry(Throwable t, String stacktrace, boolean ignoreTest) {
         handleProgrammerFault(t, ignoreTest);
         try {
-            if (GlopionCore.test) Log.err("Called from: \n" + getStacktrace(getStacktrace()));
+            StackTraceElement[] elements = getStacktrace();
+            if (GlopionCore.test) Log.err("Called from: \n" + getStacktrace(elements));
         }catch(Throwable ignored){}
     }
     

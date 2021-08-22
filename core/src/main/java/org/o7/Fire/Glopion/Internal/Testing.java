@@ -47,7 +47,7 @@ public class Testing extends ModsModule {
             t.printStackTrace();
             System.out.println();
         }
-        assert WarningHandler.errorList.size() == 0;
+    
     }
     
     @Override
