@@ -60,7 +60,7 @@ jobs:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       with:
-        run: ./gradlew clean download copyMods test sonarqube -PgithubRepo="$GITHUB_REPOSITORY" --info --scan
+        run: ./gradlew clean download copyMods test sonarqube -PgithubRepo="$GITHUB_REPOSITORY" --info --scan --continue
        
     - name: Download mindustry
       run: |

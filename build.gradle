@@ -74,7 +74,9 @@ allprojects {
     } catch (e){
 
     }
+
     tasks.withType(Test) {
+        options.failOnError(false)
         useJUnitPlatform()
         finalizedBy(jacocoTestReport)
         testLogging {
@@ -87,7 +89,7 @@ allprojects {
             showExceptions true
             showCauses true
             showStackTraces true
-            ignoreFailures true
+            ignoreFailures false
             failFast true
             setWorkingDir(rootProject.projectDir)
             // set options for log level DEBUG and INFO
