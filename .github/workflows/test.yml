@@ -55,7 +55,6 @@ jobs:
     - name: Virtual sink
       run: |
         sudo apt-get install libasound2 libasound2-plugins alsa-utils alsa-oss
-        pulseaudio -D
         pactl load-module module-null-sink sink_name=vspeaker sink_properties=device.description=virtual_speaker
         pacmd list-sinks
 
