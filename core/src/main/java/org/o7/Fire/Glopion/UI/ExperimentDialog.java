@@ -16,6 +16,7 @@
 
 package org.o7.Fire.Glopion.UI;
 
+import Atom.Struct.FunctionalPoolObject;
 import arc.util.Log;
 import mindustry.Vars;
 import mindustry.gen.Icon;
@@ -44,13 +45,15 @@ public class ExperimentDialog extends ScrollableDialog {
     public ExperimentDialog() {
         experimental.addAll(Arrays.asList(RelayChatToWebhook.class, LogToDiscordWebhook.class, ThreadStackTrace.class, OutOfMemory.class, LockAllContent.class, SwingBox.class, UnlockAllContent.class));
         if (!Vars.mobile) experimental.addAll(InformationCenter.getExtendedClass(Experimental.class));
-        StringBuilder sb = new StringBuilder();
+        experimental.add(EffectsDialog.class);//added in 0.7.2
+        StringBuilder sb = FunctionalPoolObject.StringBuilder.obtain();
         sb.append("Experimental: [");
         for (Class<?> c : experimental) {
             sb.append(c.getSimpleName()).append(".class").append(", ");
         }
         sb.append("]");
         Log.debug(sb.toString());
+        FunctionalPoolObject.StringBuilder.free(sb);
     }
     
     
@@ -63,18 +66,19 @@ public class ExperimentDialog extends ScrollableDialog {
                         if (cache.containsKey(c)){
                             cache.get(c).run();
                         }
-            
+    
                         Experimental e = c.getDeclaredConstructor().newInstance();
                         e.run();
                         if (e.reusable()) cache.put(c, e);
+    
                     }catch(Throwable t){
-                        Vars.ui.showException(t);
-                        WarningHandler.handleMindustry(t);
+                        WarningHandler.handleMindustryUserFault(t);
                     }
                 }).growX().row();
                 
             }
         }catch(Throwable t){
+            WarningHandler.handleProgrammerFault(t);
             ad(t.toString());
         }
     }

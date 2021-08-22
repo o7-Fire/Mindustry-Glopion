@@ -1,5 +1,6 @@
 package org.o7.Fire.Glopion.Bootstrapper;
 
+import arc.util.Log;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -17,6 +18,7 @@ import java.util.function.Consumer;
 public class SharedBootstrapper {
     public static final long version = 30;
     public final static String javaPath;
+    public static final boolean test = System.getProperty("test") != null;
     public static final ExecutorService executors = Executors.newCachedThreadPool(r -> {
         Thread t = Executors.defaultThreadFactory().newThread(r);
         t.setName(t.getName() + "-Cached-Pool");
@@ -32,7 +34,7 @@ public class SharedBootstrapper {
         
         javaPath = javaPath1;
         if (System.getProperty("MindustryVersion", null) == null) System.setProperty("MindustryVersion", "v127.2");
-        
+        if (test) Log.infoTag("Glopion-Boostrapper", "Test Environment");
     }
     
     @NotNull

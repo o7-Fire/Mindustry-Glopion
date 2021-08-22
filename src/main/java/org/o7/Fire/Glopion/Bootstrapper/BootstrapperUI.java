@@ -11,7 +11,6 @@ import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Strings;
 import arc.util.async.Threads;
-import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.gen.Icon;
 import mindustry.graphics.Pal;
@@ -24,12 +23,9 @@ import org.o7.Fire.Glopion.Bootstrapper.UI.InfoDialog;
 import org.o7.Fire.Glopion.Bootstrapper.UI.ProviderURLDialog;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,7 +36,6 @@ public class BootstrapperUI extends Mod {
     public FlavorDialog flavorDialog;
     public ProviderURLDialog providerURLDialog;
     public DependencyManager dependencyManager;
-    public Properties release = new Properties();
     public Cell<Table> tableCell = null;
     public Table t = null;
     
@@ -137,76 +132,12 @@ public class BootstrapperUI extends Mod {
     
     }
     
-    public void onReleaseFetched(InputStream is) throws IOException {
-        release.clear();
-        release.load(is);
-        if (release.getProperty(flavor) == null){
-            Log.warn("@ Flavor doesn't exist ", flavor);
-            runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
-            return;
-        }else{
-            runOnUI(() -> ui.showInfoFade("Fetched: [green]" + release.size() + " [white]Flavor"));
-        }
-    }
-    
-    public void fetchRelease(Runnable succ) {
-        baseURL = baseURL.endsWith("/") ? baseURL : baseURL + "/";
-        Thread t = new Thread(() -> {
-            try {
-                URL u = new URL(baseURL + "release.properties");
-                onReleaseFetched(u.openConnection().getInputStream());
-                succ.run();
-            }catch(IOException e){
-                handleException(e);
-            }
-        });
-        t.setDaemon(true);
-        t.start();
-    }
-    
-    public void tryDownload() {
-        String url = release.getProperty(flavor);
-        if (url == null) return;
-        String path = flavor.replace('-', '/') + ".jar";
-        jar = Core.files.cache(path);
-        if (!jar.exists() || Core.settings.getBool("glopion-auto-update", false)){
-            Log.infoTag("Glopion-Bootstrapper", "");
-            Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
-            boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || !jar.exists();
-            if (!Vars.headless && b){
-                //sometime jar already exist
-                Main.runOnUI(() -> BootstrapperUI.downloadConfirm(url, jar, () -> {
-                    if (Main.jar.exists()){
-                        Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
-                    }else{
-                        ui.showErrorMessage(jar.absolutePath() + " still doesn't exist ??? how");
-                    }
-                    
-                }));
-            }else{
-                long size = jar.length();
-                
-                download(url, Main.jar, () -> {
-                    if (downloadThing || size != jar.length())
-                        runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
-                }, Main::handleException);
-            }
-        }
-    }
-
-    public void downloadIfNotExist() {
-        String url = release.getProperty(flavor);
-        if (url == null) return;
-        jar = Core.files.cache(flavor.replace('-', '/') + ".jar");
-        if (!jar.exists()) tryDownload();
-    }
-    
     @Override
     public void init() {
         providerURLDialog = new ProviderURLDialog(this);
         flavorDialog = new FlavorDialog(this);
         dependencyManager = new DependencyManager();
-        fetchRelease(this::tryDownload);
+        fetchRelease(Main::tryDownload);
         tableCell = ui.settings.game.row().table().growX();
         t = tableCell.get();
         Main.runOnUI(this::buildUI);

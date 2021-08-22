@@ -17,6 +17,7 @@
 package org.o7.Fire.Glopion.UI;
 
 
+import android.os.Build;
 import arc.Core;
 import arc.audio.Sound;
 import arc.graphics.Color;
@@ -42,6 +43,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class EnvironmentInformation extends ScrollableDialog {
     
@@ -81,7 +83,7 @@ public class EnvironmentInformation extends ScrollableDialog {
         ad("UUID", Core.settings.getString("uuid"), s -> {
             if (Vars.platform.getUUID().length() == s.length()) Core.settings.put("uuid", s);
         });
-        ad("Classloader", () -> {
+        adInstant("Classloader", () -> {
             StringBuilder sb = new StringBuilder();
             try {
                 ClassLoader cl = EnvironmentInformation.class.getClassLoader();
@@ -102,9 +104,25 @@ public class EnvironmentInformation extends ScrollableDialog {
             ad("Compilation Time Total (ms)", ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
             ad("isCompilationTimeMonitoringSupported", ManagementFactory.getCompilationMXBean().isCompilationTimeMonitoringSupported());
         }catch(Throwable ignored){}
-        uid();
-       
+        try {
+            ad("Android API", Build.VERSION.SDK_INT);
+            ad("Android Model", Build.MODEL);
         
+        }catch(Throwable ignored){}
+        uid();
+    
+    
+    }
+    
+    private void adInstant(Object k, Callable<Object> o) {
+        String s = "non";
+        try {
+            s = String.valueOf(o.call());
+        }catch(Exception e){
+            WarningHandler.handleProgrammerFault(e);
+            s = e.getMessage();
+        }
+        ad(k, s);
     }
     
     

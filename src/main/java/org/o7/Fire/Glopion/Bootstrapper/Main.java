@@ -17,6 +17,7 @@ import mindustry.mod.ModClassLoader;
 import mindustry.mod.Mods;
 import mindustry.mod.Plugin;
 import mindustry.ui.dialogs.BaseDialog;
+import org.o7.Fire.Glopion.Bootstrapper.UI.FlavorDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 import static mindustry.Vars.mobile;
+import static mindustry.Vars.ui;
 import static org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper.*;
 
 public class Main extends Plugin {
@@ -43,6 +45,7 @@ public class Main extends Plugin {
     public static String classpath = "org.o7.Fire.Glopion.";
     public static String info = "None";
     public static String glopionLoadedString = "glopion.loaded";
+    public static Properties release = new Properties();
     
     static {
         classpath = classpath + flavor.split("-")[0] + "Launcher";
@@ -179,15 +182,22 @@ public class Main extends Plugin {
                 }
             }
         }
-        if (jar.exists() || classExist){
+        if (jar.exists() || classExist || test){
             Log.infoTag(GlopionBootstrapperText, "Loading: " + jar.absolutePath());
-    
+        
             Seq<URL> urls = new Seq<>();
             try {
                 modClassloader = (ModClassLoader) Vars.mods.mainLoader();
             }catch(ClassCastException ignored){}
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
+                if (test && !jar.exists()){
+                    Log.info("Downloading now");
+                    fetchRelease(baseURL);
+                    String flavor = getFlavorThatExist();
+                    Log.info("Flavor: " + flavor);
+                    tryDownload(release.getProperty(flavor), flavor);
+                }
                 if (!mobile){
                     while (parentClasslaoder.getParent() != null && parentClasslaoder.getClass() != ModClassLoader.class)
                         parentClasslaoder = parentClasslaoder.getParent();
@@ -270,6 +280,7 @@ public class Main extends Plugin {
                 }
             }
             info = sb.toString();
+            if (Vars.headless) Log.debug(info);
         }else{
             Log.warn(jar.absolutePath() + " doesn't exist, loading in next startup to prevent game freeze");
             downloadThing = true;
@@ -348,6 +359,90 @@ public class Main extends Plugin {
         runOnUI(() -> Vars.ui.showException("Glopion-Bootstrapper Failed To Load", e));
         
         
+    }
+    
+    public static void onReleaseFetched(InputStream is) throws IOException {
+        release.clear();
+        release.load(is);
+        
+        if (release.getProperty(flavor) == null){
+            Log.warn("@ Flavor doesn't exist ", flavor);
+            runOnUI(() -> ui.showInfo(flavor + " Flavor doesn't exist"));
+            return;
+        }else{
+            runOnUI(() -> ui.showInfoFade("Fetched: [green]" + release.size() + " [white]Flavor"));
+        }
+    }
+    
+    public static void fetchRelease(String baseURL) throws IOException {
+        baseURL = baseURL.endsWith("/") ? baseURL : baseURL + "/";
+        URL u = new URL(baseURL + "release.properties");
+        onReleaseFetched(u.openConnection().getInputStream());
+    }
+    
+    public static void fetchRelease(Runnable succ) {
+        Thread t = new Thread(() -> {
+            try {
+                fetchRelease(baseURL);
+                succ.run();
+            }catch(IOException e){
+                handleException(e);
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+    
+    public static String getFlavorThatExist() {
+        if (release.getProperty(flavor) != null) return flavor;
+        Seq<Seq<String>> seq = new Seq<>();
+        for (Object s : release.keySet()) {
+            try {
+                seq.add(FlavorDialog.toKey(String.valueOf(s)));
+            }catch(IllegalArgumentException h){}
+        }
+        seq.sort(FlavorDialog.flavorSort);
+        return seq.get(seq.size - 1).toString("-");
+    }
+    
+    public static void tryDownload(String url, String flavor) {
+        if (url == null) return;
+        String path = flavor.replace('-', '/') + ".jar";
+        jar = Core.files.cache(path);
+        if (!jar.exists() || Core.settings.getBool("glopion-auto-update", false)){
+            Log.infoTag("Glopion-Bootstrapper", "");
+            Log.infoTag("Glopion-Bootstrapper", "Downloading: " + url);
+            boolean b = !Core.settings.getBoolOnce("glopion-prompt-" + flavor) || !jar.exists();
+            if (!Vars.headless && b){
+                //sometime jar already exist
+                Main.runOnUI(() -> BootstrapperUI.downloadConfirm(url, jar, () -> {
+                    if (Main.jar.exists()){
+                        Vars.ui.showConfirm("Exit", "Finished downloading do you want to exit", Core.app::exit);
+                    }else{
+                        ui.showErrorMessage(jar.absolutePath() + " still doesn't exist ??? how");
+                    }
+                    
+                }));
+            }else{
+                long size = jar.length();
+                
+                BootstrapperUI.download(url, Main.jar, () -> {
+                    if (downloadThing || size != jar.length())
+                        runOnUI(() -> ui.showInfoFade(url + " has been downloaded"));
+                }, Main::handleException);
+            }
+        }
+    }
+    
+    public static void tryDownload() {
+        tryDownload(release.getProperty(flavor), flavor);
+    }
+    
+    public static void downloadIfNotExist() {
+        String url = release.getProperty(flavor);
+        if (url == null) return;
+        jar = Core.files.cache(flavor.replace('-', '/') + ".jar");
+        if (!jar.exists()) tryDownload();
     }
     
     @Override

@@ -170,6 +170,7 @@ allprojects {
             sdkJar = new File(sdkRoot, "nope").getAbsolutePath()
         if (!new File(sdkD8).exists())
             sdkD8 = new File(sdkRoot, "nope").getAbsolutePath()
+        androidJarFile = new File(sdkJar)
         mindustryExecutable = getMindustryFile()
         mindustryServerExecutable = getMindustryServerFile()
         //imagine writing json
@@ -276,7 +277,10 @@ ext {
 //Root Module only
 dependencies {
 
-
+    annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
+    testAnnotationProcessor "com.github.Anuken:jabel:$jabelVersion"
+    if(androidJarFile.exists())
+        compileOnly(files(androidJarFile))
 }
 
 //make .class jar with executable main and MANIFEST.MF

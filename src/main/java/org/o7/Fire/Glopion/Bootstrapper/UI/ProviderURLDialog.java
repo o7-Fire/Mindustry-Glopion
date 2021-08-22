@@ -3,6 +3,7 @@ package org.o7.Fire.Glopion.Bootstrapper.UI;
 import arc.Core;
 import mindustry.ui.dialogs.BaseDialog;
 import org.o7.Fire.Glopion.Bootstrapper.BootstrapperUI;
+import org.o7.Fire.Glopion.Bootstrapper.Main;
 import org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class ProviderURLDialog extends BaseDialog {
                 return;
             }
             ui.showInfoFade("Loaded: " + temp.size() + " flavor");
-            bootstrapper.release = temp;
+            Main.release = temp;
             Core.settings.put("glopion-url", finalS);
             bootstrapper.buildUI();
         }, e -> {

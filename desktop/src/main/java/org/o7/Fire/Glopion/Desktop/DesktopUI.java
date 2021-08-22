@@ -15,7 +15,7 @@ public class DesktopUI extends ModsModule {
     
     @Override
     public boolean disabled() {
-        return Vars.headless;
+        return Vars.ui == null;
     }
     
     @Override

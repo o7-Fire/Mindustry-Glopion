@@ -37,7 +37,7 @@ dependencies {
     }
     compileOnly("com.github.Anuken.Mindustry:server:$mindustryHash")
     compileOnly("com.github.Anuken.Arc:backend-headless:$arcHash")
-    compileOnly(group: 'com.aparapi', name: 'aparapi', version: '2.0.0') { because("runtime") }
+    compileOnly(group: 'com.aparapi', name: 'aparapi', version: '3.0.0') { because("runtime") }
 
     //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}
     compileOnly(group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
@@ -91,7 +91,7 @@ dependencies {
     testImplementation group: 'org.jfree', name: 'jfreechart', version: '1.5.3'
     testImplementation group: 'org.nd4j', name: 'nd4j-native-platform', version: nd4jVersion
     testImplementation group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: nd4jVersion
-    testImplementation group: 'com.aparapi', name: 'aparapi', version: '2.0.0'
+    testImplementation group: 'com.aparapi', name: 'aparapi', version: '3.0.0'
     testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
     testImplementation group: 'org.jblas', name: 'jblas', version: '1.2.5'
     testImplementation(atomModule(":Atomic"))

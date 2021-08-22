@@ -111,7 +111,7 @@ public class TranslateChat extends ModsModule implements Administration.ChatFilt
                 }
             });
         }
-        if (!Vars.headless){
+        if (Vars.ui != null){
             try {
                 Log.infoTag("Translation", "ChatFragment Hook");
                 Vars.ui.chatfrag = new ChatFragmentPatched(Vars.ui.chatfrag);

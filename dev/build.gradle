@@ -1,8 +1,8 @@
 dependencies {
     implementation(atomModule(":Atomic"))
     implementation(atomModule(":Atomic"))
-    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.16.1'
-    implementation group: 'com.google.googlejavaformat', name: 'google-java-format', version: '1.7'
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.22.1'
+    implementation group: 'com.google.googlejavaformat', name: 'google-java-format', version: '1.11.0'
     File mindustry = file(mindustryExecutable)
     if (mindustry.exists()) {
         implementation(files(mindustry))
