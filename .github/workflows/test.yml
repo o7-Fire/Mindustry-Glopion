@@ -51,7 +51,13 @@ jobs:
       with:
         path: ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-
+        
+    - name: Virtual sink
+      run: |
+        sudo apt-get install libasound2 libasound2-plugins alsa-utils alsa-oss
+        sudo usermod -aG pulse,pulse-access runner
+        pulseaudio -D
+        pacmd list-sinks
 
     - name: Gradle Test Coverage
       uses: GabrielBB/xvfb-action@v1
