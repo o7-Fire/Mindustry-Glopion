@@ -44,7 +44,12 @@ jobs:
         
     - name: Build with Gradle
       run: ./gradlew deploy
-      
+    - name: run tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.api-level }}
+        script: chmod +x runTestAndroid.sh && ./runTestAndroid.sh
+        
     - name: Install emulator
       run: |
        chmod +x setupEmulator.sh
