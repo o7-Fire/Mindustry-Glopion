@@ -19,8 +19,9 @@ jobs:
       fail-fast: false
       matrix:
         api-level:
-          - 21
+          - 19
           - 24
+          - 29
         
     steps:
     - uses: actions/checkout@v2
@@ -34,12 +35,23 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       
+      # Cache Gradle dependencies
+    - name: Setup Gradle Dependencies Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties') }}
+        
     - name: Build with Gradle
       run: ./gradlew deploy
       
     - name: Install emulator
-      run: ./setupEmulator.sh ${{ matrix.api-level }}
+      run: |
+       chmod +x setupEmulator.sh
+       ./setupEmulator.sh ${{ matrix.api-level }}
       
     - name: Do emulator
-      run: ./runTest.sh
+      run: |
+       chmod +x runTest.sh
+       ./runTest.sh
 
