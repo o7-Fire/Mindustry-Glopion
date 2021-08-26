@@ -52,6 +52,6 @@ jobs:
       
     - name: Do emulator
       run: |
-       chmod +x runTest.sh
-       ./runTest.sh
+       chmod +x runTestAndroid.sh
+       ./runTestAndroid.sh
 
