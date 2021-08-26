@@ -1,0 +1,1 @@
+java -Dtest="1" -jar v130-server/server.jar

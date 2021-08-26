@@ -202,9 +202,13 @@ allprojects {
                 downloadMindustry(getMindustryURL(), getMindustryFile());
             }
             File mindustry = file(mindustryExecutable)
-            if (be && mindustry.exists()) {
+
+            File mindustryServer = file(mindustryServerExecutable)
+            if (be || mindustry.exists() || mindustryServer.exist()) {
                 compileOnly(files(mindustry))
+                compileOnly(files(mindustryServer))
                 //testCompileOnly(files(mindustry))
+                testImplementation(files(mindustryServer))
                 testImplementation(files(mindustry))
             } else {//if you feel fancy remove this else
                 compileOnly("com.github.Anuken.Mindustry:desktop:$mindustryHash")
@@ -337,9 +341,7 @@ task baseJar(type: Jar) {
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs.addAll(['--release', '8'])//android 4.4 like java 8
-}
+
 //here we combine typical jar and dex jar to make
 //typical-dex.jar
 //if android sdk exist
@@ -447,6 +449,10 @@ task download() {
         downloadMindustry(getMindustryServerURL(), getMindustryServerFile());
         downloadMindustry(getMindustryURL(), getMindustryFile());
     }
+}
+tasks.withType(JavaCompile) {
+    dependsOn(download)
+    options.compilerArgs.addAll(['--release', '8'])//android 4.4 like java 8
 }
 //don't want open file manager
 task copyMods() {

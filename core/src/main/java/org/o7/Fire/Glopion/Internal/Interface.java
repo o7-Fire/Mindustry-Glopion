@@ -31,12 +31,14 @@
 package org.o7.Fire.Glopion.Internal;
 
 
+import Atom.Exception.ShouldNotHappenedException;
 import Atom.Reflect.Reflect;
 import Atom.String.WordGenerator;
 import Atom.Struct.Filter;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
 import Atom.Utility.Utility;
+import arc.ApplicationListener;
 import arc.Core;
 import arc.Events;
 import arc.func.Cons;
@@ -55,6 +57,7 @@ import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.net.ValidateException;
+import mindustry.server.ServerControl;
 import mindustry.type.Item;
 import mindustry.ui.Styles;
 import mindustry.world.Block;
@@ -78,7 +81,7 @@ public class Interface {
     @Deprecated
     public static final ObjectMap<String, String> bundle = new ObjectMap<>();
     public static Map<Integer, ArrayList<Building>> buildingCache = Collections.synchronizedMap(new WeakHashMap<>());
-    public static String fancyBoxBorder = "+-", fancyBoxAcceptDeclineSeparator = " <> ", fancyBoxIgnore = "-ALBEITIGNORETHISLINE";
+    public static String fancyBoxBorder = "-+", fancyBoxAcceptDeclineSeparator = " | ", fancyBoxIgnore = "-ALBEITIGNORETHISLINE";
     public static boolean fancyBoxDebug = true;
     private static long lastToast = 0;
     
@@ -125,19 +128,51 @@ public class Interface {
         getConsoleInputAsync(title, about, null, s);
     }
     
-    public static void getConsoleInputAsync(String title, String about, String[] allowed, Cons<String> s) {
-        getConsoleInputAsync(fancyBox(title, about), allowed, s);
+    public static ServerControl serverControl = null;
+    
+    public static void getConsoleInputAsync(String title, String about, final Map<String, String> allowedDescrption, Cons<String> s) {
+        getConsoleInputAsync(fancyBox(title, about), allowedDescrption, s);
     }
     
-    public static void getConsoleInputAsync(String prompt, String[] allowed, Cons<String> s) {
+    public static ServerControl getServerControl() {
+        if (serverControl != null) return serverControl;
+        try {
+            for (ApplicationListener e : Core.app.getListeners()) {
+                if (e instanceof ServerControl){
+                    return serverControl = (ServerControl) e;
+                }
+            }
+        }catch(Exception e){}
+        return null;
+    }
+    
+    public static void getConsoleInputAsync(String prompt, final Map<String, String> allowedDescrption, Cons<String> s) {
+        if (Vars.headless){
+            if (allowedDescrption == null) throw new NullPointerException("need allowedDescription in server version");
+            for (final Map.Entry<String, String> a : allowedDescrption.entrySet()) {
+                getServerControl().handler.register(a.getKey(), a.getValue(), ss -> {
+                    s.get(a.getKey());
+                    for (String b : allowedDescrption.keySet())
+                        getServerControl().handler.removeCommand(b);
+                });
+            }
+            Log.info(System.lineSeparator() + prompt);
+            return;
+        }
         Pool.submit(() -> {
             
             String ss = null;
             while (ss == null) {
                 try {
                     System.out.println(prompt);
-                    if (allowed != null) ss = getConsoleInput(allowed);
-                    else ss = getConsoleInput();
+                    if (allowedDescrption != null){
+                        String[] allowed = new String[allowedDescrption.size()];
+                        int i = 0;
+                        for (String sss : allowedDescrption.keySet()) {
+                            allowed[i++] = sss;
+                        }
+                        ss = getConsoleInput(allowed);
+                    }else ss = getConsoleInput();
                 }catch(IOException e){
                     e.printStackTrace();
                 }
@@ -556,7 +591,7 @@ public class Interface {
         String border = Utility.repeatThisString(fancyBoxBorder, repeatLength);//make repeating string
         return '\n' + border + '\n' + output + '\n' + border;//fill top and bottom
     }
-    
+
     public static void showConfirm(String title, String text, String accept, String decline, Runnable confirm, Runnable no) {
         
         if (Vars.headless){
@@ -564,12 +599,27 @@ public class Interface {
                 if (Random.getBool()){confirm.run();}else{no.run();}
                 return;
             }
-            System.out.println(fancyBox(title, text, accept, decline));
-            if (accept.equals(getConsoleInput(accept, decline))){
-                confirm.run();
-            }else{
-                no.run();
-            }
+            String keyMain = title.hashCode() + "-";
+            String keyAccept = keyMain + accept.toLowerCase().replace(" ", "-");
+            String keyDecline = keyMain + decline.toLowerCase().replace(" ", "-");
+            String prompt = fancyBox(title, text, keyAccept, keyDecline);
+            Cons<String> consumer = s -> {
+                if (s.equals(keyAccept)){
+                    confirm.run();
+                    Log.info("Confirmed: " + accept);
+                    return;
+                }else if (s.equals(keyDecline)){
+                    no.run();
+                    Log.info("Confirmed: " + decline);
+                    return;
+                }
+                throw new ShouldNotHappenedException("User manage to bypass consoleInput: \"" + s + '"');
+            };
+            HashMap<String, String> h = new HashMap<>();
+            h.put(keyAccept, title + ": " + accept);
+            h.put(keyDecline, title + ": " + decline);
+            getConsoleInputAsync(prompt, h, consumer);
+    
         }else{
             runOnUI(() -> ui.showCustomConfirm(title, text, accept, decline, confirm, no));
         }
@@ -589,6 +639,33 @@ public class Interface {
         runOnUI(() -> Vars.ui.showInfoText(title, desc));
         if (Vars.headless){
             Log.info(fancyBox("\t" + title + "\n" + desc));
+        }
+    }
+    
+    public static void showConfirmOnce(String title, String text, String accept, String decline) {
+        showConfirmOnce(title, text, accept, decline, () -> {});
+    }
+    
+    public static void showConfirmOnce(String title, String text, String accept, String decline, Runnable accepted) {
+        showConfirmOnce(title, text, accept, decline, accepted, () -> {});
+    }
+    
+    public static void showConfirmOnce(String title, String text, String accept, String decline, Runnable accepted, Runnable declined) {
+        String key = TextManager.toKey(text);
+        boolean runned = settings.getBool(key, false);
+        
+        if (!runned){
+            Runnable finalAccepted = accepted;
+            accepted = () -> {
+                settings.put(key, true);
+                finalAccepted.run();
+            };
+            Runnable finalDeclined = declined;
+            declined = () -> {
+                settings.put(key, true);
+                finalDeclined.run();
+            };
+            showConfirm(title, text, accept, decline, accepted, declined);
         }
     }
     

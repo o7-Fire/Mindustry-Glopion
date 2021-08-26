@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Internal;
 
 import Atom.Time.Timer;
 import arc.util.Log;
+import mindustry.Vars;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModsModule;
 import org.o7.Fire.Glopion.Module.ModuleRegisterer;
@@ -69,9 +70,10 @@ public class Testing extends ModsModule {
     
     @Override
     public void update() {
+        if (Vars.state.isPlaying()) testCompleted = true;
         if (testCompleted()){
             String stat = "preInit: " + preInit + ", Init: " + init + ", postInit: " + postInit;
-    
+        
             if (init != 1 || preInit != 1 || postInit != 1){
                 throw new RuntimeException("Runned more than once or not runned:\n" + stat);
             }

@@ -18,7 +18,6 @@ package org.o7.Fire.Glopion.Internal;
 
 import Atom.Exception.GetRealException;
 import Atom.Reflect.Reflect;
-import Atom.Utility.Digest;
 import Atom.Utility.Random;
 import arc.Core;
 import arc.struct.ObjectMap;
@@ -197,7 +196,7 @@ public class TextManager extends ModsModule {
     
     public static String truncateHash(String s, int max) {
         if (s.length() > max){
-            return s.substring(0, s.length() - 1) + "-" + Digest.longHash(s);
+            return s.substring(0, max) + "-" + s.hashCode();
         }
         return s;
     }
@@ -212,6 +211,12 @@ public class TextManager extends ModsModule {
     
     private static String prefix() {
         return "glopion-bundle";
+    }
+    
+    public static String toKey(String title) {
+        String key = title.toLowerCase().replace(' ', '-').trim();
+        key = truncateHash(title, 20);
+        return key;
     }
     
     @Override
