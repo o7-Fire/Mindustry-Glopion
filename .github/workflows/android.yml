@@ -42,7 +42,7 @@ jobs:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties') }}
         
-    - name: Build with Gradle
+    - name: Test with emulator
       run: ./gradlew deploy
     - name: run tests
       uses: reactivecircus/android-emulator-runner@v2
