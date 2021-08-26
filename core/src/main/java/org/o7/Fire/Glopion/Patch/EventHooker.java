@@ -16,7 +16,6 @@
 
 package org.o7.Fire.Glopion.Patch;
 
-import arc.Core;
 import arc.Events;
 import arc.util.Log;
 import mindustry.Vars;
@@ -55,7 +54,6 @@ public class EventHooker extends ModsModule {
     @Override
     public void start() {
         super.start();
-        Vars.loadLogger();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Events.fire(EventExtended.Shutdown.class, new EventExtended.Shutdown());
             ModuleRegisterer.invokeAll(Module::onShutdown);
@@ -66,17 +64,11 @@ public class EventHooker extends ModsModule {
         Events.run(EventType.Trigger.update, () -> {
             ModuleRegisterer.invokeAll(Module::update);
         });
+    
+        Events.on(EventType.ServerLoadEvent.class, s -> {
+            ModuleRegisterer.invokeAll(Module::postInit);
+        });
         Events.on(EventType.ClientLoadEvent.class, s -> {
-            Core.settings.getBoolOnce("GlopionDisclaimer", () -> {
-                Vars.ui.showCustomConfirm("[royal]Glopion[white]-[red]Warning", "Use this mods at your own risk", "Accept", "Accept", () -> { }, () -> { });
-            });
-            Core.settings.getBoolOnce("CrashReport1", () -> Vars.ui.showConfirm("Anonymous Data Reporter", "We collect your anonymous data e.g crash-log, to make your experience much worse", () -> {
-            }));
-            if (System.getProperty("gay-shit-no-offense") != null){
-                Core.settings.getBoolOnce("gay-shit-no-offense", () -> {
-                    Vars.ui.showText("[royal]Glopion[white]-[red]Warning", "something wrong, i can feel it");
-                });
-            }
             ModuleRegisterer.invokeAll(Module::postInit);
             //GlopionCore.moduleRegisterer.postInit();
             //SharedBoot.finishStartup();

@@ -71,7 +71,7 @@ public interface Module extends Loadable, Disposable {
     }
     
     /**
-     * When {@link mindustry.game.EventType.ClientCreateEvent ClientCreateEvent} is called
+     * When {@link mindustry.game.EventType.ServerLoadEvent ServerLoadEvent} or {@link mindustry.game.EventType.ClientLoadEvent ClientLoadEvent} is called
      */
     default void postInit() throws Throwable {
     

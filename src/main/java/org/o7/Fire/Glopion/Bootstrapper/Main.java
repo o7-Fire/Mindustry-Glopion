@@ -146,8 +146,8 @@ public class Main extends Plugin {
             }
             if (!(Vars.headless || test)) break;
         }
-        
-        
+    
+    
     }
     
     public static void disable() {
@@ -157,6 +157,18 @@ public class Main extends Plugin {
             mod.state = Mods.ModState.disabled;
             runOnUI(() -> Vars.ui.showInfo("Bootstrapper Disabled"));
         }
+    }
+    
+    public static void downloadGlopionNow(String flavor) throws IOException, InterruptedException {
+        Log.info("Downloading now");
+        fetchRelease(baseURL);
+        if (release.getProperty(flavor) == null) flavor = getFlavorThatExist();
+        Log.info("Flavor: " + flavor);
+        String path = flavor.replace('-', '/') + ".jar";
+        String url = release.getProperty(flavor);
+        jar = Core.files.cache(path);
+        SharedBootstrapper.download(new URL(url), jar.file()).join();
+        classpath = "org.o7.Fire.Glopion." + flavor.split("-")[0] + "Launcher";
     }
     
     public static void load() {
@@ -196,15 +208,7 @@ public class Main extends Plugin {
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
                 if ((test || Vars.headless) && !jar.exists()){
-                    Log.info("Downloading now");
-                    fetchRelease(baseURL);
-                    String flavor = getFlavorThatExist();
-                    Log.info("Flavor: " + flavor);
-                    String path = flavor.replace('-', '/') + ".jar";
-                    String url = release.getProperty(flavor);
-                    jar = Core.files.cache(path);
-                    SharedBootstrapper.download(new URL(url), jar.file()).join();
-                    classpath = "org.o7.Fire.Glopion." + flavor.split("-")[0] + "Launcher";
+                    downloadGlopionNow(flavor);
                 }
                 if (!mobile){
                     while (parentClasslaoder.getParent() != null && parentClasslaoder.getClass() != ModClassLoader.class)
@@ -229,7 +233,6 @@ public class Main extends Plugin {
                 }
                 
                 if (!Vars.mobile && somethingMissing()){
-    
                     downloadLibrary();
                 }
                 mainClassloader = modClassloader;

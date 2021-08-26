@@ -32,9 +32,11 @@ package org.o7.Fire.Glopion.Internal;
 
 
 import Atom.Reflect.Reflect;
+import Atom.String.WordGenerator;
 import Atom.Struct.Filter;
 import Atom.Utility.Pool;
 import Atom.Utility.Random;
+import Atom.Utility.Utility;
 import arc.Core;
 import arc.Events;
 import arc.func.Cons;
@@ -45,6 +47,7 @@ import arc.scene.event.Touchable;
 import arc.scene.style.Drawable;
 import arc.scene.ui.layout.Table;
 import arc.struct.ObjectMap;
+import arc.util.Log;
 import arc.util.Time;
 import mindustry.Vars;
 import mindustry.core.GameState;
@@ -59,7 +62,11 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Sorter;
 import mindustry.world.blocks.sandbox.ItemSource;
 import org.jetbrains.annotations.NotNull;
+import org.o7.Fire.Glopion.GlopionCore;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.Future;
 
@@ -71,10 +78,12 @@ public class Interface {
     @Deprecated
     public static final ObjectMap<String, String> bundle = new ObjectMap<>();
     public static Map<Integer, ArrayList<Building>> buildingCache = Collections.synchronizedMap(new WeakHashMap<>());
+    public static String fancyBoxBorder = "+-", fancyBoxAcceptDeclineSeparator = " <> ", fancyBoxIgnore = "-ALBEITIGNORETHISLINE";
+    public static boolean fancyBoxDebug = true;
     private static long lastToast = 0;
     
     public static void openLink(String url) {
-        Vars.ui.showConfirm("Open URL", "Are you sure want to open\n \"" + url + "\"", () -> {
+        showConfirm("Open URL", "Are you sure want to open\n \"" + url + "\"", () -> {
             Pool.submit(() -> {
                 if (!Core.app.openURI(url)){
                     ui.showErrorMessage("@linkfail");
@@ -98,9 +107,46 @@ public class Interface {
     }
     
     public static void showInput(String key, String title, String about, Cons<String> s) {
-        Vars.ui.showTextInput(title, about, 1000, Core.settings.getString(key, ""), se -> {
-            Core.settings.put(key, se);
-            s.get(se);
+        if (Vars.headless){
+            getConsoleInputAsync(title, about, se -> {
+                Core.settings.put(key, se);
+                s.get(se);
+            });
+        }else{
+            Runnable e = () -> Vars.ui.showTextInput(title, about, 1000, Core.settings.getString(key, ""), se -> {
+                Core.settings.put(key, se);
+                s.get(se);
+            });
+            runOnUI(e);
+        }
+    }
+    
+    public static void getConsoleInputAsync(String title, String about, Cons<String> s) {
+        getConsoleInputAsync(title, about, null, s);
+    }
+    
+    public static void getConsoleInputAsync(String title, String about, String[] allowed, Cons<String> s) {
+        getConsoleInputAsync(fancyBox(title, about), allowed, s);
+    }
+    
+    public static void getConsoleInputAsync(String prompt, String[] allowed, Cons<String> s) {
+        Pool.submit(() -> {
+            
+            String ss = null;
+            while (ss == null) {
+                try {
+                    System.out.println(prompt);
+                    if (allowed != null) ss = getConsoleInput(allowed);
+                    else ss = getConsoleInput();
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+            String finalSs = ss;
+            Core.app.post(() -> {
+                s.get(finalSs);
+            });
+            
         });
     }
     
@@ -112,7 +158,6 @@ public class Interface {
     public static void showInput(String key, String about, Cons<String> s) {
         showInput(key, about, about, s);
     }
-    
     
     public static Tile getMouseTile() {
         return Vars.world.tileWorld(Vars.player.mouseX, Vars.player.mouseY);
@@ -168,16 +213,20 @@ public class Interface {
     }
     
     public static void showInfo(String s) {
-        runOnUI(()->Vars.ui.showInfo(s));
+        runOnUI(() -> Vars.ui.showInfo(s));
     }
     
     public static void runOnUI(Runnable r) {
+        if (Vars.headless) return;//futile
         if (Vars.ui == null || Core.scene == null) Events.on(EventType.ClientLoadEvent.class, s -> r.run());
         r.run();
     }
     
-    public static void warningUI(String title, String description) {
+    public static void showWarning(String title, String description) {
         runOnUI(() -> Vars.ui.showErrorMessage(title + "\n" + description));
+        if (Vars.headless){
+            Log.warn("[@]: @", title, description);
+        }
     }
     
     @Deprecated
@@ -233,10 +282,12 @@ public class Interface {
         }
         return false;
     }
+    
     @Deprecated
     public synchronized static void registerWords(String key, String value) {
         TextManager.registerWords(key, value);
     }
+    
     @Deprecated
     public synchronized static void registerWords(String key) {
         registerWords(key, key);
@@ -399,6 +450,145 @@ public class Interface {
             return (Class<T>) Class.forName(key, false, Interface.class.getClassLoader());
         }catch(ClassNotFoundException e){
             return null;
+        }
+    }
+    
+    public static String getConsoleInputOrNull() {
+        try {
+            return getConsoleInput();
+        }catch(IOException e){
+            return null;
+        }
+    }
+    
+    public static String getConsoleInput(String... allowedWord) {
+        HashSet<String> allowed = new HashSet<>(Arrays.asList(allowedWord));
+        String that = null;
+        try {
+            that = getConsoleInput();
+        }catch(IOException e){
+            that = e.getMessage();
+        }
+        while (!allowed.contains(that)) {
+            try {
+                System.out.println("Try again");
+                that = getConsoleInput();
+            }catch(IOException e){
+                that = e.getMessage();
+            }
+        }
+        return that;
+    }
+    
+    public static String getConsoleInput() throws IOException {
+        System.out.print(">");
+        return new BufferedReader(new InputStreamReader(System.in)).readLine();
+    }
+    
+    public static void main(String[] args) {
+        System.err.println(fancyBox("\tYeet\n" + WordGenerator.newWord(120) + "\nyes" + " no"));
+        for (int i = 0; i < 5; i++) {
+            System.err.println(fancyBox(WordGenerator.randomWord().toString(), WordGenerator.randomWord().append("\n").append(WordGenerator.newWord(50)).append("\n").append(WordGenerator.newWord(60)).toString(), WordGenerator.randomWord().append(" | ").append(WordGenerator.randomWord()).toString()));
+        }
+        for (int i = 0; i < 5; i++) {
+            System.err.println(fancyBox(WordGenerator.randomWord().toString(), WordGenerator.randomWord().append("\n").append(WordGenerator.newWord(50)).append("\n").append(WordGenerator.newWord(60)).toString(), WordGenerator.randomString(), WordGenerator.randomString()));
+            
+        }
+        
+        System.out.println(getConsoleInputOrNull());
+        System.out.println(getConsoleInput("yes", "no"));
+    }
+    
+    public static String fancyBox(String title, String text) {
+        return fancyBox(title, text, "");
+    }
+    
+    public static String fancyBox(String title, String text, String bottomText) {
+        int center = measureStringMax(text, bottomText);
+        center = center / 2;
+        
+        return fancyBox(Utility.repeatThisString(" ", Math.max(0, center - (title.length() / 2))) + title + "\n\n" + text + "\n\n" + bottomText);
+    }
+    
+    //for debugging
+    public static String fancyBoxDebug(int i, String text) {
+        if (!fancyBoxDebug) return text;
+        String stack = Reflect.getCallerClassStackTrace().toString();
+        stack = stack + fancyBoxIgnore;
+        if (i < 0){
+            return text + "\n" + i + stack;
+        }
+        return text + "\n" + Utility.repeatThisString(" ", i) + "|" + stack;
+    }
+    
+    public static int measureStringMax(String... texts) {
+        int center = 0;
+        for (String text : texts) {
+            for (String s : text.split("\n")) {
+                if (s.endsWith(fancyBoxIgnore)) continue;
+                center = Math.max(s.length(), center);
+            }
+        }
+        return center;
+    }
+    
+    public static String fancyBox(String title, String text, String accept, String decline) {
+        final String fancyBoxAcceptDeclineSeparator = Interface.fancyBoxAcceptDeclineSeparator;
+        String bottomText = accept + fancyBoxAcceptDeclineSeparator + decline;//yes
+        int center = measureStringMax(text) / 2;//to calculate center of title
+        int bottomTextRepeat = Math.max(0, center - (title.length() / 2));//0 to title start index
+        
+        bottomTextRepeat += title.length() / 2;//add half of the string length
+        
+        bottomTextRepeat = bottomTextRepeat - accept.length();//compensate for this text
+        
+        bottomTextRepeat -= Math.ceil((double) fancyBoxAcceptDeclineSeparator.length() / 2);//compensate for this text by half
+        
+        bottomTextRepeat = Math.max(0, bottomTextRepeat);//extra safety
+        bottomText = Utility.repeatThisString(" ", bottomTextRepeat) + bottomText;//self centered
+        return fancyBox(title, text, bottomText);
+    }
+    
+    public static String fancyBox(String output) {
+        final String fancyBoxBorder = Interface.fancyBoxBorder;
+        int repeatLength = measureStringMax(output);//to cover all text
+        repeatLength = (int) Math.ceil((double) repeatLength / fancyBoxBorder.length());//if fancyBoxBorder is not a single character its problematic. single char: 20/1 or double char: 20/2 to fill the border
+        String border = Utility.repeatThisString(fancyBoxBorder, repeatLength);//make repeating string
+        return '\n' + border + '\n' + output + '\n' + border;//fill top and bottom
+    }
+    
+    public static void showConfirm(String title, String text, String accept, String decline, Runnable confirm, Runnable no) {
+        
+        if (Vars.headless){
+            if (GlopionCore.test){
+                if (Random.getBool()){confirm.run();}else{no.run();}
+                return;
+            }
+            System.out.println(fancyBox(title, text, accept, decline));
+            if (accept.equals(getConsoleInput(accept, decline))){
+                confirm.run();
+            }else{
+                no.run();
+            }
+        }else{
+            runOnUI(() -> ui.showCustomConfirm(title, text, accept, decline, confirm, no));
+        }
+        
+    }
+    
+    
+    public static void showConfirm(String s, String s1, String accept, String accept1) {
+        showConfirm(s, s1, accept, accept1, () -> {}, () -> {});
+    }
+    
+    public static void showConfirm(String title, String text, Runnable accepted) {
+        showConfirm(title, text, TextManager.translate("Accept"), TextManager.translate("Decline"), accepted, () -> {});
+    }
+    
+    public static void showInfo(String title, String desc) {
+        runOnUI(() -> Vars.ui.showInfoText(title, desc));
+        if (Vars.headless){
+            Log.info(fancyBox("\t" + title + "\n" + desc));
         }
     }
     

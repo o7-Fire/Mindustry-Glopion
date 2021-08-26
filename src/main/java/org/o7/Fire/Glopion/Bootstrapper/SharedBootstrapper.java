@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 //Java 8 only
 public class SharedBootstrapper {
-    public static final long version = 30;
+    public static final long version = 32;
     public final static String javaPath;
     public static final boolean test = System.getProperty("test") != null;
     public static final ExecutorService executors = Executors.newCachedThreadPool(r -> {
@@ -52,12 +52,15 @@ public class SharedBootstrapper {
         dependencies.load(is);
         if (dependencies.size() == 0) return;
         SharedBootstrapper.parent.mkdirs();
-        for (String key : dependencies.stringPropertyNames()) {
+        for (Object objKey : dependencies.keySet()) {
+            String key = String.valueOf(objKey);
             String[] download = dependencies.getProperty(key).split(" ");
             String[] keyPlatform = key.split(":");
-            if(keyPlatform.length == 4){
-                if(!keyPlatform[3].startsWith(getPlatform()))
+            if (keyPlatform.length == 4){
+                if (!keyPlatform[3].startsWith(getPlatform())){
+                    Log.debug("Discarding @, incompatible platform", key);
                     continue;
+                }
             }
             //System.out.println(Arrays.toString(keyPlatform));
             String[] keys = key.split("-", 2);

@@ -18,11 +18,13 @@ package org.o7.Fire.Glopion.Internal;
 
 import Atom.Exception.GetRealException;
 import Atom.Reflect.Reflect;
+import Atom.Utility.Digest;
 import Atom.Utility.Random;
 import arc.Core;
 import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Strings;
+import mindustry.Vars;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModsModule;
@@ -86,7 +88,7 @@ public class TextManager extends ModsModule {
     /**
      * Convert string to current {@link Interface#getLocale()}
      *
-     * @return "Colorize the word to" -> "Colorize verbum"
+     * @return e.g "Colorize the word to" -> "Colorize verbum"
      */
     public static String translate(String val) {
         String key = val.toLowerCase().replace(' ', '-').trim();
@@ -138,7 +140,7 @@ public class TextManager extends ModsModule {
     }
     
     public static String colorized(String s) {
-        if (!GlopionCore.colorPatchSettings) return s;
+        if (!GlopionCore.colorPatchSettings || Vars.headless) return s;
         return getRandomHexColor() + s + "[white]";
     }
     
@@ -153,12 +155,6 @@ public class TextManager extends ModsModule {
         registerWords("Ozone");
         registerWords("Glopion");
         registerWords("Update");
-        registerWords("ozone.menu", "Ozone Menu");
-        registerWords("ozone.hud", "Ozone HUD");
-        registerWords("ozone.javaEditor", "Java Executor");
-        registerWords("ozone.javaEditor.reformat", "Reformat");
-        registerWords("ozone.javaEditor.run", "Run");
-        registerWords("ozone.commandsUI", "Commands GUI");
         registerWords("colorPatchSettings", "Translation Colorized");
         registerWords("blockDebugSettings", "Enable Block Debug Info");
         commands.put("help", "help desk");
@@ -197,6 +193,13 @@ public class TextManager extends ModsModule {
         }catch(Exception e){
             WarningHandler.handleProgrammerFault(e);
         }
+    }
+    
+    public static String truncateHash(String s, int max) {
+        if (s.length() > max){
+            return s.substring(0, s.length() - 1) + "-" + Digest.longHash(s);
+        }
+        return s;
     }
     
     public static void registerWords(String s) {
