@@ -204,13 +204,13 @@ allprojects {
             File mindustry = file(mindustryExecutable)
 
             File mindustryServer = file(mindustryServerExecutable)
-            if (be || mindustry.exists() || mindustryServer.exists()) {
+       
                 compileOnly(files(mindustry))
                 compileOnly(files(mindustryServer))
                 //testCompileOnly(files(mindustry))
                 testImplementation(files(mindustryServer))
                 testImplementation(files(mindustry))
-            } else {//if you feel fancy remove this else
+            if(!be){//if you feel fancy remove this else
                 compileOnly("com.github.Anuken.Mindustry:desktop:$mindustryHash")
                 compileOnly("com.github.Anuken.Arc:arc-core:$arcHash")
                 compileOnly("com.github.Anuken.Arc:backend-sdl:$arcHash")
