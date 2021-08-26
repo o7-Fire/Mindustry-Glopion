@@ -51,9 +51,9 @@ public class EventHooker extends ModsModule {
         drawc.clear();
     }
     
+    
     @Override
-    public void start() {
-        super.start();
+    public void preInit() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Events.fire(EventExtended.Shutdown.class, new EventExtended.Shutdown());
             ModuleRegisterer.invokeAll(Module::onShutdown);
@@ -66,9 +66,11 @@ public class EventHooker extends ModsModule {
         });
     
         Events.on(EventType.ServerLoadEvent.class, s -> {
+            Log.debug("Post Init");
             ModuleRegisterer.invokeAll(Module::postInit);
         });
         Events.on(EventType.ClientLoadEvent.class, s -> {
+            Log.debug("Post Init");
             ModuleRegisterer.invokeAll(Module::postInit);
             //GlopionCore.moduleRegisterer.postInit();
             //SharedBoot.finishStartup();
