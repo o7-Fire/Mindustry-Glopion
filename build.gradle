@@ -204,7 +204,7 @@ allprojects {
             File mindustry = file(mindustryExecutable)
 
             File mindustryServer = file(mindustryServerExecutable)
-            if (be || mindustry.exists() || mindustryServer.exist()) {
+            if (be || mindustry.exists() || mindustryServer.exists()) {
                 compileOnly(files(mindustry))
                 compileOnly(files(mindustryServer))
                 //testCompileOnly(files(mindustry))
