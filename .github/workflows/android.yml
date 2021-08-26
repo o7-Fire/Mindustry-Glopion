@@ -15,8 +15,12 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
+     # Allow tests to continue on other devices if they fail on one device.
+      fail-fast: false
       matrix:
-        api-level: [19, 24, 30]
+        api-level:
+          - 21
+          - 24
         
     steps:
     - uses: actions/checkout@v2
@@ -29,11 +33,13 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+      
     - name: Build with Gradle
       run: ./gradlew deploy
-    - name: Run Test
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: ${{ matrix.api-level }}
-        script: ./runTestAndroid.sh
+      
+    - name: Install emulator
+      run: ./setupEmulator.sh ${{ matrix.api-level }}
+      
+    - name: Do emulator
+      run: ./runTest.sh
 
