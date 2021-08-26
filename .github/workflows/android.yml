@@ -49,14 +49,5 @@ jobs:
       with:
         api-level: ${{ matrix.api-level }}
         script: chmod +x runTestAndroid.sh && ./runTestAndroid.sh
-        
-    - name: Install emulator
-      run: |
-       chmod +x setupEmulator.sh
-       ./setupEmulator.sh ${{ matrix.api-level }}
-      
-    - name: Do emulator
-      run: |
-       chmod +x runTestAndroid.sh
-       ./runTestAndroid.sh
+
 
