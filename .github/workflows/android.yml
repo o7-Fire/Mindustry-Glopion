@@ -2,7 +2,7 @@ name: Android CI
 
 on:
   workflow_run:
-    workflows: [ "Sonar Gradle Test" ]
+    workflows: [ "Java CI" ]
     branches: [ main ]
     types:
       - completed
