@@ -19,12 +19,18 @@ package org.o7.Fire.Glopion.Watcher;
 import Atom.Reflect.FieldTool;
 import arc.Core;
 import arc.input.KeyCode;
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.world.Tile;
+import org.o7.Fire.Glopion.Brain.Classification.NodeNSFWJS;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
+import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Module.ModsModule;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class BlockWatcher extends ModsModule {
     private static Tile target = null;
@@ -35,9 +41,17 @@ public class BlockWatcher extends ModsModule {
     
     public void start() {
         super.start();
+        try {
+            GlopionCore.imageClassifier = new NodeNSFWJS(new URL(GlopionCore.nsfwJsUrlSettings));
+            Log.infoTag("Image Classifier", "Provider: " + GlopionCore.nsfwJsUrlSettings);
+        }catch(MalformedURLException e){
+            WarningHandler.handleMindustry(e);
+            Log.err("Failed to register Image Classifier");
+        }
     }
     
     public void update() {
+    
         if (Vars.state.isPlaying()){
             if (GlopionCore.blockDebugSettings){
                 if (Core.input.keyDown(KeyCode.controlLeft)) if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();

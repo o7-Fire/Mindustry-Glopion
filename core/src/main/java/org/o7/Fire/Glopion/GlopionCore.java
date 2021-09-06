@@ -7,6 +7,7 @@ import arc.Core;
 import arc.util.Log;
 import mindustry.mod.Mod;
 import mindustry.mod.Plugin;
+import org.o7.Fire.Glopion.Brain.Classification.ImageClassifier;
 import org.o7.Fire.Glopion.Control.GlopionControl;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
@@ -30,12 +31,14 @@ public class GlopionCore extends Plugin implements Module {
     public static WorldInformation worldInformation;
     public static Class<? extends Mod> mainClass = GlopionCore.class;
     public static boolean blockDebugSettings, machineVisualizeRenderSettings, colorPatchSettings, debugSettings, translateChatSettings,//kys
-            interceptChatThenTranslateSettings, rebroadcastTranslatedMessageSettings;
+            interceptChatThenTranslateSettings, rebroadcastTranslatedMessageSettings, censorInapproriatePictureSettings;
+    public static String nsfwJsUrlSettings = "https://nsfw-detector-o7.herokuapp.com/";
     public static ModuleRegisterer moduleRegisterer;
     public static HudMenu glopionHud;
     public static AtomicDialog machineInformation;
     public static final Time startTime = new Time(TimeUnit.MILLISECONDS);
     public static Time loadFinishedTime = null;
+    public static ImageClassifier imageClassifier = null;
     
     static {
         if (debugSettings && Reflect.debug){
@@ -84,6 +87,8 @@ public class GlopionCore extends Plugin implements Module {
     @Override
     public void init() {
         //this tbh
+        TextManager.registerWords("nsfwJsUrlSettings", "NSFW JS Provider");
+        TextManager.registerWords("censorInapproriatePictureSettings", "Censor inapproriate pixel art/logic display");
         TextManager.registerWords("machineVisualizeRenderSettings", "Machine Recorder Visualization");
         TextManager.registerWords("translateChatSettings", "Translate Chat (Client GUI Only, async, unglyph, uncolorized, duplicating, skip already translated)");
         TextManager.registerWords("interceptChatThenTranslateSettings", "Intercept Player Message Then Translate It (Server Only, may cause lag, send to everyone)");

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class NodeNSFWJS implements ImageClassifier {
     protected final String mainURL;
-    protected final URL blobURL;
+    protected final URL blobURL, hashURL;
     protected final String auth;
     
     public NodeNSFWJS(URL api) throws MalformedURLException {
@@ -24,10 +24,19 @@ public class NodeNSFWJS implements ImageClassifier {
     public NodeNSFWJS(URL api, String auth) throws MalformedURLException {
         mainURL = api.toString().endsWith("/") ? api.toString() : api.toString() + "/";
         blobURL = new URL(mainURL + "api/json/graphical/classification");
+        hashURL = new URL(mainURL + "api/json/graphical/classification/hash");
         this.auth = auth;
     }
     
-    public String post(byte[] postData) throws IOException {
+    public String postClassify(byte[] postData) throws IOException {
+        return post(blobURL, postData);
+    }
+    
+    public String postHash(byte[] hash) throws IOException {
+        return post(hashURL, hash);
+    }
+    
+    public String post(URL url, byte[] postData) throws IOException {
         URL realUrl = blobURL;
         // build connection
         HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
@@ -42,15 +51,24 @@ public class NodeNSFWJS implements ImageClassifier {
         conn.getOutputStream().write(postData);
         conn.getOutputStream().flush();
         byte[] b = Encoder.readAllBytes(conn.getInputStream());
+        if (conn.getResponseCode() == 404) throw new IOException("Non exist");
         return new String(b);
+    }
+    
+    public ClassificationResult makeResult(String data) {
+        JsonElement element = JsonParser.parseString(data);
+        Map<String, String> h = EncoderJson.jsonToMap(element);
+        if (h.containsKey("err")) throw new RuntimeException(h.get("err"));
+        return new NodeNSFWJSResult(data);
     }
     
     @Override
     public ClassificationResult classify(Image image) throws IOException {
-        String resp = post(image.getData());
-        JsonElement element = JsonParser.parseString(resp);
-        Map<String, String> h = EncoderJson.jsonToMap(element);
-        if (h.containsKey("err")) throw new RuntimeException(h.get("err"));
-        return new NodeNSFWJSResult(resp);
+        try {
+            String s = postHash(image.hash());
+            return makeResult(s);
+        }catch(Exception e){}
+        String resp = postClassify(image.getData());
+        return makeResult(resp);
     }
 }

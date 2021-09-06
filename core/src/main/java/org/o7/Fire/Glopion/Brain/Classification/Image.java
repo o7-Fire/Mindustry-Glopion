@@ -5,4 +5,5 @@ import arc.util.Disposable;
 public interface Image extends Disposable {
     byte[] getData();
     
+    byte[] hash();
 }

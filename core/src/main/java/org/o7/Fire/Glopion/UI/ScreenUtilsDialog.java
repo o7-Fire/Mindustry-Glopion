@@ -3,19 +3,21 @@ package org.o7.Fire.Glopion.UI;
 import Atom.Time.Time;
 import arc.Core;
 import arc.files.Fi;
-import arc.graphics.Color;
-import arc.graphics.Pixmap;
-import arc.graphics.PixmapIO;
-import arc.graphics.Texture;
+import arc.graphics.*;
 import arc.graphics.g2d.TextureRegion;
+import arc.graphics.gl.FrameBuffer;
+import arc.graphics.gl.GLOnlyTextureData;
 import arc.scene.Action;
 import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.Label;
 import arc.scene.ui.layout.Scl;
 import arc.util.ScreenUtils;
+import mindustry.gen.Building;
+import mindustry.gen.Groups;
 import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
 import mindustry.ui.BorderImage;
+import mindustry.world.blocks.logic.LogicDisplay;
 import org.o7.Fire.Glopion.Bootstrapper.SharedBootstrapper;
 import org.o7.Fire.Glopion.Experimental.Experimental;
 
@@ -58,23 +60,42 @@ public class ScreenUtilsDialog extends ScrollableDialog implements Experimental 
         }).growX().row();
         table.table(t -> {
             Label sb = t.label(() -> "Width: " + w).get();
-            t.slider(0, 1, 0.01f, wF,s -> {
+            t.slider(0, 1, 0.01f, wF, s -> {
                 wF = s;
                 w = (int) (Core.graphics.getBackBufferWidth() * wF);
                 sb.setText("Width: " + w);
             }).growX();
         }).growX().row();
         table.table(t -> {
-            if(texture != null){
-                texture.dispose();
+            if (texture != null){
+                if (texture.getTextureData().getClass() != GLOnlyTextureData.class) texture.dispose();
                 texture = null;
             }
     
             Time time = new Time(TimeUnit.MILLISECONDS);
             Pixmap pixmap = null;
-            pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h, flipY);
     
-            texture = new Texture(pixmap);
+            for (Building b : Groups.build)
+                if (b instanceof LogicDisplay.LogicDisplayBuild){
+                    FrameBuffer fb = ((LogicDisplay.LogicDisplayBuild) b).buffer;
+                    texture = ((LogicDisplay.LogicDisplayBuild) b).buffer.getTexture();
+                    pixmap = new Pixmap(texture.width, texture.height, texture.getTextureData().getFormat());
+                    texture.bind();
+                    //TODO from texture to png
+                    texture.draw(pixmap);
+                    //Gl.readPixels();
+                    //Gl.texSubImage2D(texture.glTarget,0,0,0,texture.width,texture.height,pixmap.getGLFormat(), pixmap.getGLType(), pixmap.pixels);
+                    t.add("err: " + Gl.getError()).growX().row();
+                    texture.draw(pixmap);
+                    //texture.draw(pixmap);
+                    break;
+                }
+            if (texture == null){
+        
+                pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h, flipY);
+        
+                texture = new Texture(pixmap);
+            }
             texture.setFilter(Texture.TextureFilter.linear);
             final TextureRegionDrawable region = new TextureRegionDrawable(new TextureRegion(texture));
             if (borderImage != null){
@@ -110,7 +131,7 @@ public class ScreenUtilsDialog extends ScrollableDialog implements Experimental 
     @Override
     public void hide(Action action) {
         if (texture != null){
-            texture.dispose();
+            if (texture.getTextureData().getClass() != GLOnlyTextureData.class) texture.dispose();
             texture = null;
         }
         super.hide(action);

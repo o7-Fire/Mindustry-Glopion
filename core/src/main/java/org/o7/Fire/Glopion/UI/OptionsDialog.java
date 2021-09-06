@@ -5,6 +5,7 @@ import arc.Core;
 import arc.func.Cons2;
 import arc.func.Func;
 import arc.graphics.Color;
+import arc.scene.ui.layout.Table;
 import arc.struct.ObjectMap;
 import arc.util.Log;
 import mindustry.Vars;
@@ -71,11 +72,15 @@ public class OptionsDialog extends ScrollableDialog {
     
     @Override
     protected void setup() {
+        Table tt = table.table().growX().get();
+        table.row();
         for (Field f : getSettingsField()) {
             if (f.getType() == boolean.class){
+            
+            
                 try {
                     boolean b = f.getBoolean(null);
-                    table.check(TextManager.get(f.getName()), b, be -> {
+                    tt.check("", b, be -> {
                         try {
                             f.set(null, be);
                             saveSettings.get(getQualifiedName(f), String.valueOf(be));
@@ -83,12 +88,14 @@ public class OptionsDialog extends ScrollableDialog {
                             WarningHandler.handleProgrammerFault(e);
                             Vars.ui.showException(e);
                         }
-                    }).row();
+                    });
+                    tt.add(TextManager.get(f.getName())).growX().row();
                 }catch(Exception e){
-                    table.add(e.toString()).growX().color(Color.red).row();
+                    tt.add(e.toString()).growX().color(Color.red).row();
                     WarningHandler.handleProgrammerFault(e);
                 }
-                
+            
+            
             }else{
                 table.table(t -> {
                     t.add(TextManager.get(f.getName())).growX().row();
@@ -97,7 +104,7 @@ public class OptionsDialog extends ScrollableDialog {
                         temp.put(getQualifiedName(f), f.get(null) + "");
                         t.field(temp.get(getQualifiedName(f)), s -> {
                             temp.put(getQualifiedName(f), s);
-                        }).row();
+                        }).growX();
                         t.button(Icon.save, () -> {
                             try {
                                 Object data = Reflect.parseStringToPrimitive(temp.get(getQualifiedName(f)), f.getType());
@@ -108,7 +115,7 @@ public class OptionsDialog extends ScrollableDialog {
                             }catch(Exception e){
                                 Vars.ui.showException(e);
                             }
-                        }).tooltip("Save").growX();
+                        }).tooltip("Save");
                     }catch(IllegalAccessException e){
                         t.add(e.toString()).color(Color.red).growX();
                         WarningHandler.handleMindustry(e);
