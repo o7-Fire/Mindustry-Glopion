@@ -1,0 +1,53 @@
+name: Android CI
+
+on:
+  workflow_run:
+    workflows: [ "Java CI" ]
+    branches: [ main ]
+    types:
+      - completed
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+     # Allow tests to continue on other devices if they fail on one device.
+      fail-fast: false
+      matrix:
+        api-level:
+          - 19
+          - 24
+          - 29
+        
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 16
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+      # Cache Gradle dependencies
+    - name: Setup Gradle Dependencies Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties') }}
+        
+    - name: Test with emulator
+      run: ./gradlew deploy
+    - name: run tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.api-level }}
+        script: chmod +x runTestAndroid.sh && ./runTestAndroid.sh
+
+

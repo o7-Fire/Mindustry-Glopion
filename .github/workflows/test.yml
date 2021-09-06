@@ -62,11 +62,8 @@ jobs:
         ./downloadMindustryForTest.sh
 
     - name: Run headless test
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: |
-          chmod +x ./runTest.sh
-          ./runTest.sh
-        working-directory: ./ #optional
-        options: #optional
+      run: |
+       chmod +x ./runTest.sh
+       ./runTest.sh
+
         
