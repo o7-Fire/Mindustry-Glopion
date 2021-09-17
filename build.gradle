@@ -146,10 +146,15 @@ allprojects {
     }
     ext {
         try {
-            System.properties.load(new FileReader("gradle.properties"))
-            System.properties.load(new FileReader("local.properties"))
-        } catch (ignored) {
+
+            System.properties.load(new FileReader(new File(rootDir, "gradle.properties")))
+            System.properties.load(new FileReader(new File(rootDir, "local.properties")))
+        } catch (s) {
+            //println s
         }
+
+        //def s = mindustryHash
+        //System.setProperty("mindustryHash", String.valueOf(s))
         //System.out.println(System.getProperty("modsNBE"))
         //automatically detect latest shit and skipping it if doesn't exists
         //export ANDROID_HOME=~/android-sdk
@@ -445,7 +450,8 @@ static File getMindustryFile() {
 
 //how lazy to download this
 task download() {
-    doLast {
+    doLast{
+
         downloadMindustry(getMindustryServerURL(), getMindustryServerFile());
         downloadMindustry(getMindustryURL(), getMindustryFile());
     }

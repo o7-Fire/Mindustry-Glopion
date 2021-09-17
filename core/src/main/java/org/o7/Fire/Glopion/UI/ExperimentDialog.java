@@ -24,6 +24,7 @@ import org.o7.Fire.Glopion.Experimental.*;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import org.o7.Fire.Glopion.Internal.TextManager;
+import org.o7.Fire.Glopion.UI.Element.PlotTableExperiment;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -46,6 +47,7 @@ public class ExperimentDialog extends ScrollableDialog {
         experimental.addAll(Arrays.asList(RelayChatToWebhook.class, LogToDiscordWebhook.class, ThreadStackTrace.class, OutOfMemory.class, LockAllContent.class, SwingBox.class, UnlockAllContent.class));
         if (!Vars.mobile) experimental.addAll(InformationCenter.getExtendedClass(Experimental.class));
         experimental.add(EffectsDialog.class);//added in 0.7.2
+        experimental.add(PlotTableExperiment.class);
         StringBuilder sb = FunctionalPoolObject.StringBuilder.obtain();
         sb.append("Experimental: [");
         for (Class<?> c : experimental) {

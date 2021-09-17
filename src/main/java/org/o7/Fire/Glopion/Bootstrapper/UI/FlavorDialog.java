@@ -43,7 +43,7 @@ public class FlavorDialog extends BaseDialog {
     public static final Comparator<Seq<String>> flavorSort = new Comparator<Seq<String>>() {
         public int getScore(Seq<String> s) {
             int score = 0;
-            score += Math.min(bootstrapperCompatiblity(s), 0);
+            score += Math.min(bootstrapperCompatibility(s), 0);
             if (isMindustryVersionCompatible(s)) score += 4;
             if (isMindustryModifierCompatible(s)) score += 5;
             if (!isPlatformCompatible(s)) score -= 10;
@@ -69,10 +69,10 @@ public class FlavorDialog extends BaseDialog {
     }
     
     public static boolean isBootstrapperCompatible(Seq<String> key) {
-        return bootstrapperCompatiblity(key) == 0;
+        return bootstrapperCompatibility(key) >= 0;
     }
     
-    public static long bootstrapperCompatiblity(Seq<String> key) {
+    public static long bootstrapperCompatibility(Seq<String> key) {
         long bootstrapMin = -1;
         int bootstrapIndex = key.indexOf("Bootstrap");
         if (bootstrapIndex != -1){

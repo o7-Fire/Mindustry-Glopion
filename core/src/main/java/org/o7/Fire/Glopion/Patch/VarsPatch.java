@@ -45,6 +45,7 @@ public class VarsPatch extends ModsModule {
     public void preInit() {
         Core.input.getDevices().add(GlopionCore.glopionControl);
         //java 8 only
+    
         try {
             Field orange = LoadRenderer.class.getDeclaredField("orange"), color = LoadRenderer.class.getDeclaredField("color");
             Color c = new Color(Pal.darkMetal).lerp(Color.black, 0.5f);

@@ -39,7 +39,7 @@ public class MindustryLauncher {
         try {
             Native.load();
         }catch(Throwable t){
-            Log.warn("Failed to load LZ4Factory Native online multiplayer performance may be degraded: @",t);
+            Log.warn("Failed to load LZ4Factory-Native, multiplayer performance may be degraded: @", t);
         }
         DesktopLauncher.main(args);
     }
