@@ -28,7 +28,6 @@ public class LoggableNet extends Net {
     public LoggableNet(Net net) {
         super(null);
         this.net = net;
-        
     }
     
     

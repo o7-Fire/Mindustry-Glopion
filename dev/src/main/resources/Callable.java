@@ -20,13 +20,13 @@ import arc.util.io.Writes;
 import mindustry.Vars;
 import mindustry.net.Net;
 import org.o7.Fire.Glopion.Net.LoggableNet;
-
 import java.io.DataOutputStream;
 
 public class Callable {
     
     private static final StaticNet staticNet = new StaticNet();
     private Net net, original;
+    
     private Net.NetProvider provider;
     
     public Callable(Net net) {
@@ -47,9 +47,12 @@ public class Callable {
         Vars.net = original;
         original = null;
     }
-    //For generation purpose
+    
+    // For generation purpose
     public void base() {
-        pre();
+        synchronized (staticNet) {
+            pre();
+        }
     }
     
     private static class StaticNet extends LoggableNet {

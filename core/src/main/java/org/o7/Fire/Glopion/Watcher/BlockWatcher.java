@@ -17,6 +17,7 @@
 package org.o7.Fire.Glopion.Watcher;
 
 import Atom.Reflect.FieldTool;
+import Atom.Time.Timer;
 import arc.Core;
 import arc.input.KeyCode;
 import arc.util.Log;
@@ -31,6 +32,7 @@ import org.o7.Fire.Glopion.Module.ModsModule;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 public class BlockWatcher extends ModsModule {
     private static Tile target = null;
@@ -50,12 +52,16 @@ public class BlockWatcher extends ModsModule {
         }
     }
     
+    Timer timer = new Timer(TimeUnit.MILLISECONDS, 500);
     public void update() {
     
         if (Vars.state.isPlaying()){
-            if (GlopionCore.blockDebugSettings){
-                if (Core.input.keyDown(KeyCode.controlLeft)) if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();
+            if (!timer.get()) return;
         
+            if (GlopionCore.blockDebugSettings){
+                if (Core.input.keyDown(KeyCode.controlLeft))
+                    if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();
+            
                 if (target != null){
                     StringBuilder sb = new StringBuilder();
                     if (target.build != null){
