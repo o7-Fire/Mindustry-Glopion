@@ -1,10 +1,10 @@
 import arc.util.OS
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 buildscript {
     repositories {//more than you need
@@ -167,7 +167,8 @@ allprojects {
         sdkRootf = new File(sdkRoot)
         if (sdkRootf.exists()) {
             try {
-                sdkD8 = new File(getLatestFolder(new File(sdkRootf, 'build-tools/')), "d8").getAbsolutePath()
+                String extension = OS.isWindows ? ".bat" : "";
+                sdkD8 = new File(getLatestFolder(new File(sdkRootf, 'build-tools/')), ("d8" + extension)).getAbsolutePath()
                 sdkJar = new File(getLatestFolder(new File(sdkRootf, "platforms/")), "android.jar").getAbsolutePath()
             } catch (ignored) {
                 //FileNotFoundException
@@ -259,7 +260,7 @@ subprojects {
 
 }
 ext {
-    println System.getenv("ANDROID_HOME") == null ? "Android SDK doesn't exist" : "Android SDK exist"
+    println System.getenv("ANDROID_HOME") == null ? "Android SDK doesn't exist, please specify ANDROID_HOME" : "Android SDK exist"
     //rewrite mod.hjson everytime gradle rollin
     //println System.getenv("ANDROID_HOME")
     try {

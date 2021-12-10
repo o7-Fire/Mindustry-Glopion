@@ -37,7 +37,6 @@ dependencies {
     }
     compileOnly("com.github.Anuken.Mindustry:server:$mindustryHash")
     compileOnly("com.github.Anuken.Arc:backend-headless:$arcHash")
-    compileOnly(group: 'com.aparapi', name: 'aparapi', version: '3.0.0') { because("runtime") }
 
     //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}
     compileOnly(group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
@@ -47,50 +46,7 @@ dependencies {
     compileOnly(group: 'org.jfree', name: 'jfreechart', version: '1.5.3') {
         because("runtime")
     }
-    def nd4jVersion = "1.0.0-M1"
-    //DL4J and its cult
-    compileOnly (group: 'org.deeplearning4j', name: 'rl4j-core', version: nd4jVersion){
-        exclude group: 'org.bytedeco', module: 'leptonica-platform'
-        exclude group: 'org.bytedeco', module: 'hdf5-platform'
-        exclude group: 'org.bytedeco', module: 'ffmpeg-platform'
-        exclude group: 'org.bytedeco', module: 'ffmpeg'
-        because("runtime")
-    }
-    compileOnly(group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: nd4jVersion) {
-        because("runtime")
-    }
 
-    //nvidia, man fragnance
-    //TODO runtimeOnly
-    if(isRunner && !githubRepoExist) {
-        println("Writing Dep")
-        compileOnly(group: 'org.nd4j', name: 'nd4j-native-platform', version: nd4jVersion) {
-            because("runtime")
-        }
-        compileOnly(group: 'org.nd4j', name: 'nd4j-native', version: nd4jVersion, classifier: "linux-x86_64-avx2") {
-            because("runtime")
-        }
-        compileOnly(group: 'org.nd4j', name: 'nd4j-native', version: nd4jVersion, classifier: "linux-x86_64-avx512") {
-            because("runtime")
-        }
-        compileOnly(group: 'org.nd4j', name: 'nd4j-native', version: nd4jVersion, classifier: "windows-x86_64-avx2") {
-            because("runtime")
-        }
-
-        compileOnly(group: 'org.nd4j', name: 'nd4j-cuda-11.0-platform', version: nd4jVersion) {
-            because("runtime")
-        }
-        compileOnly(group: 'org.nd4j', name: 'nd4j-cuda-11.0', version: nd4jVersion) {
-            because("runtime")
-        }
-        compileOnly(group: 'org.bytedeco', name: 'cuda-platform-redist', version: '11.0-8.0-1.5.4') {
-            because("runtime")
-        }
-    }
-    testImplementation group: 'org.deeplearning4j', name: 'rl4j-core', version: nd4jVersion
-    testImplementation group: 'org.jfree', name: 'jfreechart', version: '1.5.3'
-    testImplementation group: 'org.nd4j', name: 'nd4j-native-platform', version: nd4jVersion
-    testImplementation group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: nd4jVersion
     testImplementation group: 'com.aparapi', name: 'aparapi', version: '3.0.0'
     testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
     testImplementation group: 'org.jblas', name: 'jblas', version: '1.2.5'
