@@ -151,8 +151,9 @@ public class WorldInformation extends ScrollableDialog {
                 ad("Buildable Tiles", buildableTile);
                 ad(mainCount);
                 Log.debug("World calculation finished in @", te.elapsed().convert(TimeUnit.MILLISECONDS).toString());
-                if (te.elapsed().convert(TimeUnit.MILLISECONDS).getSrc() > 3000)
-                    Vars.ui.showInfo("World calculation finished: " + te.elapsed().convert(TimeUnit.MILLISECONDS).toString());
+                if (te.elapsed().convert(TimeUnit.MILLISECONDS).src > 3000)
+                    Vars.ui.showInfo(
+                            "World calculation finished: " + te.elapsed().convert(TimeUnit.MILLISECONDS).toString());
             }catch(Throwable i){
                 /*
                 if (st != null){

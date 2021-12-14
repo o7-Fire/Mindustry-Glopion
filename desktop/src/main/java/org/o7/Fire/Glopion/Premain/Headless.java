@@ -3,8 +3,6 @@ package org.o7.Fire.Glopion.Premain;
 import Atom.Reflect.Reflect;
 import arc.util.Log;
 import mindustry.mod.ModClassLoader;
-import org.o7.Fire.Glopion.Brain.AparapiBenchmark;
-import org.o7.Fire.Glopion.Brain.TrainingJeneticData;
 import org.o7.Fire.Glopion.Experimental.WebhookStandalone;
 
 import java.net.MalformedURLException;
@@ -35,14 +33,14 @@ public class Headless {
         if(arg.contains("training")){
             System.out.println("training ?");
             try {
-                TrainingJeneticData.main(args);
+                //TrainingJeneticData.main(args);
             }catch(Throwable throwable){
                 throwable.printStackTrace();
             }
         }else if(arg.contains("logging")){
             System.out.println("logging");
         }else if (arg.contains("benchmark")){
-            AparapiBenchmark.main(args);
+            //AparapiBenchmark.main(args);
         }else if (arg.contains("test")){
             System.out.println("test yes");
             Log.info("Testing");
