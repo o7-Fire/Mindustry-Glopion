@@ -31,6 +31,7 @@ import com.github.javaparser.ast.type.Type;
 import mindustry.gen.Call;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -59,35 +60,59 @@ public class GenerateCallNet {
             sb.append(Random.getRandom(met.getReturnType()));
         }
         return sb.append(";").append("}").toString();
-        
+
     }
-    
+
     public static MethodDeclaration convertToParser(Method m) {
         String s = methodToStringStub(m);
         return StaticJavaParser.parseMethodDeclaration(s);
     }
-    
+
+    public static MethodDeclaration stub(Method met) {
+        MethodDeclaration me;
+        System.err.println("No declaration in source for method: " + met);
+        me = convertToParser(met);
+        System.err.println("Generating stub:\n" + me.toString());
+        return me;
+    }
+
     public static void main(String[] args) throws Throwable {
         List<String> strings = Arrays.asList(args);
-        String version = "v130";
+        String version = "v135";
         try {
             version = strings.get(0);
-        }catch(IndexOutOfBoundsException gay){}
+        } catch (IndexOutOfBoundsException gay) {
+        }
         System.out.println(version);
-        String callable = new String(GenerateCallNet.class.getClassLoader().getResourceAsStream("Callable.java").readAllBytes());
-        URL sourceJar = new URL("https://jitpack.io/com/github/Anuken/Mindustry/core/" + version + "/core-" + version + "-sources.jar");
+        String callable = new String(GenerateCallNet.class.getClassLoader().getResourceAsStream("Callable.java")
+                .readAllBytes());
+        URL sourceJar = new URL(
+                "https://jitpack.io/com/github/Anuken/Mindustry/core/" + version + "/core-" + version + "-sources.jar");
         DownloadPatch.repo.addRepo(FileUtility.convertToURLJar(sourceJar));
         File b = new File("core/src/main/java/");
         String name = "Callable";//+version.replace(".","dot");
         File gen = new File(b, "org/o7/Fire/Glopion/Gen/" + name + ".java");
         String path = Call.class.getName().replace('.', '/') + ".java";
         System.out.println(path);
-        
+
         URLClassLoader classLoader = new URLClassLoader(new URL[]{sourceJar}, GenerateCallNet.class.getClassLoader());
-        
-        CompilationUnit base = StaticJavaParser.parse(callable), callCU = StaticJavaParser.parse(Encoder.readString(classLoader.getResource(path).openStream()));
-        String packages = gen.getParentFile().getAbsolutePath().replaceFirst(b.getAbsolutePath() + "/", "").replace('/', '.');
-        ClassOrInterfaceDeclaration clazz = base.getClassByName("Callable").get(), callClazz = callCU.getClassByName("Call").get();
+        sourceJar = FileUtility.convertToURLJar(sourceJar, path);
+        CompilationUnit base = StaticJavaParser.parse(callable), callCU;
+        try {
+            sourceJar.getContent();
+            callCU = StaticJavaParser.parse(Encoder.readString(sourceJar.openStream()));
+        } catch (FileNotFoundException real) {
+            callCU = StaticJavaParser.parse(Encoder.readString(classLoader.getResource(path).openStream()));
+        }
+        String packages = gen.getParentFile().getAbsolutePath();
+        if (packages.startsWith(b.getAbsolutePath() + File.separator)) {
+            packages = packages.substring(b.getAbsolutePath().length() + 1);
+        } else {
+            packages = packages.substring(b.getAbsolutePath().length());
+        }
+        packages = packages.replace(File.separator, ".");
+        ClassOrInterfaceDeclaration clazz = base.getClassByName("Callable")
+                .get(), callClazz = callCU.getClassByName("Call").get();
         clazz.setName(name);
         clazz.getConstructors().forEach(constructorDeclaration -> constructorDeclaration.setName(name));
         MethodDeclaration method = clazz.getMethodsByName("base").get(0);
@@ -103,40 +128,78 @@ public class GenerateCallNet {
                 java.lang.reflect.Parameter s = parameters[i];
                 signatures[i] = s.getType().getSimpleName();
             }
+            IllegalStateException whoResponsible = new IllegalStateException();
             try {
                 me = callClazz.getMethodsBySignature(met.getName(), signatures).get(0);
+                whoResponsible = new IllegalStateException();
             }catch(IndexOutOfBoundsException ignored){
-        
+
             }
+
             if (me == null){
                 List<MethodDeclaration> methodDeclarations = callClazz.getMethodsByName(met.getName());
         
                 if (methodDeclarations.size() == 1){
                     me = methodDeclarations.get(0);
-                }else if (!methodDeclarations.isEmpty()){
+                    whoResponsible = new IllegalStateException();
+                }else if (!methodDeclarations.isEmpty()) {
                     System.err.println("Searching for: " + met);
+                    ArrayList<MethodDeclaration> matchingByParamType = new ArrayList<>();
+                    thistbh:
                     for (MethodDeclaration m : methodDeclarations) {
                         System.err.println("Ambiguous method: " + m.getSignature());
+                        List<Type> parameterTypes = m.getSignature().getParameterTypes();
+                        if (parameterTypes.size() == met.getParameterCount()) {
+                            for (int i = 0, parameterTypesSize = signatures.length; i < parameterTypesSize; i++) {
+                                Type t = parameterTypes.get(i);
+                                if (!signatures[i].endsWith(t.toString())) break thistbh;
+                            }
+                            System.out.println("Matching Signature");
+                            matchingByParamType.add(m);
+                        }
                     }
-                }else{
-                    System.err.println("No declaration in source for method: " + met);
-                    me = convertToParser(met);
-                    System.err.println("Generating stub:\n" + me.toString());
+                    if (matchingByParamType.size() == 1) {
+                        me = matchingByParamType.get(0);
+                        whoResponsible = new IllegalStateException();
+                    } else {
+                        System.err.println("Ambiguous parameter type");
+                        me = stub(met);
+                        whoResponsible = new IllegalStateException();
+                    }
+
+
+                } else {
+                    me = stub(met);
+                    whoResponsible = new IllegalStateException();
                 }
             }
             if (me == null) throw new AssertionError("me is null: " + met);
+            if (me.getSignature().getParameterTypes().size() != met.getParameterCount()) {
+                System.err.println("PARAMETER COUNT MISMATCH: " + met.getName() + " " + met.getParameterCount() + " " +
+                        me.getSignature().getParameterTypes().size());
+                whoResponsible.printStackTrace();
+                me = stub(met);
+                whoResponsible = new IllegalStateException();
+            }
             if (!me.hasModifier(Modifier.Keyword.PUBLIC) || !me.hasModifier(Modifier.Keyword.STATIC)) continue;
             MethodDeclaration m = me.clone();
             callClazz.remove(m);
             m.removeBody();
             m.removeModifier(Modifier.Keyword.STATIC);
-    
+
             m.setBody(method.getBody().get().clone());
             BlockStmt body = m.getBody().get();
             ArrayList<String> param = new ArrayList<>();
             
             for (int i = 0; i < met.getParameterCount(); i++) {
-                Parameter p = m.getParameter(i);
+                Parameter p;
+                try {
+                    p = m.getParameter(i);
+                } catch (IndexOutOfBoundsException e) {
+                    System.err.println("Parameter mismatch: " + met.getName() + " " + met.getParameterCount() + " " +
+                            m.getParameters().size());
+                    throw whoResponsible;
+                }
                 Type t = StaticJavaParser.parseType(met.getParameters()[i].getType().getTypeName().replace('$', '.'));
                 m.setParameter(i, new Parameter(t, p.getName().toString()));
             }

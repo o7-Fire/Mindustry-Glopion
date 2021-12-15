@@ -10,7 +10,6 @@ import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.core.NetClient;
 import mindustry.game.EventType;
-import mindustry.gen.Call;
 import mindustry.gen.Player;
 import mindustry.net.Administration;
 import org.o7.Fire.Glopion.GlopionCore;
@@ -106,7 +105,7 @@ public class TranslateChat extends ModsModule implements Administration.ChatFilt
                         message = getMeta() + " " + message;
                         Log.info("&fi@: @", "&lc" + playerChatEvent.player.name, "&lw" + message);
                         //Resend to everyone
-                        Call.sendMessage(message, NetClient.colorizeName(playerChatEvent.player.id(), playerChatEvent.player.name), playerChatEvent.player);
+                        //Call.sendMessage(message, NetClient.(playerChatEvent.player.id(), playerChatEvent.player.name), playerChatEvent.player);
                     });
                 }
             });
@@ -121,7 +120,7 @@ public class TranslateChat extends ModsModule implements Administration.ChatFilt
             }
         }
     }
-    
+
     @Override
     public String filter(Player player, final String message) {
         startProvider();
