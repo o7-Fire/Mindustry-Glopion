@@ -88,14 +88,13 @@ public class BlockWatcher extends ModsModule implements GraphicsModule {
     public void update() {
         
         if (Vars.state.isPlaying()){
-            
-            if (taskLogicDisplayBuild.isDone()){
+            if (taskLogicDisplayBuild != null && taskLogicDisplayBuild.isDone()){
                 onTaskLogicDisplayDone();
             }
             if (GlopionCore.blockDebugSettings){
                 if (Core.input.keyDown(KeyCode.controlLeft))
                     if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();
-                
+        
                 if (target != null){
                     StringBuilder sb = new StringBuilder();
                     if (target.build != null){
