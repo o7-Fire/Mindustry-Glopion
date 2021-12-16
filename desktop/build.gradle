@@ -58,7 +58,7 @@ dependencies {
     }
 
 }
-//implementation don't get included
+//dont include implementation
 task writeDependency() {
     File txt = new File(projectDir, "src/main/resources/dependencies")
     txt.parentFile.mkdirs()

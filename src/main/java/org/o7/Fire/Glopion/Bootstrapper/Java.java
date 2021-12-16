@@ -8,18 +8,32 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class Java {
     public static URL stableGlopion;
     
     public static boolean test;
+    public static Properties config;
     
     static {
         try {
-            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/v5.9.3/Mindustry-Glopion-DeepPatch.jar");
+            loadConfig();
+            stableGlopion = new URL("https://github.com/o7-Fire/Mindustry-Glopion/releases/download/" + config.getProperty(
+                    "stableGlopion") + "/Mindustry-Glopion-DeepPatch.jar");
         }catch(MalformedURLException e){
             e.printStackTrace();
             System.out.println("impossible");
+        }
+    }
+    
+    public static void loadConfig() {
+        if (config != null) return;
+        config = new Properties();
+        try {
+            config.load(Java.class.getResourceAsStream("/glopion.bootstrapper.config.properties"));
+        }catch(Exception e){
+            throw new RuntimeException(e);
         }
     }
     

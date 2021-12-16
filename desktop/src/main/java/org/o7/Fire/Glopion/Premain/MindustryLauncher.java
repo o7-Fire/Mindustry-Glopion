@@ -105,8 +105,9 @@ public class MindustryLauncher {
         }
         
     }
-    
+    public static final boolean test = System.getProperty("test") != null;
     static void loadWithoutFile() {
+        if (test) return;
         MindustryLauncher.varsInitMethodLineNo312ListenerHijacker = () -> {
             MindustryLauncher.hookModsLoader();
             MindustryLauncher.modsClassHook.load("org.o7.Fire.Glopion.GlopionDesktop");
