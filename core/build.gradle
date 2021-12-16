@@ -8,6 +8,7 @@ dependencies {
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.2'
     annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
     testAnnotationProcessor "com.github.Anuken:jabel:$jabelVersion"
+
     if(androidJarFile.exists()) {
         compileOnly(files(androidJarFile))
         println androidJarFile.absolutePath
