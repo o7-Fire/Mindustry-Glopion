@@ -49,7 +49,7 @@ public class MindustryLauncher {
         Events.on(EventType.ClientCreateEvent.class,s->{
             //at this point Vars.platform != this
             //so we need to wait a few more line
-            Log.LogHandler original = Log.logger;
+            final Log.LogHandler original = Log.logger;
             Log.logger = (e, a) ->{
                 if(a.startsWith("[GL] Version:")){
                     //Vars.platform == this
