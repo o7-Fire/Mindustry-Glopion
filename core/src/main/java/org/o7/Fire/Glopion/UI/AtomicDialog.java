@@ -25,6 +25,7 @@ public class AtomicDialog extends BaseDialog {
     public AtomicDialog(String title, DialogStyle style) {
         super(title, style);
         showSetup();
+        getTitle();
     }
     
     public static void showTest(Dialog d, Runnable afterShown) {

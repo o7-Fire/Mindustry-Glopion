@@ -87,8 +87,10 @@ public class VarsPatch extends ModsModule {
             menu = Vars.ui.settings.game.table().growX().get();
         }
         if (Vars.net != null){
+    
             Vars.net = new NetPatched(Vars.net);
             InformationCenter.callable = new Callable(Vars.net);
+            Log.debug("Vars.net: " + Vars.net.getClass().getCanonicalName());
         }
         Log.infoTag("Glopion", "Patching Complete");
     }

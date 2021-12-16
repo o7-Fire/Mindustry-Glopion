@@ -18,23 +18,34 @@ package org.o7.Fire.Glopion.Watcher;
 
 import Atom.Reflect.FieldTool;
 import Atom.Time.Timer;
+import Atom.Utility.Random;
 import arc.Core;
+import arc.graphics.Blending;
+import arc.graphics.g2d.Draw;
 import arc.input.KeyCode;
 import arc.util.Log;
 import mindustry.Vars;
+import mindustry.gen.Building;
 import mindustry.world.Tile;
+import mindustry.world.blocks.logic.LogicDisplay;
 import org.o7.Fire.Glopion.Brain.Classification.NodeNSFWJS;
 import org.o7.Fire.Glopion.Commands.Pathfinding;
 import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
+import org.o7.Fire.Glopion.Module.GraphicsModule;
 import org.o7.Fire.Glopion.Module.ModsModule;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public class BlockWatcher extends ModsModule {
+public class BlockWatcher extends ModsModule implements GraphicsModule {
     private static Tile target = null;
     
     public static void stub() {
@@ -52,16 +63,35 @@ public class BlockWatcher extends ModsModule {
         }
     }
     
-    Timer timer = new Timer(TimeUnit.MILLISECONDS, 500);
-    public void update() {
+    final HashSet<LogicDisplay.LogicDisplayBuild> logicDisplay = new HashSet<>();
+    Timer timer = new Timer(TimeUnit.MILLISECONDS, 100);
+    Future<ArrayList<Building>> taskLogicDisplayBuild = null;
+    HashMap<byte[], byte[]> hashMapLiterally = new HashMap<>();
     
-        if (Vars.state.isPlaying()){
-            if (!timer.get()) return;
+    
+    protected void onTaskLogicDisplayDone() {
+        try {
+            for (Building b : taskLogicDisplayBuild.get()) {
+                if (b instanceof LogicDisplay.LogicDisplayBuild) logicDisplay.add((LogicDisplay.LogicDisplayBuild) b);
+            }
+        }catch(InterruptedException | ExecutionException e){
+            WarningHandler.handleMindustry(e);
+        }finally{
+            taskLogicDisplayBuild = null;
+        }
+    }
+    
+    public void update() {
         
+        if (Vars.state.isPlaying()){
+            
+            if (taskLogicDisplayBuild.isDone()){
+                onTaskLogicDisplayDone();
+            }
             if (GlopionCore.blockDebugSettings){
                 if (Core.input.keyDown(KeyCode.controlLeft))
                     if (Core.input.keyDown(KeyCode.mouseLeft)) target = Interface.getMouseTile();
-            
+                
                 if (target != null){
                     StringBuilder sb = new StringBuilder();
                     if (target.build != null){
@@ -71,8 +101,36 @@ public class BlockWatcher extends ModsModule {
                     sb.append("SafetyIndex:").append(Pathfinding.isSafe(target)).append("[white]\n");
                     Vars.ui.hudfrag.setHudText(sb.toString());
                 }
-        
+                
             }
+        }
+    }
+    
+    @Override
+    public void draw() {
+        if (!Vars.state.isPlaying()) return;
+        if (!timer.get()) return;
+        
+        if (taskLogicDisplayBuild == null && logicDisplay.size() == 0)
+            taskLogicDisplayBuild = Interface.getBuilds(s -> s instanceof LogicDisplay.LogicDisplayBuild);
+        if (logicDisplay.size() != 0){
+            LogicDisplay.LogicDisplayBuild yes = Random.getRandom(logicDisplay);
+            logicDisplay.remove(yes);
+            if (yes.buffer != null){
+                Draw.blend(Blending.disabled);
+                Draw.draw(Draw.z(), () -> {
+                    if (yes.buffer != null){
+                        Draw.rect(Draw.wrap(yes.buffer.getTexture()),
+                                0,
+                                0,
+                                (float) yes.buffer.getWidth(),
+                                (float) (-yes.buffer.getHeight()));
+                    }
+                    
+                });
+                Draw.blend();
+            }
+            
         }
     }
 }

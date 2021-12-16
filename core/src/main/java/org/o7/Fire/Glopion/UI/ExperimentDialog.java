@@ -48,6 +48,7 @@ public class ExperimentDialog extends ScrollableDialog {
         if (!Vars.mobile) experimental.addAll(InformationCenter.getExtendedClass(Experimental.class));
         experimental.add(EffectsDialog.class);//added in 0.7.2
         experimental.add(PlotTableExperiment.class);
+        experimental.add(EnvironmentInformation.class);//Too alienating for user
         StringBuilder sb = FunctionalPoolObject.StringBuilder.obtain();
         sb.append("Experimental: [");
         for (Class<?> c : experimental) {

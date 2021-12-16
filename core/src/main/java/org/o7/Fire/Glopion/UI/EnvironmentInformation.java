@@ -35,6 +35,7 @@ import mindustry.gen.Sounds;
 import mindustry.ui.Styles;
 import net.jpountz.lz4.LZ4Factory;
 import org.o7.Fire.Glopion.Experimental.Evasion.Identification;
+import org.o7.Fire.Glopion.Experimental.Experimental;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
@@ -45,13 +46,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class EnvironmentInformation extends ScrollableDialog {
+public class EnvironmentInformation extends ScrollableDialog implements Experimental {
     
     boolean b;
     
     public EnvironmentInformation() {
         icon = Icon.info;
-
+        
     }
     
     //non async function first
@@ -100,14 +101,22 @@ public class EnvironmentInformation extends ScrollableDialog {
         ad("Current Jar", InformationCenter.getCurrentJar());
         ad("Fastest LZ4 Decompressor", LZ4Factory.fastestInstance().fastDecompressor().getClass().getName());
         ad("Fastest LZ4 Compressor", LZ4Factory.fastestInstance().fastCompressor().getClass().getName());
+        ad("Can Access Private Field", InformationCenter.canAccessPrivateField());
+        ad("Can Access Public Field", InformationCenter.canAccessPublicField());
+        ad("Can Modify Private Final Field", InformationCenter.canModifyPrivateFinalField());
+        ad("Can Modify Private Field", InformationCenter.canModifyPrivateField());
+        ad("Can Modify Public Field", InformationCenter.canModifyPublicField());
+        ad("Can Modify Public Final Field", InformationCenter.canModifyPublicFinalField());
+        
         try {
             ad("Compilation Time Total (ms)", ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
-            ad("isCompilationTimeMonitoringSupported", ManagementFactory.getCompilationMXBean().isCompilationTimeMonitoringSupported());
+            ad("isCompilationTimeMonitoringSupported",
+                    ManagementFactory.getCompilationMXBean().isCompilationTimeMonitoringSupported());
         }catch(Throwable ignored){}
         try {
             ad("Android API", Build.VERSION.SDK_INT);
             ad("Android Model", Build.MODEL);
-        
+            
         }catch(Throwable ignored){}
         uid();
     
@@ -203,7 +212,7 @@ public class EnvironmentInformation extends ScrollableDialog {
                         t.field("[accent]"+f.getName()+"[white]-.growX().disabled.colorCyan", style,s->{}).growX().disabled(true).color(Color.cyan).row();
                     }
                 }).growX().color(Color.gold).row();
-               
+    
             }catch(Exception e){//should not happened etc...
                 WarningHandler.handleProgrammerFault(e);
             }
@@ -211,4 +220,8 @@ public class EnvironmentInformation extends ScrollableDialog {
     }
     
     
+    @Override
+    public void run() {
+        show();
+    }
 }

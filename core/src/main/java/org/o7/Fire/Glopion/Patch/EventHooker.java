@@ -80,6 +80,7 @@ public class EventHooker extends ModsModule {
             for (Runnable r : drawc) {
                 r.run();
             }
+            ModuleRegisterer.invokeAll(GraphicsModule.class, GraphicsModule::draw);
         });
         Events.run(EventExtended.Game.Start, () -> {
             Log.debug("Server: " + InformationCenter.getCurrentServerIP() + ":" + InformationCenter.getCurrentServerPort());

@@ -38,7 +38,7 @@ public class WorldInformation extends ScrollableDialog {
     
     public volatile static Future task;
     
-    
+    //note copy variable to final to prevent desync with UI
     public void setup() {
         if (Vars.world == null){
             table.add("No World").growX();

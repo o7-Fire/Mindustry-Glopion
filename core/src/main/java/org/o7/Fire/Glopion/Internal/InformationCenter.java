@@ -32,6 +32,8 @@ package org.o7.Fire.Glopion.Internal;
 
 import Atom.Annotation.MethodFuzzer;
 import Atom.Exception.GetRealException;
+import Atom.Exception.ShouldNotHappenedException;
+import Atom.Reflect.FieldTool;
 import Atom.Reflect.OS;
 import Atom.Reflect.Reflect;
 import Atom.Utility.TestingUtility;
@@ -46,6 +48,7 @@ import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Module.ModsModule;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Set;
 
 public class InformationCenter extends ModsModule {
@@ -53,13 +56,64 @@ public class InformationCenter extends ModsModule {
     public static int currentServerPort = 0;
     public static Callable callable;
     
+    public static boolean canModifyPrivateFinalField() {
+        return canModifyField("privateStaticFinal");
+    }
+    
+    public static boolean canModifyPublicFinalField() {
+        return canModifyField("publicStaticFinal");
+    }
+    
+    public static boolean canModifyPublicField() {
+        return canModifyField("publicStatic");
+    }
+    
+    public static boolean canModifyPrivateField() {
+        return canModifyField("privateStatic");
+    }
+    
+    protected static boolean canModifyField(String field) {
+        Field f = Reflect.findDeclaredField(InformationCenter0.class, ff -> ff.getName().equals(field)).get(0);
+        if (f == null) throw new ShouldNotHappenedException("Failed to look for " + field + " field");
+        FieldTool.trySetAccessible(f);
+        try {
+            boolean b = f.getBoolean(null);
+            f.setBoolean(null, !b);
+            boolean b1 = f.getBoolean(null);
+            return b != b1;
+        }catch(IllegalAccessException e){
+            return false;
+        }
+    }
+    
+    public static boolean canAccessPublicField() {
+        return canAccessField("publicStaticFinal");
+    }
+    
+    public static boolean canAccessPrivateField() {
+        return canAccessField("privateStaticFinal");
+    }
+    
+    protected static boolean canAccessField(String field) {
+        Field f = Reflect.findDeclaredField(InformationCenter0.class, ff -> ff.getName().equals(field)).get(0);
+        if (f == null) throw new ShouldNotHappenedException("Failed to look for " + field + " field");
+        FieldTool.trySetAccessible(f);
+        try {
+            boolean b = f.getBoolean(null);
+            return true;
+        }catch(IllegalAccessException e){
+            return false;
+        }
+    }
     
     @MethodFuzzer(skip = true)
     public static <T> Set<Class<? extends T>> getExtendedClass(Class<T> c) {
         if (OS.isAndroid || OS.isIos){//Dalvik bad
             throw new GetRealException("Mobile doesn't support Reflect.getExtendedClass()");
         }
-        return Atom.Reflect.ExternalReflection.getExtendedClass(GlopionCore.class.getPackage().getName(), c, InformationCenter.class.getClassLoader());
+        return Atom.Reflect.ExternalReflection.getExtendedClass(GlopionCore.class.getPackage().getName(),
+                c,
+                InformationCenter.class.getClassLoader());
     }
     
     public static Callable getCallableMain() {

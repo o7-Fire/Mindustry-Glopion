@@ -97,7 +97,7 @@ public class UIPatch extends ModsModule {
         ModsMenu.add(new BundleViewer());
         ModsMenu.add(GlopionCore.worldInformation = new WorldInformation());
         ModsMenu.add(new OzonePlaySettings());
-        ModsMenu.add(new EnvironmentInformation());//mmm
+        //ModsMenu.add(new EnvironmentInformation());//mmm
         ModsMenu.add(new LogView());
         ModsMenu.add(new ExperimentDialog());
         ModsMenu.add(new OptionsDialog());
