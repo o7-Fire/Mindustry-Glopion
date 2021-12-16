@@ -44,7 +44,7 @@ public class Untest {
         for (Throwable t : ServerLauncher.exception)
             t.printStackTrace();
         if (!ServerLauncher.exception.isEmpty()) throw ServerLauncher.exception.get(0);
-        assert ServerLauncher.exception.size() == 0 : "Exception not empty";
+        System.err.println("Cool");
     }
     
     

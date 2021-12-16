@@ -31,9 +31,11 @@ public class SharedBootstrapper {
         File javaBin = new File(System.getProperty("java.home") + "/bin/java");
         javaPath1 = "java";
         if (javaBin.exists()) javaPath1 = javaBin.getAbsolutePath();
-        
+    
         javaPath = javaPath1;
-        if (System.getProperty("MindustryVersion", null) == null) System.setProperty("MindustryVersion", "v127.2");
+        Java.loadConfig();
+        if (System.getProperty("MindustryVersion", null) == null)
+            System.setProperty("MindustryVersion", Java.config.getProperty("MindustryVersion"));
         if (test) Log.infoTag("Glopion-Boostrapper", "Test Environment");
     }
     

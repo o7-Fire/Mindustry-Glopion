@@ -21,12 +21,13 @@ import static mindustry.Vars.platform;
 public class ServerLauncher extends mindustry.server.ServerLauncher {
     public static final List<Throwable> exception = Collections.synchronizedList(new ArrayList<>());
     public static HeadlessApplicationWithExtraModification application;
-
-
+    
+    
     public static void main(String[] args) {
         if (System.getProperty("dev") != null) {
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
             Reflect.debug = true;
+    
             MindustryLauncher.loadWithoutFile();
         }
 
