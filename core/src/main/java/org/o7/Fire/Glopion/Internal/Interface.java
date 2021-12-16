@@ -146,13 +146,13 @@ public class Interface {
         return null;
     }
     
-    public static void getConsoleInputAsync(String prompt, final Map<String, String> allowedDescrption, Cons<String> s) {
-        if (Vars.headless){
-            if (allowedDescrption == null) throw new NullPointerException("need allowedDescription in server version");
-            for (final Map.Entry<String, String> a : allowedDescrption.entrySet()) {
+    public static void getConsoleInputAsync(String prompt, final Map<String, String> allowedDescription, Cons<String> s) {
+        if (Vars.headless) {
+            if (allowedDescription == null) throw new NullPointerException("need allowedDescription in server version");
+            for (final Map.Entry<String, String> a : allowedDescription.entrySet()) {
                 getServerControl().handler.register(a.getKey(), a.getValue(), ss -> {
                     s.get(a.getKey());
-                    for (String b : allowedDescrption.keySet())
+                    for (String b : allowedDescription.keySet())
                         getServerControl().handler.removeCommand(b);
                 });
             }
@@ -165,14 +165,14 @@ public class Interface {
             while (ss == null) {
                 try {
                     System.out.println(prompt);
-                    if (allowedDescrption != null){
-                        String[] allowed = new String[allowedDescrption.size()];
+                    if (allowedDescription != null) {
+                        String[] allowed = new String[allowedDescription.size()];
                         int i = 0;
-                        for (String sss : allowedDescrption.keySet()) {
+                        for (String sss : allowedDescription.keySet()) {
                             allowed[i++] = sss;
                         }
                         ss = getConsoleInput(allowed);
-                    }else ss = getConsoleInput();
+                    } else ss = getConsoleInput();
                 }catch(IOException e){
                     e.printStackTrace();
                 }
@@ -594,32 +594,42 @@ public class Interface {
 
     public static void showConfirm(String title, String text, String accept, String decline, Runnable confirm, Runnable no) {
         
-        if (Vars.headless){
-            if (GlopionCore.test){
-                if (Random.getBool()){confirm.run();}else{no.run();}
+        if (Vars.headless) {
+            if (GlopionCore.test) {
+                if (Random.getBool()) {
+                    confirm.run();
+                } else {
+                    no.run();
+                }
                 return;
             }
             String keyMain = title.hashCode() + "-";
             String keyAccept = keyMain + accept.toLowerCase().replace(" ", "-");
             String keyDecline = keyMain + decline.toLowerCase().replace(" ", "-");
-            String prompt = fancyBox(title, text, keyAccept, keyDecline);
+            StringBuilder prompt = new StringBuilder(fancyBox(title, text, keyAccept, keyDecline));
+            ArrayList<String> h = new ArrayList<>(Arrays.asList(prompt.toString().split("\n")));
+            h.add(h.size(), System.lineSeparator() + "Type the choice above in the console to confirm");
+            prompt = new StringBuilder();
+            for (String s : h) {
+                prompt.append(s).append(System.lineSeparator());
+            }
             Cons<String> consumer = s -> {
-                if (s.equals(keyAccept)){
+                if (s.equals(keyAccept)) {
                     confirm.run();
                     Log.info("Confirmed: " + accept);
                     return;
-                }else if (s.equals(keyDecline)){
+                } else if (s.equals(keyDecline)) {
                     no.run();
                     Log.info("Confirmed: " + decline);
                     return;
                 }
                 throw new ShouldNotHappenedException("User manage to bypass consoleInput: \"" + s + '"');
             };
-            HashMap<String, String> h = new HashMap<>();
-            h.put(keyAccept, title + ": " + accept);
-            h.put(keyDecline, title + ": " + decline);
-            getConsoleInputAsync(prompt, h, consumer);
-    
+            HashMap<String, String> ll = new HashMap<>();
+            ll.put(keyAccept, title + ": " + accept);
+            ll.put(keyDecline, title + ": " + decline);
+            getConsoleInputAsync(prompt.toString(), ll, consumer);
+
         }else{
             runOnUI(() -> ui.showCustomConfirm(title, text, accept, decline, confirm, no));
         }

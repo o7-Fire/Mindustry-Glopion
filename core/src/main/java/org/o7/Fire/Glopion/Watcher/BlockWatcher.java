@@ -57,26 +57,30 @@ public class BlockWatcher extends ModsModule implements GraphicsModule {
         try {
             GlopionCore.imageClassifier = new NodeNSFWJS(new URL(GlopionCore.nsfwJsUrlSettings));
             Log.infoTag("Image Classifier", "Provider: " + GlopionCore.nsfwJsUrlSettings);
-        }catch(MalformedURLException e){
+        } catch (MalformedURLException e) {
             WarningHandler.handleMindustry(e);
             Log.err("Failed to register Image Classifier");
         }
     }
-    
+
     final HashSet<LogicDisplay.LogicDisplayBuild> logicDisplay = new HashSet<>();
     Timer timer = new Timer(TimeUnit.MILLISECONDS, 100);
     Future<ArrayList<Building>> taskLogicDisplayBuild = null;
     HashMap<byte[], byte[]> hashMapLiterally = new HashMap<>();
-    
-    
+
+    @Override
+    public boolean disabled() {
+        return Vars.headless;
+    }
+
     protected void onTaskLogicDisplayDone() {
         try {
             for (Building b : taskLogicDisplayBuild.get()) {
                 if (b instanceof LogicDisplay.LogicDisplayBuild) logicDisplay.add((LogicDisplay.LogicDisplayBuild) b);
             }
-        }catch(InterruptedException | ExecutionException e){
+        } catch (InterruptedException | ExecutionException e) {
             WarningHandler.handleMindustry(e);
-        }finally{
+        } finally {
             taskLogicDisplayBuild = null;
         }
     }

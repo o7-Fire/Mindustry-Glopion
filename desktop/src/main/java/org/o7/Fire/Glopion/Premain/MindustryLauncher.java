@@ -16,6 +16,7 @@ import mindustry.mod.Scripts;
 import mindustry.net.Net;
 import mindustry.type.Publishable;
 import net.jpountz.util.Native;
+import org.o7.Fire.Glopion.Dev.ModsClassHook;
 import rhino.Context;
 
 public class MindustryLauncher {
@@ -63,6 +64,19 @@ public class MindustryLauncher {
         });
     }
 
+    static ModsClassHook modsClassHook;
+
+    static void hookModsLoader() {
+        if (Vars.mods != null) {
+            try {
+                modsClassHook = new ModsClassHook(Vars.mods);
+            } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException e) {
+                throw new IllegalStateException("Failed to hook mods loader", e);
+            }
+        } else {
+            throw new IllegalStateException("Vars.mods is null");
+        }
+    }
 
     /**
      * patch after Vars.platform = this {@link ClientLauncher#setup()} to gain classloader control over mods

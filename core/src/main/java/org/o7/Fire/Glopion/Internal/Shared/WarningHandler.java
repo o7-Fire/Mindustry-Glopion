@@ -113,7 +113,10 @@ public class WarningHandler {
     }
     
     public static void handleProgrammerFault(Throwable t) {
-    
+        handleJava(t);
+        if (Reflect.debug) {
+            t.printStackTrace();
+        }
     }
     
     /**
