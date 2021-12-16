@@ -21,17 +21,13 @@ import static mindustry.Vars.platform;
 public class ServerLauncher extends mindustry.server.ServerLauncher {
     public static final List<Throwable> exception = Collections.synchronizedList(new ArrayList<>());
     public static HeadlessApplicationWithExtraModification application;
-    private static Runnable varsInitMethodLineNo312ListenerHijacker;
+
 
     public static void main(String[] args) {
         if (System.getProperty("dev") != null) {
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
             Reflect.debug = true;
-            varsInitMethodLineNo312ListenerHijacker = () -> {
-                MindustryLauncher.hookModsLoader();
-                MindustryLauncher.modsClassHook.load("org.o7.Fire.Glopion.GlopionDesktop");
-                Log.info("GlopionDesktop loaded");
-            };
+            MindustryLauncher.loadWithoutFile();
         }
 
 
@@ -57,23 +53,8 @@ public class ServerLauncher extends mindustry.server.ServerLauncher {
             t.printStackTrace();
         });
     }
-
-    /**
-     * This is a hack to make the Vars.init() method to be called after the Vars.mods are loaded.
-     * to load the mods without placing files in the mods folder.
-     * Development usage only
-     */
-    private static void hijacker() {
-        if (varsInitMethodLineNo312ListenerHijacker != null) {
-            StackTraceElement stackTraceElement = Reflect.getCallerClassStackTrace(1);
-            if (stackTraceElement.getFileName() != null && stackTraceElement.getFileName().equals("Vars.java") &&
-                    stackTraceElement.getMethodName().equals("init")) {
-                varsInitMethodLineNo312ListenerHijacker.run();
-                varsInitMethodLineNo312ListenerHijacker = null;
-            }
-        }
-    }
-
+    
+    
     @Override
     public void init() {
         if (System.getProperty("dev") != null) Administration.Config.debug.set(true);
@@ -97,7 +78,7 @@ public class ServerLauncher extends mindustry.server.ServerLauncher {
 
         @Override
         public boolean isAndroid() {
-            hijacker();
+            MindustryLauncher.hijacker();
             return super.isAndroid();
         }
 

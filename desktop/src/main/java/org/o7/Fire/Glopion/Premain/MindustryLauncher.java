@@ -2,10 +2,14 @@ package org.o7.Fire.Glopion.Premain;
 
 import Atom.Reflect.Reflect;
 import arc.Events;
+import arc.Files;
+import arc.backend.sdl.SdlApplication;
+import arc.backend.sdl.SdlConfig;
 import arc.files.Fi;
 import arc.func.Cons;
 import arc.struct.Seq;
 import arc.util.Log;
+import arc.util.Structs;
 import mindustry.ClientLauncher;
 import mindustry.Vars;
 import mindustry.core.Platform;
@@ -17,24 +21,53 @@ import mindustry.net.Net;
 import mindustry.type.Publishable;
 import net.jpountz.util.Native;
 import org.o7.Fire.Glopion.Dev.ModsClassHook;
+import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 import rhino.Context;
 
+import java.lang.reflect.Method;
+
 public class MindustryLauncher {
-  
+    
+    
+    static Method handleCrashMethod;
+    static Runnable varsInitMethodLineNo312ListenerHijacker;
+    
+    public static void handleCrash(Throwable e) {
+        if (handleCrashMethod == null){
+            try {
+                handleCrashMethod = DesktopLauncher.class.getDeclaredMethod("handleCrash", Throwable.class);
+                handleCrashMethod.setAccessible(true);
+            }catch(ReflectiveOperationException ignored){}
+        }
+        if (handleCrashMethod != null){
+            try {
+                handleCrashMethod.invoke(null, e);
+            }catch(ReflectiveOperationException ignored){
+            
+            }
+        }
+        WarningHandler.handleMindustry(e);
+    }
+    
     public static void main(String[] args) {
         if (System.getProperty("dev-user") != null){
             Reflect.DEBUG_TYPE = Reflect.DebugType.UserPreference;
             Reflect.debug = true;
         }
-    
+        
         if (System.getProperty("dev") != null){
             Reflect.DEBUG_TYPE = Reflect.DebugType.DevEnvironment;
             Reflect.debug = true;
+            MindustryLauncher.loadWithoutFile();
         }
     
         if (Reflect.debug){
-            System.out.println("Mindustry Jar Classloader: " + MindustryLauncher.class.getClassLoader().getClass().getCanonicalName());
-            System.out.println("Current Jar Classloader: " + ModClassLoader.class.getClassLoader().getClass().getCanonicalName());
+            System.out.println("Mindustry Jar Classloader: " + MindustryLauncher.class.getClassLoader()
+                    .getClass()
+                    .getCanonicalName());
+            System.out.println("Current Jar Classloader: " + ModClassLoader.class.getClassLoader()
+                    .getClass()
+                    .getCanonicalName());
             registerPatcher();
         }
         try {
@@ -43,20 +76,73 @@ public class MindustryLauncher {
             Log.warn("Failed to load LZ4Factory-Native, multiplayer performance may be degraded: @", t);
             //godammn why load factory
         }
-        DesktopLauncher.main(args);
+        try {
+            Vars.loadLogger();
+            new SdlApplication(new DesktopLauncher(args), new SdlConfig() {
+                {
+                    this.title = "Mindustry-Glopion";
+                    this.maximized = true;
+                    this.width = 900;
+                    this.height = 700;
+                    this.gl30 = !Structs.contains(args, "-nogl3");
+                    
+                    if (Structs.contains(args, "-debug") || Reflect.debug){
+                        Log.level = Log.LogLevel.debug;
+                    }
+                    
+                    this.setWindowIcon(Files.FileType.internal, new String[]{"icons/icon_64.png"});
+                }
+                
+            }) {
+                @Override
+                public boolean isAndroid() {
+                    MindustryLauncher.hijacker();
+                    return super.isAndroid();
+                }
+            };
+        }catch(Throwable t){
+            handleCrash(t);
+        }
+        
     }
-    public static void registerPatcher(){
+    
+    static void loadWithoutFile() {
+        MindustryLauncher.varsInitMethodLineNo312ListenerHijacker = () -> {
+            MindustryLauncher.hookModsLoader();
+            MindustryLauncher.modsClassHook.load("org.o7.Fire.Glopion.GlopionDesktop");
+            System.err.println("GlopionDesktop loaded via reflection");
+        };
+    }
+    
+    /**
+     * This is a hack to make the Vars.init() method to be called after the Vars.mods are loaded.
+     * to load the mods without placing files in the mods folder.
+     * Development usage only
+     * Max 1 hops
+     */
+    static void hijacker() {
+        if (varsInitMethodLineNo312ListenerHijacker != null){
+            StackTraceElement stackTraceElement = Reflect.getCallerClassStackTrace(1);
+            if (stackTraceElement.getFileName() != null && stackTraceElement.getFileName()
+                    .equals("Vars.java") && stackTraceElement.getMethodName().equals("init")){
+                varsInitMethodLineNo312ListenerHijacker.run();
+                varsInitMethodLineNo312ListenerHijacker = null;
+            }
+        }
+    }
+    
+    public static void registerPatcher() {
         //Use ClientCreateEvent as Logger is not initialized
-        Events.on(EventType.ClientCreateEvent.class,s->{
+        Events.on(EventType.ClientCreateEvent.class, s -> {
             //at this point Vars.platform != this
             //so we need to wait a few more line
             final Log.LogHandler original = Log.logger;
-            Log.logger = (e, a) ->{
-                if(a.startsWith("[GL] Version:")){
+            Log.logger = (e, a) -> {
+                if (a.startsWith("[GL] Version:")){
                     //Vars.platform == this
                     //patch time
                     patchClassloader(Vars.platform);
-                    //return to original to avoid conflict
+                    //return to original to avoid conflict, or something
                     Log.logger = original;
                 }
                 original.log(e, a);

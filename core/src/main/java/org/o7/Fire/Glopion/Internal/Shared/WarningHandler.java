@@ -67,6 +67,7 @@ public class WarningHandler {
      * Mindustry or Runtime Related Error e.g {@link RuntimeException}, {@link java.io.IOException}
      */
     public static void handleMindustry(Throwable t, boolean ignoreTest) {
+        handleJava(t);
         String s = "Glopion-Handler";
         try {s = Reflect.getCallerClassStackTrace().toString();}catch(Throwable ignored){}
         handleMindustry(t, s, ignoreTest);

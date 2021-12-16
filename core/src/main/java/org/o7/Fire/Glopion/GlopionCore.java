@@ -24,6 +24,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class GlopionCore extends Plugin implements Module {
+    static {
+        if (System.getProperty(GlopionCore.class.getCanonicalName()) != null){
+            throw new IllegalStateException("GlopionCore is already loaded");
+        }
+        System.setProperty(GlopionCore.class.getCanonicalName(), "true");
+    }
+    
     public static AtomicDialog modsMenu;
     public static GlopionControl glopionControl = new GlopionControl();
     public static final boolean test = Testing.isTestMode();
@@ -48,6 +55,7 @@ public class GlopionCore extends Plugin implements Module {
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);
+    
     }
     
     public GlopionCore() {
