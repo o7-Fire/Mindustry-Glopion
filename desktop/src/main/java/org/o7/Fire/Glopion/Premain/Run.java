@@ -1,8 +1,5 @@
 package org.o7.Fire.Glopion.Premain;
 
-import Atom.Bootstrap.AtomicBootstrap;
-import Atom.Utility.Cache;
-
 public class Run {
     //run configuration
     //Classpath: Mindustry-Glopion.desktop.test
@@ -27,6 +24,9 @@ public class Run {
                 System.setProperty("glopion-deepPatch", "1");
                 System.setProperty("dev", "1");//let's assume you use Intellij Run Button
                 System.out.println("DEV ?");
+                if (args.length == 0) {
+                    args = new String[]{"host", "Ancient_Caldera", "sandbox"};
+                }
             }
             ServerLauncher.main(args);
         }

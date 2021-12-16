@@ -40,6 +40,7 @@ public class MindustryLauncher {
             Native.load();
         }catch(Throwable t){
             Log.warn("Failed to load LZ4Factory-Native, multiplayer performance may be degraded: @", t);
+            //godammn why load factory
         }
         DesktopLauncher.main(args);
     }
@@ -57,19 +58,22 @@ public class MindustryLauncher {
                     //return to original to avoid conflict
                     Log.logger = original;
                 }
-                original.log(e,a);
+                original.log(e, a);
             };
         });
     }
-    /**  patch after Vars.platform = this {@link ClientLauncher#setup()} to gain classloader control over mods
+
+
+    /**
+     * patch after Vars.platform = this {@link ClientLauncher#setup()} to gain classloader control over mods
      * i use Intellij breakpoint evaluate or just do some dark magic
-     * */
-    public static void patchClassloader(Platform inert){
-       
+     */
+    public static void patchClassloader(Platform inert) {
+
         Vars.platform = new Platform() {
             @Override
             public ClassLoader loadJar(Fi jar, ClassLoader parent) throws Exception {
-                if(jar.absolutePath().contains("Glopion")){
+                if (jar.absolutePath().contains("Glopion")) {
                     Log.info("Found The Glopion, try using system classloader");
                     return MindustryLauncher.class.getClassLoader();//we do some little trolling
                 }else{
