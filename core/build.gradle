@@ -9,6 +9,7 @@ dependencies {
     annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
     testAnnotationProcessor "com.github.Anuken:jabel:$jabelVersion"
     compileOnly(urlFile(fooClient))
+    testCompileOnly(urlFile(fooClient))
     if(androidJarFile.exists()) {
         compileOnly(files(androidJarFile))
         println androidJarFile.absolutePath
