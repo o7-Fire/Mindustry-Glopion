@@ -132,21 +132,50 @@ public class InformationCenter extends ModsModule {
                 f = Reflect.getCurrentJar(InformationCenter.class);
             }catch(Throwable ignored){}
         }
-        if (f == null){
+        if (f == null) {
             try {
-                f = new File(InformationCenter.class.getClassLoader().getResource(InformationCenter.class.getCanonicalName().replace('.', '/') + ".class").getFile());
-            }catch(Throwable ignored){}
+                f = new File(InformationCenter.class.getClassLoader()
+                        .getResource(InformationCenter.class.getCanonicalName().replace('.', '/') + ".class")
+                        .getFile());
+            } catch (Throwable ignored) {
+            }
         }
         if (f == null) return null;
         return f.getAbsoluteFile();
-        
+
     }
-    
-    
+
+    public static File fooClasspathLocation;
+
+    static {
+        try {
+            fooClasspathLocation = getClasspathLocation(mindustry.client.Client.class.getCanonicalName());
+        } catch (Throwable ignored) {
+        }
+    }
+
+    public static File getClasspathLocation(String canocialName) {
+        File f = null;
+        try {
+            f = Reflect.getCurrentJar(Class.forName(canocialName, false, InformationCenter.class.getClassLoader()));
+        } catch (Throwable ignored) {
+        }
+        if (f == null) {
+            try {
+                f = new File(InformationCenter.class.getClassLoader()
+                        .getResource(canocialName.replace('.', '/') + ".class").getFile());
+            } catch (Throwable ignored) {
+            }
+        }
+        if (f == null) return null;
+        return f.getAbsoluteFile();
+    }
+
+
     public static int getCurrentServerPort() {
         try {
             return getCurrentClientNet().getRemoteAddressTCP().getPort();
-        }catch(Throwable t){
+        } catch (Throwable t) {
             return currentServerPort;
         }
     }

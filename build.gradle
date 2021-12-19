@@ -144,6 +144,20 @@ allprojects {
             return project(":" + modsNname + module)
         }
     }
+    ext.urlFile = { url ->
+        String name = url.substring(url.lastIndexOf('/') + 1)
+        File file = new File("$buildDir/download/${name}")
+        file.parentFile.mkdirs()
+        if (!file.exists()) {
+            println("Downloading $url")
+            new URL(url).withInputStream { downloadStream ->
+                file.withOutputStream { fileOut ->
+                    fileOut << downloadStream
+                }
+            }
+        }
+        files(file.absolutePath)
+    }
     ext {
         try {
 

@@ -46,7 +46,7 @@ public class Main extends Plugin {
     public static String info = "None";
     public static String glopionLoadedString = "glopion.loaded";
     public static Properties release = new Properties();
-    
+
     static {
         classpath = classpath + flavor.split("-")[0] + "Launcher";
         if (!Vars.headless) bootstrapper = new BootstrapperUI();

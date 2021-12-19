@@ -5,6 +5,7 @@ import Atom.Time.Time;
 import Atom.Utility.Pool;
 import arc.Core;
 import arc.util.Log;
+import mindustry.client.Client;
 import mindustry.mod.Mod;
 import mindustry.mod.Plugin;
 import org.o7.Fire.Glopion.Brain.Classification.ImageClassifier;
@@ -46,16 +47,24 @@ public class GlopionCore extends Plugin implements Module {
     public static final Time startTime = new Time(TimeUnit.MILLISECONDS);
     public static Time loadFinishedTime = null;
     public static ImageClassifier imageClassifier = null;
-    
+    public static final boolean fooClient;
+
     static {
-        if (debugSettings && Reflect.debug){
+        boolean fooClient1;
+        try {
+            Client.INSTANCE.getTimer();
+            fooClient1 = true;
+        } catch (Throwable e) {
+            fooClient1 = false;
+        }
+        fooClient = fooClient1;
+        if (debugSettings && Reflect.debug) {
             Reflect.DEBUG_TYPE = Reflect.DebugType.UserPreference;
-            Reflect.debug = true;
         }
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);
-    
+
     }
     
     public GlopionCore() {
