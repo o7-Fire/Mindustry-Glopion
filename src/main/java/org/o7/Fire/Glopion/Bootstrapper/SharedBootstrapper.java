@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 //Java 8 only, no external
 public class SharedBootstrapper {
-    public static final long version = 32;
+    public static final long version = 34;
     public final static String javaPath;
     public static final boolean test = System.getProperty("test") != null;
     public static final ExecutorService executors = Executors.newCachedThreadPool(r -> {
