@@ -122,18 +122,22 @@ public class UIPatch extends ModsModule {
         settingsTable = h.get();
         //GlopionCore.commFrag.build(Vars.ui.hudGroup);
         ui.logic.buttons.button("Show Hash", Icon.list, () -> {
-            new ScrollableDialog("Hash Code") {
+            new ScrollableDialog("Hash") {
                 @Override
                 protected void setup() {
                     String src = ui.logic.canvas.save();
                     int hash = src.hashCode();
                     long lhash = Digest.longHash(src);
-                    table.button(hash + "", () -> {
+                    String sha256 = Digest.toHex(Digest.sha256(src.getBytes()));
+                    table.button("int32 " + hash + "", () -> {
                         Interface.copyToClipboard(hash + "");
-                    }).tooltip("Copy").growY();
-                    table.button(lhash + "", () -> {
+                    }).tooltip("Copy").growX().row();
+                    table.button("int64 Hash: " + lhash + "", () -> {
                         Interface.copyToClipboard(lhash + "");
-                    }).tooltip("Copy").growY();
+                    }).tooltip("Copy").growX().row();
+                    table.button("SHA256: " + sha256 + "", () -> {
+                        Interface.copyToClipboard(sha256 + "");
+                    }).tooltip("Copy").growX().row();
                 }
             }.show();
         }).size(210f, 64f);
