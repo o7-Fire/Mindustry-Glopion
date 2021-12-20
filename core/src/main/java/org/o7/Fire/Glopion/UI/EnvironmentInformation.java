@@ -36,10 +36,12 @@ import mindustry.ui.Styles;
 import net.jpountz.lz4.LZ4Factory;
 import org.o7.Fire.Glopion.Experimental.Evasion.Identification;
 import org.o7.Fire.Glopion.Experimental.Experimental;
+import org.o7.Fire.Glopion.GlopionCore;
 import org.o7.Fire.Glopion.Internal.InformationCenter;
 import org.o7.Fire.Glopion.Internal.Interface;
 import org.o7.Fire.Glopion.Internal.Shared.WarningHandler;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -107,7 +109,7 @@ public class EnvironmentInformation extends ScrollableDialog implements Experime
         ad("Can Modify Private Field", InformationCenter.canModifyPrivateField());
         ad("Can Modify Public Field", InformationCenter.canModifyPublicField());
         ad("Can Modify Public Final Field", InformationCenter.canModifyPublicFinalField());
-        
+    
         try {
             ad("Compilation Time Total (ms)", ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
             ad("isCompilationTimeMonitoringSupported",
@@ -116,8 +118,25 @@ public class EnvironmentInformation extends ScrollableDialog implements Experime
         try {
             ad("Android API", Build.VERSION.SDK_INT);
             ad("Android Model", Build.MODEL);
-            
+        
         }catch(Throwable ignored){}
+        if (GlopionCore.fooClient){
+            ad("Foo Classpath", InformationCenter.fooClasspathLocation.getAbsolutePath());
+        }
+        try {
+            String classpath = System.getProperty("java.class.path");
+            String[] classpathEntries = classpath.split(File.pathSeparator);
+            table.button("Classpath", Icon.file, () -> {
+                new ScrollableDialog() {
+                    @Override
+                    protected void setup() {
+                        for (String entry : classpathEntries) {
+                            ad(entry);
+                        }
+                    }
+                }.show();
+            }).growX().row();
+        }catch(Exception ignored){}
         uid();
     
     
@@ -136,6 +155,7 @@ public class EnvironmentInformation extends ScrollableDialog implements Experime
     
     
     void uid() {
+    
         ad(System.getenv());
         try {
             ArrayList<String> yikes = Identification.getKeys();

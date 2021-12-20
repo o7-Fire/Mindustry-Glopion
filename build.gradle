@@ -529,6 +529,8 @@ public static void writeBootstrapperConfig(File root){
         bootstrapperProperties.load(new FileInputStream(bootstrapPropertiesFile));
         String s = gradlePropertiesProperties.getProperty("mindustryHash");
         bootstrapperProperties.setProperty("MindustryVersion", s );
+        bootstrapperProperties.setProperty("fooClient", gradlePropertiesProperties.getProperty("fooClient"))
+        bootstrapperProperties.setProperty("minAndroidApi", gradlePropertiesProperties.getProperty("minAndroidApi"))
     } catch (Exception e) {
         e.printStackTrace();
     }

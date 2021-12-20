@@ -70,6 +70,7 @@ public class OptionsDialog extends ScrollableDialog {
         Log.debug("loaded @ settings", loaded);
     }
     
+    
     @Override
     protected void setup() {
         Table tt = table.table().growX().get();
@@ -84,6 +85,7 @@ public class OptionsDialog extends ScrollableDialog {
                         try {
                             f.set(null, be);
                             saveSettings.get(getQualifiedName(f), String.valueOf(be));
+                            arc.Events.fire(new Events.BooleanSettingsChanged(be, f));
                         }catch(IllegalAccessException e){
                             WarningHandler.handleProgrammerFault(e);
                             Vars.ui.showException(e);
@@ -112,6 +114,7 @@ public class OptionsDialog extends ScrollableDialog {
                                     throw new NullPointerException("Yikes can't parse: " + temp.get(getQualifiedName(f)));
                                 f.set(null, data);
                                 saveSettings.get(getQualifiedName(f), String.valueOf(data));
+                                arc.Events.fire(new Events(f, String.valueOf(data)));
                             }catch(Exception e){
                                 Vars.ui.showException(e);
                             }
@@ -121,6 +124,25 @@ public class OptionsDialog extends ScrollableDialog {
                         WarningHandler.handleMindustry(e);
                     }
                 }).growX().row();
+            }
+        }
+    }
+    
+    public static class Events {
+        public final Field field;
+        public final String value;
+        
+        public Events(Field field, String value) {
+            this.field = field;
+            this.value = value;
+        }
+        
+        public static class BooleanSettingsChanged extends Events {
+            public final boolean newSettings;
+            
+            public BooleanSettingsChanged(boolean newSettings, Field field) {
+                super(field, newSettings + "");
+                this.newSettings = newSettings;
             }
         }
     }

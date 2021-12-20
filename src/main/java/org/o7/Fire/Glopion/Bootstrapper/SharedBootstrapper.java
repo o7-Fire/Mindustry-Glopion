@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-//Java 8 only
+//Java 8 only, no external
 public class SharedBootstrapper {
     public static final long version = 32;
     public final static String javaPath;
@@ -42,11 +42,29 @@ public class SharedBootstrapper {
     @NotNull
     public static File parent = new File("cache/");
     public static Properties dependencies = new Properties();
+    // name -> download url
     public static HashMap<String, List<URL>> downloadList = new HashMap<>();
+    // name -> download file
     public static TreeMap<String, File> downloadFile = new TreeMap<>();
     public static HashMap<String, String> sizeList = new HashMap<>();
     public static HashMap<String, Long> sizeLongList = new HashMap<>();
     public static long totalSize = 0;
+    
+    public static void addDependency(String name, String url) throws MalformedURLException {
+        URL u = new URL(url);
+        downloadList.put(name, Collections.singletonList(u));
+        downloadFile.put(name, new File(parent, u.getFile()));
+        httpGet(url, c -> {
+            setReadableSize(name, c.getContentLengthLong());
+        }, c -> {});
+    }
+    
+    public static void setReadableSize(String key, long l) {
+        String size = humanReadableByteCountSI(l);
+        sizeList.put(key, size);
+        sizeLongList.put(key, l);
+    }
+    
     public static void checkDependency(InputStream is) throws IOException {
         downloadFile.clear();
         downloadList.clear();
@@ -69,8 +87,9 @@ public class SharedBootstrapper {
             try {
                long l = Long.parseLong(keys[0]);
                totalSize += l;
-                String size = humanReadableByteCountSI(l);
+    
                 key = keys[1];
+                String size = humanReadableByteCountSI(l);
                 sizeList.put(key, size);
                 sizeLongList.put(key, l);
              
@@ -108,12 +127,17 @@ public class SharedBootstrapper {
     
     public static void httpGet(String url, Consumer<HttpURLConnection> connected, Consumer<Exception> died) {
         executors.submit(() -> {
+            HttpURLConnection connection = null;
             try {
                 URL u = new URL(url);
-                HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+                connection = (HttpURLConnection) u.openConnection();
                 connected.accept(connection);
             }catch(Exception e){
                 died.accept(e);
+            }finally{
+                if (connection != null){
+                    connection.disconnect();
+                }
             }
         });
     }

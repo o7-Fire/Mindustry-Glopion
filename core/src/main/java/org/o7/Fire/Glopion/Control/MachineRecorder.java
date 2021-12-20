@@ -189,16 +189,17 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
         return getSize()+12;
     }
     
-    public void enviromentInformation(){
+    public void environmentInformation() {
         ScreenUtils.getFrameBufferPixels(false);
         compiledIndex = getSize();
-        incrementAssignCompiledIndex(()-> player.unit().vel().getX());
-        incrementAssignCompiledIndex(()-> player.unit().vel().getY());
-        incrementAssignCompiledIndex(()-> player.unit().closestEnemyCore().tile().dst(player.tileOn()));
-        incrementAssignCompiledIndex(()-> player.unit().closestCore().tile().dst(player.tileOn()));
-        incrementAssignCompiledIndex(()-> player.unit().closestEnemyCore().tile().dst(player.tileOn()));
+        incrementAssignCompiledIndex(() -> player.unit().vel().getX());
+        incrementAssignCompiledIndex(() -> player.unit().vel().getY());
+        incrementAssignCompiledIndex(() -> player.unit().closestEnemyCore().tile().dst(player.tileOn()));
+        incrementAssignCompiledIndex(() -> player.unit().closestCore().tile().dst(player.tileOn()));
+        incrementAssignCompiledIndex(() -> player.unit().closestEnemyCore().tile().dst(player.tileOn()));
     }
-    public void incrementAssignCompiledIndex(Floatp fc){
+    
+    public void incrementAssignCompiledIndex(Floatp fc) {
         compiledVector[compiledIndex] = 0;
         compiledIndex++;
         try {
@@ -208,8 +209,8 @@ public class MachineRecorder implements Module, WorldModule, Serializable {
     public float[] compiledVector(){
         if(compiledVector == null)
             compiledVector = new float[getCompiledSize()];
-        worldDataToVisualFlat(getWorldData(maxView),compiledVector);
-        enviromentInformation();
+        worldDataToVisualFlat(getWorldData(maxView), compiledVector);
+        environmentInformation();
         return compiledVector;
     }
     public float[] worldDataToVisualFlat(Tile[][] rawMatrix) {

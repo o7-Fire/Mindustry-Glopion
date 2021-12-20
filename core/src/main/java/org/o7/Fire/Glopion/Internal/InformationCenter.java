@@ -39,6 +39,7 @@ import Atom.Reflect.Reflect;
 import Atom.Utility.TestingUtility;
 import arc.Core;
 import arc.net.Client;
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.net.ArcNetProvider;
 import mindustry.net.Net;
@@ -49,6 +50,7 @@ import org.o7.Fire.Glopion.Module.ModsModule;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Properties;
 import java.util.Set;
 
 public class InformationCenter extends ModsModule {
@@ -119,6 +121,17 @@ public class InformationCenter extends ModsModule {
     public static Callable getCallableMain() {
         if (callable == null) callable = new Callable(Vars.net);
         return callable;
+    }
+    
+    public static Properties glopionBootstrapperConfig = new Properties();
+    
+    static {
+        try {
+            glopionBootstrapperConfig.load(InformationCenter.class.getResourceAsStream(
+                    "/glopion.bootstrapper.config.properties"));
+        }catch(Exception e){
+            Log.err("Failed to load glopion.bootstrapper.config.properties: " + e.getMessage());
+        }
     }
     
     public static File getCurrentJar() {

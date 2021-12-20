@@ -21,6 +21,7 @@ import Atom.Utility.Digest;
 import arc.Core;
 import arc.Events;
 import arc.scene.ui.Dialog;
+import arc.scene.ui.TextButton;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import mindustry.Vars;
@@ -52,15 +53,27 @@ public class UIPatch extends ModsModule {
     private void onResize() {
         
         if (VarsPatch.menu != null){
+            Table menu = VarsPatch.menu;
+            if (VarsPatch.menu.getChildren().size > 0 && VarsPatch.menu.getChildren().get(0) instanceof Table){
+                menu = (Table) VarsPatch.menu.getChildren().get(0);
+            }
             if (Vars.testMobile) try {
                 Reflect.getMethod(MenuFragment.class, "buildMobile", ui.menufrag).invoke(ui.menufrag);
             }catch(Throwable ignored){}
             if (Vars.mobile || Vars.testMobile){
                 if (Core.graphics.isPortrait()) VarsPatch.menu.row();
-                VarsPatch.menu.add(new MobileButton(Icon.info, TextManager.get("Glopion-Menu"), () -> GlopionCore.modsMenu.show()));
+                menu.add(new MobileButton(Icon.info,
+                        TextManager.get("Glopion-Menu"),
+                        () -> GlopionCore.modsMenu.show()));
             }else{
-    
-                VarsPatch.menu.button(TextManager.get("Glopion-Menu"), Icon.file, GlopionCore.modsMenu::show).growX().bottom();
+                TextButton b = menu.button(TextManager.get("Glopion-Menu"),
+                        Icon.file,
+                        Styles.clearToggleMenut,
+                        () -> {}).growX().get();
+                b.clicked(() -> {
+                    GlopionCore.modsMenu.show();
+                    b.setChecked(false);
+                });
             }
         }
         if(settingsTable != null){

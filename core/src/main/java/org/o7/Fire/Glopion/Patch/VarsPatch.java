@@ -65,9 +65,9 @@ public class VarsPatch extends ModsModule {
         Log.debug("Glopion-Debug: @", "Debugs, peoples, debugs");
         if (Vars.ui != null){
             try {
-                Vars.ui.chatfrag.addMessage("gay", "no");
+                Vars.ui.chatfrag.addMessage("no");
             }catch(NoSuchMethodError t){
-                System.setProperty("gay-shit-no-offense", "1");
+                System.setProperty("gay-shit-no-offense", "1");//wha this
             }
         }
         

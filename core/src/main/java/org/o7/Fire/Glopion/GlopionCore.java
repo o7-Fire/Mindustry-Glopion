@@ -3,6 +3,7 @@ package org.o7.Fire.Glopion;
 import Atom.Reflect.Reflect;
 import Atom.Time.Time;
 import Atom.Utility.Pool;
+import android.os.Build;
 import arc.Core;
 import arc.util.Log;
 import mindustry.client.Client;
@@ -26,10 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GlopionCore extends Plugin implements Module {
     static {
-        if (System.getProperty(GlopionCore.class.getCanonicalName()) != null){
-            throw new IllegalStateException("GlopionCore is already loaded");
-        }
-        System.setProperty(GlopionCore.class.getCanonicalName(), "true");
+        validator();
     }
     
     public static AtomicDialog modsMenu;
@@ -52,9 +50,9 @@ public class GlopionCore extends Plugin implements Module {
     static {
         boolean fooClient1;
         try {
-            Client.INSTANCE.getTimer();
+            Client.INSTANCE.getTimer();//stub
             fooClient1 = true;
-        } catch (Throwable e) {
+        }catch(Error e){
             fooClient1 = false;
         }
         fooClient = fooClient1;
@@ -76,6 +74,25 @@ public class GlopionCore extends Plugin implements Module {
         }
         
         
+    }
+    
+    static void validator() {
+        if (System.getProperty(GlopionCore.class.getCanonicalName()) != null){
+            throw new IllegalStateException("GlopionCore is already loaded");
+        }
+        System.setProperty(GlopionCore.class.getCanonicalName(), "true");
+        //get android api version
+        try {
+            int current = Build.VERSION.SDK_INT;
+            int required = Integer.parseInt(InformationCenter.glopionBootstrapperConfig.getProperty("minAndroidApi"));
+            if (current < required){
+                throw new IllegalStateException("Glopion requires Android API level " + required + " or higher");
+            }
+        }catch(Throwable throwable){
+            if (throwable instanceof IllegalStateException){
+                throw (IllegalStateException) throwable;
+            }
+        }
     }
     
     public Time getLoadingTime() {
@@ -104,12 +121,16 @@ public class GlopionCore extends Plugin implements Module {
     @Override
     public void init() {
         //this tbh
-        TextManager.registerWords("nsfwJsUrlSettings", "NSFW JS Provider");
-        TextManager.registerWords("censorInapproriatePictureSettings", "Censor inapproriate pixel art/logic display");
+        TextManager.registerWords("nsfwJsUrlSettings", "NSFW JS Provider[WIP]");
+        TextManager.registerWords("censorInapproriatePictureSettings",
+                "Censor inappropriate pixel art/logic display[WIP]");
         TextManager.registerWords("machineVisualizeRenderSettings", "Machine Recorder Visualization");
-        TextManager.registerWords("translateChatSettings", "Translate Chat (Client GUI Only, async, unglyph, uncolorized, duplicating, skip already translated)");
-        TextManager.registerWords("interceptChatThenTranslateSettings", "Intercept Player Message Then Translate It (Server Only, may cause lag, send to everyone)");
-        TextManager.registerWords("rebroadcastTranslatedMessageSettings", "Translate message, then send it again to all player (same as Translate Chat except for Server Only, and resend to everyone)");
+        TextManager.registerWords("translateChatSettings",
+                "Translate Chat (Client GUI Only, async, unglyph, uncolorized, duplicating, skip already translated)");
+        TextManager.registerWords("interceptChatThenTranslateSettings",
+                "Intercept Player Message Then Translate It (Server Only, may cause lag, send to everyone)");
+        TextManager.registerWords("rebroadcastTranslatedMessageSettings",
+                "Translate message, then send it again to all player (same as Translate Chat except for Server Only, and resend to everyone)");
         try {
             moduleRegisterer.init();
         }catch(Throwable t){

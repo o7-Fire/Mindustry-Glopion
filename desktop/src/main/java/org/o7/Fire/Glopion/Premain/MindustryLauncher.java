@@ -39,7 +39,7 @@ public class MindustryLauncher {
                 handleCrashMethod.setAccessible(true);
             }catch(ReflectiveOperationException ignored){}
         }
-        if (handleCrashMethod != null){
+        if (handleCrashMethod != null && !Reflect.debug){
             try {
                 handleCrashMethod.invoke(null, e);
             }catch(ReflectiveOperationException ignored){
@@ -89,8 +89,8 @@ public class MindustryLauncher {
                     if (Structs.contains(args, "-debug") || Reflect.debug){
                         Log.level = Log.LogLevel.debug;
                     }
-                    
-                    this.setWindowIcon(Files.FileType.internal, new String[]{"icons/icon_64.png"});
+    
+                    this.setWindowIcon(Files.FileType.internal, "icons/icon_64.png");
                 }
                 
             }) {
@@ -110,8 +110,8 @@ public class MindustryLauncher {
         if (test) return;
         MindustryLauncher.varsInitMethodLineNo312ListenerHijacker = () -> {
             MindustryLauncher.hookModsLoader();
-            MindustryLauncher.modsClassHook.load("org.o7.Fire.Glopion.GlopionDesktop");
-            System.err.println("GlopionDesktop loaded via reflection");
+            MindustryLauncher.modsClassHook.load("org.o7.Fire.Glopion.Bootstrapper.Main");
+            System.err.println("Glopion loaded via reflection");
         };
     }
     
