@@ -178,6 +178,7 @@ public class Main extends Plugin {
         }
         System.setProperty(glopionLoadedString, "1");
         jar = getFlavorJar(flavor);
+        Log.infoTag(GlopionBootstrapperText, "Finding Jar: " + jar.absolutePath());
         SharedBootstrapper.parent = Core.files.cache("libs").file();
         boolean classExist = false;
         try {
@@ -216,13 +217,13 @@ public class Main extends Plugin {
                 }
                 if (parentClasslaoder instanceof ModClassLoader) modClassloader = (ModClassLoader) parentClasslaoder;
                 if (!Vars.android){
-                    //forbidden pacakage name "java", wait how bootstrapper (bootstrapper.jar) manage to load
+                    //forbidden package name "java", wait how bootstrapper (bootstrapper.jar) manage to load
                     platformClassloader = new URLClassLoader(new URL[]{jar.file().toURI().toURL()}, parentClasslaoder);
                 }else{
                     //assume core version
                     platformClassloader = Vars.platform.loadJar(jar, parentClasslaoder);
                 }
-                //if not development enviroment then its must be Vars.mods.mainLoader()
+                //if not development environment then its must be Vars.mods.mainLoader()
                 modClassloader.addChild(platformClassloader);
                 //desktop
                 InputStream is = platformClassloader.getResourceAsStream("dependencies");
