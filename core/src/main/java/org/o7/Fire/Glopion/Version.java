@@ -22,17 +22,18 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
 public class Version {
-    public static String desktop = "0.6.2";
-    public static String core = "0.7.2";
-    
+    public static String desktop = "0.7.0";
+    public static String core = "0.8.0";
+
     public static boolean isCore() {
         return desktop.isEmpty();
     }
-    
+
     public static String buildString() {
         return desktop.isEmpty() ? core : core + ":" + desktop;
     }
-    
+
+    //invoked by gradle
     public static void main(String[] args) throws Throwable {
         Files.write(new File("Version").toPath(), buildString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     }
