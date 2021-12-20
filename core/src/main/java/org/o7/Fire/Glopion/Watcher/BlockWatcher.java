@@ -86,7 +86,7 @@ public class BlockWatcher extends ModsModule implements GraphicsModule {
     }
     
     public void update() {
-        
+        //Interface.getBuilds(LogicBuild.class::isInstance).get()
         if (Vars.state.isPlaying()){
             if (taskLogicDisplayBuild != null && taskLogicDisplayBuild.isDone()){
                 onTaskLogicDisplayDone();
