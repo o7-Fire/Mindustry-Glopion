@@ -58,7 +58,7 @@ public class GlopionCore extends Plugin implements Module {
         fooClient = fooClient1;
         if (debugSettings && Reflect.debug) {
             Reflect.DEBUG_TYPE = Reflect.DebugType.UserPreference;
-        }
+         }
         if (Reflect.DEBUG_TYPE != Reflect.DebugType.None) Log.level = Log.LogLevel.debug;
         Log.debug("Debug: @", Reflect.DEBUG_TYPE);
         Log.debug("Invoked @ static ctr", GlopionCore.class);
