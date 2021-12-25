@@ -297,6 +297,7 @@ public class Main extends Plugin {
         }else{
             Log.warn(jar.absolutePath() + " doesn't exist, loading in next startup to prevent game freeze");
             downloadThing = true;
+            jar.file().getAbsoluteFile().mkdirs();
         }
         
         

@@ -38,12 +38,15 @@ public class Java {
     }
     
     public static void main(String[] args) throws Throwable {
-        
+        if (args.length == 0) {
+            System.out.println("no");
+            return;
+        }
         boolean headless = GraphicsEnvironment.isHeadless() && System.console() != null;
         System.out.println("Headless: " + headless);
         boolean training = false;
-        if (args.length != 0){
-            if (Arrays.asList(args).contains("training")){
+        if (args.length != 0) {
+            if (Arrays.asList(args).contains("training")) {
                 training = true;
                 System.out.println("Training");
             }
