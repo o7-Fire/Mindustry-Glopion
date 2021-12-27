@@ -213,18 +213,20 @@ public class Main extends Plugin {
             }catch(ClassCastException ignored){}
             if (classExist) mainClassloader = parentClasslaoder;
             if (!classExist) try {
-                if ((test || Vars.headless) && !jar.exists()){
+                if ((test || Vars.headless) && !jar.exists()) {
                     downloadGlopionNow(flavor);
                 }
-                if (!mobile){
-                    while (parentClasslaoder.getParent() != null && parentClasslaoder.getClass() != ModClassLoader.class)
+                if (!mobile) {
+                    while (parentClasslaoder.getParent() != null &&
+                            parentClasslaoder.getClass() != ModClassLoader.class)
                         parentClasslaoder = parentClasslaoder.getParent();
                 }
-                if (parentClasslaoder instanceof ModClassLoader) modClassloader = (ModClassLoader) parentClasslaoder;
-                if (!Vars.android){
+                if (parentClasslaoder instanceof ModClassLoader)
+                    modClassloader = (ModClassLoader) parentClasslaoder;
+                if (!Vars.android) {
                     //forbidden package name "java", wait how bootstrapper (bootstrapper.jar) manage to load
                     platformClassloader = new URLClassLoader(new URL[]{jar.file().toURI().toURL()}, parentClasslaoder);
-                }else{
+                } else {
                     //assume core version
                     platformClassloader = Vars.platform.loadJar(jar, parentClasslaoder);
                 }
@@ -248,14 +250,15 @@ public class Main extends Plugin {
                     for (File s : downloadFile.values()) {
                         if (s.exists()) urls.add(s.toURI().toURL());
                     }
-                    if (!urls.isEmpty()){
+                    if (!urls.isEmpty()) {
                         urls.add(jar.file().toURI().toURL());
                         URL[] url = new URL[urls.size];
                         int i = 0;
                         for (URL url1 : urls) {
                             url[i++] = url1;
                         }
-                        dependencyClassloader = new URLClassLoader(url);
+                        Log.infoTag(GlopionBootstrapperText, "Found " + urls.size + " dependencies to be injected");
+                        dependencyClassloader = new URLClassLoader(url, parentClasslaoder);
 
                         mainClassloader = dependencyClassloader;
                         //modClassloader.addChild(dependencyClassloader);
