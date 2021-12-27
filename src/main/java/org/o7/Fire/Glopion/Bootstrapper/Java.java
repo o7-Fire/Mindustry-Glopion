@@ -2,6 +2,7 @@ package org.o7.Fire.Glopion.Bootstrapper;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -26,20 +27,76 @@ public class Java {
             System.out.println("impossible");
         }
     }
-    
+
     public static void loadConfig() {
         if (config != null) return;
         config = new Properties();
         try {
             config.load(Java.class.getResourceAsStream("/glopion.bootstrapper.config.properties"));
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
+    public static void loadWithClassloader(String mainClass, String... classpath) throws Throwable {
+        ArrayList<String> classPath = new ArrayList<>();
+        classPath.addAll(Arrays.asList(System.getProperty("java.class.path").split(File.pathSeparator)));
+        classPath.addAll(Arrays.asList(classpath));
+        URL[] urls = new URL[classPath.size()];
+        for (int i = 0; i < urls.length; i++) urls[i] = new File(classPath.get(i)).toURI().toURL();
+        URLClassLoader cl = new URLClassLoader(urls);
+        Class<?> c = cl.loadClass(mainClass);
+        c.getMethod("main", String[].class).invoke(null, (Object) new String[]{});
+    }
+
+    public static Process load(String mainClass, String... classpath) throws IOException {
+        ArrayList<String> classPath = new ArrayList<>();
+        classPath.add(SharedBootstrapper.javaPath);
+        classPath.add("-cp");
+        classPath.add(String.join(File.pathSeparator, classpath) + File.pathSeparator +
+                System.getProperty("java.class.path"));
+        classPath.add(mainClass);
+        return new ProcessBuilder(classPath).inheritIO().start();
+    }
+
+    public static File download(URL url) {
+        File f = new File("cache", url.getFile().substring(1));
+        if (f.exists()) return f;
+        System.out.println("Downloading: " + url);
+        try {
+            SharedBootstrapper.download(url, f).join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (!f.exists()) throw new RuntimeException("Failed to download " + url);
+        return f;
+    }
+
+    public static File downloadMindustry() {
+        return download(SharedBootstrapper.getMindustryURL());
+    }
+
+    public static File getGlopion() {
+        File f;
+        f = new File("Mindustry-Glopion-Core.jar");
+        if (f.exists()) return f;
+        f = new File("Mindustry-Glopion-DeepPatch.jar");
+        if (f.exists()) return f;
+        f = new File("cache", "Mindustry-Glopion-DeepPatch.jar");
+        if (f.exists()) return f;
+        f = new File("cache", "Mindustry-Glopion-Core.jar");
+        if (f.exists()) return f;
+        f = new File("cache", stableGlopion.getFile().substring(1)).getAbsoluteFile();
+        if (f.exists()) return f;
+        return download(stableGlopion);
+    }
+
     public static void main(String[] args) throws Throwable {
         if (args.length == 0) {
-            System.out.println("no");
+            loadWithClassloader("mindustry.desktop.DesktopLauncher", downloadMindustry().getAbsolutePath(), getGlopion().getAbsolutePath());
+            if (true) return;
+            int exit = load("mindustry.desktop.DesktopLauncher", downloadMindustry().getAbsolutePath(), getGlopion().getAbsolutePath()).waitFor();
+            System.exit(exit);
             return;
         }
         boolean headless = GraphicsEnvironment.isHeadless() && System.console() != null;

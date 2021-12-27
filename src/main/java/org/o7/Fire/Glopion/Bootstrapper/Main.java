@@ -172,21 +172,26 @@ public class Main extends Plugin {
     }
     
     public static void load() {
-        if (System.getProperty(glopionLoadedString, "0").equals("1")){
+        if (System.getProperty(glopionLoadedString, "0").equals("1")) {
             Log.errTag(GlopionBootstrapperText, "Trying to load multiple times !!!");
             return;
         }
         System.setProperty(glopionLoadedString, "1");
         jar = getFlavorJar(flavor);
         Log.infoTag(GlopionBootstrapperText, "Finding Jar: " + jar.absolutePath());
+        if (SharedBootstrapper.localGlopion() != null) {
+            jar = new Fi(SharedBootstrapper.localGlopion());
+            Log.infoTag(GlopionBootstrapperText, "Found local jar: " + jar.absolutePath());
+        }
         SharedBootstrapper.parent = Core.files.cache("libs").file();
         boolean classExist = false;
         try {
-            classExist = Main.class.getClassLoader().getResourceAsStream(classpath.replace('.', '/') + ".class") != null;
-        }catch(Exception ignored){
-        
+            classExist =
+                    Main.class.getClassLoader().getResourceAsStream(classpath.replace('.', '/') + ".class") != null;
+        } catch (Exception ignored) {
+
         }
-        if (classExist){
+        if (classExist) {
             Log.infoTag(GlopionBootstrapperText, "Found in classpath, loading from classpath");
             InputStream is = Main.class.getClassLoader().getResourceAsStream("dependencies");
             if (is != null){
@@ -251,31 +256,37 @@ public class Main extends Plugin {
                             url[i++] = url1;
                         }
                         dependencyClassloader = new URLClassLoader(url);
-                       
+
                         mainClassloader = dependencyClassloader;
                         //modClassloader.addChild(dependencyClassloader);
                     }
                 }
                 Log.infoTag(GlopionBootstrapperText, "Parent: " + parentClasslaoder.getClass().getSimpleName());
-            }catch(Throwable e){
+            } catch (Throwable e) {
                 handleException(e);
             }
-            
-            if (mainClassloader != null) try {
-                modClassloader.addChild(mainClassloader);
-                Log.infoTag(GlopionBootstrapperText, "Main: " + mainClassloader.getClass().getSimpleName());
-                unloaded = (Class<? extends Mod>) Class.forName(classpath, true, mainClassloader);
-            }catch(Throwable e){
-                handleException(e);
+
+            if (mainClassloader != null) {
+                try {
+                    modClassloader.addChild(mainClassloader);
+                    Log.infoTag(GlopionBootstrapperText, "Main: " + mainClassloader.getClass().getSimpleName());
+                    unloaded = (Class<? extends Mod>) Class.forName(classpath, true, mainClassloader);
+                } catch (ClassNotFoundException e) {
+                    handleException(new ClassNotFoundException(
+                            e.getMessage() + " not found, please download dependency"));
+                } catch (Throwable e) {
+                    handleException(e);
+                }
             }
-            String atomExist = "false";
+            boolean atomExist = false;
+            Throwable whyAtomDontExist = null;
             try {
                 Class.forName("Atom.Manifest", false, Main.class.getClassLoader());
-                atomExist = "Exist";
-            }catch(Throwable e){
-                atomExist = e.getMessage();
+                atomExist = true;
+            } catch (Throwable e) {
+                whyAtomDontExist = e;
             }
-    
+
             StringBuilder sb = new StringBuilder().append("Class: ").append(unloaded).append("\n");
             sb.append("Flavor: ").append(flavor).append("\n");
             sb.append("Classpath: ").append(jar.absolutePath()).append("\n");
@@ -285,7 +296,7 @@ public class Main extends Plugin {
             sb.append("Parent Classloader: ").append(parentClasslaoder).append("\n");
             sb.append("Platform Classloader: ").append(platformClassloader).append("\n");
             sb.append("Dependency Classloader: ").append(dependencyClassloader).append("\n");
-            sb.append("Atom Library: ").append(atomExist).append("\n");
+            sb.append("Atom Library: ").append(atomExist ? "Yes" : whyAtomDontExist.getMessage()).append("\n");
             if (urls.size != 0){
                 sb.append("Dependency: ").append("\n");
                 for (URL o : urls) {
