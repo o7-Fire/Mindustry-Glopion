@@ -182,6 +182,8 @@ public class Main extends Plugin {
         if (SharedBootstrapper.localGlopion() != null) {
             jar = new Fi(SharedBootstrapper.localGlopion());
             Log.infoTag(GlopionBootstrapperText, "Found local jar: " + jar.absolutePath());
+            if (jar.name().contains("DeepPatch"))
+                classpath = "org.o7.Fire.Glopion.DesktopLauncher";
         }
         SharedBootstrapper.parent = Core.files.cache("libs").file();
         boolean classExist = false;
