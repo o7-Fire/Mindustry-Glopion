@@ -270,9 +270,9 @@ public class SharedBootstrapper {
     public static File localGlopion() {
 
         File f;
-        f = new File("Mindustry-Glopion-Core.jar");
-        if (f.exists()) return f;
         f = new File("Mindustry-Glopion-DeepPatch.jar");
+        if (f.exists()) return f;
+        f = new File("Mindustry-Glopion-Core.jar");
         if (f.exists()) return f;
         return null;
 
