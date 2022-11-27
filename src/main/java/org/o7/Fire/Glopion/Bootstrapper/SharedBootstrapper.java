@@ -28,7 +28,8 @@ public class SharedBootstrapper {
     
     static {
         String javaPath1;
-        File javaBin = new File(System.getProperty("java.home") + "/bin/java");
+        File javaBin = new File(System.getProperty("java.home") + "/bin/java" +
+                (System.getProperty("os.name").contains("Windows") ? ".exe" : ""));//smh windows
         javaPath1 = "java";
         if (javaBin.exists()) javaPath1 = javaBin.getAbsolutePath();
     
@@ -174,30 +175,35 @@ public class SharedBootstrapper {
         }
         return osName + "-" + osArch;
     }
-    
-    public static URL getMindustryURL() throws MalformedURLException {
-        
+
+    public static URL getMindustryURL() {
+
         return getMindustryURL(MindustryType.Desktop);
     }
-    
-    public static File getMindustryFile(MindustryType type) throws MalformedURLException {
+
+    public static File getMindustryFile(MindustryType type) {
         return new File(getMindustryURL(type).getFile().substring(1));
     }
-    
-    public static URL getMindustryURL(MindustryType type) throws MalformedURLException {
-        if (System.getProperty("BEVersion", null) != null){
-            String h = System.getProperty("BEVersion");
-            return new URL(type.getBE(h));
+
+    public static URL getMindustryURL(MindustryType type) {
+        try {
+            if (System.getProperty("BEVersion", null) != null) {
+                String h = System.getProperty("BEVersion");
+                return new URL(type.getBE(h));
+            }
+            return new URL(type.getRelease(System.getProperty("MindustryVersion")));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
-        return new URL(type.getRelease(System.getProperty("MindustryVersion")));
     }
-    
+
     public static boolean somethingMissing() {
         for (Map.Entry<String, File> download : downloadFile.entrySet()) {
             if (!download.getValue().exists()) return true;
         }
         return false;
     }
+
     public static String humanReadableByteCountSI(long bytes) {
         if (-1000 < bytes && bytes < 1000) {
             return bytes + " B";
@@ -210,21 +216,26 @@ public class SharedBootstrapper {
         return String.format("%.1f %cB", bytes / 1000.0, ci.current());
     }
     public static void waitForThreads(List<Thread> threads){
-        while (!threads.isEmpty()){
+        while (!threads.isEmpty()) {
             try {
                 Thread t = threads.remove(0);
                 System.out.println("Waiting: " + t.getName());
                 t.join();
-            }catch(Throwable e){
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
         }
     }
+
     public static Thread download(URL url, File download) {
-        Thread t = new Thread( ()->{
-           Closeable closeable = null;
+        return download(url, download, Throwable::printStackTrace);
+    }
+
+    public static Thread download(URL url, File download, Consumer<Throwable> died) {
+        Thread t = new Thread(() -> {
+            Closeable closeable = null;
             try {
-               
+
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 BufferedInputStream in = new BufferedInputStream(con.getInputStream());
                 download.getAbsoluteFile().getParentFile().mkdirs();
@@ -238,22 +249,39 @@ public class SharedBootstrapper {
                 randomAccessFile.close();
             }catch(IOException e){
                 e.printStackTrace();
-            }finally{
+            } finally {
                 try {
-                    if(closeable != null)
-                    closeable.close();
-                }catch(Throwable ignored){
-            
+                    if (closeable != null)
+                        closeable.close();
+                } catch (Throwable ignored) {
+
                 }
             }
         }, url.toString());
+        t.setUncaughtExceptionHandler((t1, e) -> {
+            if (died != null)
+                died.accept(e);
+        });
         t.start();
         return t;
-   
+
     }
-    public static Collection<File> getFiles(){
+
+    public static File localGlopion() {
+
+        File f;
+        f = new File("Mindustry-Glopion-DeepPatch.jar");
+        if (f.exists()) return f;
+        f = new File("Mindustry-Glopion-Core.jar");
+        if (f.exists()) return f;
+        return null;
+
+    }
+
+    public static Collection<File> getFiles() {
         return downloadFile.values();
     }
+
     public static void downloadAll() {
         ArrayList<Thread> threads = new ArrayList<>();
         for (Map.Entry<String, File> download : downloadFile.entrySet()) {
