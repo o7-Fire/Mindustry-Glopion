@@ -1,0 +1,169 @@
+/*******************************************************************************
+ * Copyright 2021 Itzbenz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+package org.o7.Fire.Glopion.UI;
+
+import Atom.Time.Time;
+import Atom.Utility.Pool;
+import arc.Core;
+import arc.struct.ObjectMap;
+import arc.util.Log;
+import mindustry.Vars;
+import mindustry.content.Blocks;
+import mindustry.gen.Groups;
+import mindustry.world.Build;
+import mindustry.world.Tile;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+public class WorldInformation extends ScrollableDialog {
+    
+    public volatile static Future task;
+    
+    //note copy variable to final to prevent desync with UI
+    public void setup() {
+        if (Vars.world == null){
+            table.add("No World").growX();
+            return;
+        }
+    
+        ad("Word Name", Vars.state.map.name());
+        ad("Entity Count", Groups.all.size());
+        ad("Players Count", Groups.player.size());
+        ad("Bullet Count", Groups.bullet.size());
+        ad("Unit Count", Groups.unit.size());
+        ad("Building Count", Groups.build.size());
+        ad("Sync Count", Groups.sync.size());
+        ad("Drawing Count", Groups.draw.size());
+        ad("Weather Count", Groups.weather.size());
+    
+        ad("World height", Vars.world.height());
+        ad("World width", Vars.world.width());
+        ad("World square", Vars.world.width() * Vars.world.height());
+        table.row();
+        if (task == null || task.isDone()) task = Pool.async(() -> {
+            Time te = new Time();
+            Log.debug("World calculation began");
+            try {
+                TreeMap<String, Integer> mainCount = new TreeMap<>();
+                long totalOre = 0;
+                int total = Vars.world.height() * Vars.world.width();
+                int height = Vars.world.height();
+                AtomicInteger a = new AtomicInteger(0);
+                AtomicLong buildableTile = new AtomicLong();
+                Core.app.post(() -> {
+                    if (Vars.ui == null || Vars.ui.loadfrag == null) return;
+                    Vars.ui.loadfrag.show("World calculation began...");
+                    Vars.ui.loadfrag.setButton(Vars.ui.loadfrag::hide);
+                    Vars.ui.loadfrag.setProgress(() -> (float) a.get() / total);
+                });
+                ArrayList<Future<ObjectMap<String, Integer>>> futures = new ArrayList<>();
+                for (int i = 0; i < height; i++) {
+                    int finalI = i;
+                    a.set(i * height);
+                    Core.app.post(() -> {
+                        if (Vars.ui == null || Vars.ui.loadfrag == null) return;
+                        Vars.ui.loadfrag.setText("World indexing: " + a + "/" + total);
+                    });
+                    futures.add(Pool.async(() -> {
+                        ObjectMap<String, Integer> count = new ObjectMap<>();
+                        try {
+                            for (int j = 0; j < Vars.world.width(); j++) {
+                                try {
+                                    Tile t = Vars.world.tileWorld(finalI, j);
+                                    if (t == null) continue;
+                                    if (t.staticDarkness() != 0) continue;
+                                    try {
+                                        count.put(t.floor().toString(), count.get(t.floor().toString(), 0) + 1);
+                                    }catch(Throwable ignored){
+                                    }
+                                    try {
+                                        count.put(t.overlay().toString(), count.get(t.overlay().toString(), 0) + 1);
+                                    }catch(Throwable ignored){}
+                                    try {
+                                        count.put(t.block().toString(), count.get(t.block().getDisplayName(t), 0) + 1);
+                                    }catch(Throwable ignored){}
+                                    try {
+                                        if (t.build != null)
+                                            count.put(t.build.getDisplayName(), count.get(t.build.getDisplayName(), 0) + 1);
+                                    }catch(Throwable ignored){}
+                                    if (Build.validPlace(Blocks.copperWall, Vars.player.team(), t.x, t.y, 0))
+                                        buildableTile.getAndIncrement();
+                                }catch(Throwable ignored){
+                                }
+                            }
+                        }catch(Throwable ignored){
+                        }
+                        return count;
+                    }));
+                }
+                
+                long futc = futures.size();
+                ArrayList<Future<?>> fut = new ArrayList<>(futures);
+                Core.app.post(() -> {
+                    if (Vars.ui == null || Vars.ui.loadfrag == null) return;
+                    Vars.ui.loadfrag.setProgress(() -> (float) (futc - fut.size()) / futc);
+                });
+                for (Future<ObjectMap<String, Integer>> f : futures) {
+                    try {
+                        for (ObjectMap.Entry<String, Integer> s : f.get().entries()) {
+                            if (mainCount.get(s.key) == null) mainCount.put(s.key, 0);
+                            mainCount.put(s.key, mainCount.get(s.key) + s.value);
+                        }
+                        fut.remove(f);
+                        Core.app.post(() -> {
+                            if (Vars.ui == null || Vars.ui.loadfrag == null) return;
+                            Vars.ui.loadfrag.setText("World calculating: " + (futc - fut.size()) + "/" + futc);
+                        });
+                    }catch(Throwable ignored){ }
+                }
+                for (Map.Entry<String, Integer> s : mainCount.entrySet())
+                    if (s.getKey().startsWith("ore-")) totalOre += s.getValue();
+                
+                long finalTotalOre = totalOre;
+                Core.app.post(() -> {
+                    ad("The following statistic are measured in tile (1x1)", "");
+                    ad("Total Ores", finalTotalOre);
+                    ad("Buildable Tiles", buildableTile);
+                    ad(mainCount);
+                });
+                String elapsed = te.elapsed().convert(TimeUnit.MILLISECONDS).toString();
+                long elapsedMs = te.elapsed().convert(TimeUnit.MILLISECONDS).src;
+                Log.debug("World calculation finished in @", elapsed);
+                if (elapsedMs > 3000) Core.app.post(() -> Vars.ui.showInfo("World calculation finished: " + elapsed));
+            }catch(Throwable i){
+                throw new RuntimeException(i);
+            }finally{
+                Core.app.post(() -> {
+                    if (Vars.ui != null && Vars.ui.loadfrag != null) Vars.ui.loadfrag.hide();
+                });
+            }
+        });
+        
+    }
+    
+    @Override
+    protected void init() {
+        if (!Vars.state.isGame()) return;
+        super.init();
+    }
+}

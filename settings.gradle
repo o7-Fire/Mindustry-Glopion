@@ -1,0 +1,34 @@
+rootProject.name = modsNname
+println "JDK: " + JavaVersion.current()
+
+/*
+if(!(JavaVersion.current().ordinal() < JavaVersion.VERSION_14.ordinal())){
+    include 'Desktop'
+    include 'Tools'
+}
+ */
+
+
+
+def use = { String dir, String... names ->
+    for(String name : names){
+        include(name)
+        project(name).projectDir = new File(settingsDir, "../${dir}/${name.substring(name.lastIndexOf(':') + 1)}")
+    }
+}
+
+def atomDir = null
+if(new File(settingsDir, '../Atomic-Library').exists()) {
+    atomDir = 'Atomic-Library'
+}else if(new File(settingsDir, '../Atom').exists()) {
+    atomDir = 'Atom'
+}
+if(atomDir != null) {
+    include(":Atom")
+    project(":Atom").projectDir = new File(settingsDir, "../${atomDir}")
+    use(atomDir, ":Atom:Atomic", ":Atom:Desktop")
+}
+include 'core'
+include 'desktop'
+include 'dev'
+

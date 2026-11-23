@@ -1,0 +1,571 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
+
+def versionProperties = new Properties()
+file('core/src/main/resources/version.properties').withInputStream { versionProperties.load(it) }
+ext.modsNversion = versionProperties.getProperty('version') + ':' + versionProperties.getProperty('version')
+
+buildscript {
+    repositories {//more than you need
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url 'https://jitpack.io' }
+        google()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath("com.github.Anuken.Arc:arc-core:$arcHash")//why not
+    }
+
+}
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+
+static String getAppDataDirectoryString(String name) {
+    String os = System.getProperty('os.name').toLowerCase()
+    String home = System.getProperty('user.home')
+    if (os.contains('win')) return new File(System.getenv('APPDATA') ?: home, name).absolutePath
+    if (os.contains('mac')) return new File(home, 'Library/Application Support/' + name).absolutePath
+    return new File(System.getenv('XDG_DATA_HOME') ?: home + '/.local/share', name).absolutePath
+}
+
+//github CI don't sort folder by default
+static File getLatestFolder(File fe) {
+    ArrayList<File> f = new ArrayList<>();
+    if (!fe.exists()) throw new FileNotFoundException(fe.getAbsolutePath());
+    File[] files = fe.listFiles();
+    f.addAll(Arrays.asList(files));
+    f.sort(new Comparator<File>() {
+        @Override
+        public int compare(File o1, File o2) {
+            return o1.getAbsolutePath() <=> o2.getAbsolutePath();
+        }
+    });
+    return f.get(f.size() - 1);
+}
+
+allprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'jacoco'
+    jacocoTestReport {
+        reports {
+            xml.required.set(true)
+        }
+    }
+    try {
+        buildScan {
+            termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+            termsOfServiceAgree = 'yes'
+        }
+    } catch (e){
+
+    }
+
+    tasks.withType(Test) {
+
+        useJUnitPlatform()
+        finalizedBy(jacocoTestReport)
+        testLogging {
+            // set options for log level LIFECYCLE
+            events TestLogEvent.FAILED,
+                    TestLogEvent.PASSED,
+                    TestLogEvent.SKIPPED,
+                    TestLogEvent.STANDARD_OUT
+            exceptionFormat TestExceptionFormat.FULL
+            showExceptions true
+            showCauses true
+            showStackTraces true
+            setWorkingDir(rootProject.projectDir)
+            // set options for log level DEBUG and INFO
+            debug {
+                events TestLogEvent.STARTED,
+                        TestLogEvent.FAILED,
+                        TestLogEvent.PASSED,
+                        TestLogEvent.SKIPPED,
+                        TestLogEvent.STANDARD_ERROR,
+                        TestLogEvent.STANDARD_OUT
+                exceptionFormat TestExceptionFormat.FULL
+            }
+            info.events = debug.events
+            info.exceptionFormat = debug.exceptionFormat
+            maxParallelForks = 1
+            forkEvery = 1
+            beforeTest { descriptor ->
+                logger.lifecycle("Running test: " + descriptor)
+            }
+            afterSuite { desc, result ->
+                if (!desc.parent) { // will match the outermost suite
+                    def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)"
+                    def startItem = '|  ', endItem = '  |'
+                    def repeatLength = startItem.length() + output.length() + endItem.length()
+                    println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+                    if(result.failedTestCount > 0)throw new Exception("Fail")
+                }
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url 'https://jitpack.io' }
+    }
+    group = 'com.o7.Fire.Glopion'
+    version = modsNversion.replace(':', '-')
+    ext.atomModule = { String module ->
+        boolean b = findProject(":Atom" + module) != null
+        if (b) {
+            return project(":Atom" + module)
+        } else {
+            return "com.github.o7-Fire.Atomic-Library$module:$atomHash"
+        }
+    }
+    ext.aproj = { String module ->
+        if (findProject(module) != null) {
+            return project(module)
+        } else {
+            return project(":" + modsNname + module)
+        }
+    }
+    ext.urlFile = { url ->
+        String name = url.substring(url.lastIndexOf('/') + 1)
+        File file = new File("$buildDir/download/${name}")
+        file.parentFile.mkdirs()
+        if (!file.exists()) {
+            println("Downloading $url")
+            new URL(url).withInputStream { downloadStream ->
+                file.withOutputStream { fileOut ->
+                    fileOut << downloadStream
+                }
+            }
+        }
+        files(file.absolutePath)
+    }
+    ext {
+        try {
+
+            System.properties.load(new FileReader(new File(rootDir, "gradle.properties")))
+            System.properties.load(new FileReader(new File(rootDir, "local.properties")))
+        } catch (s) {
+            //println s
+        }
+
+        //def s = mindustryHash
+        //System.setProperty("mindustryHash", String.valueOf(s))
+        //System.out.println(System.getProperty("modsNBE"))
+        //automatically detect latest shit and skipping it if doesn't exists
+        //export ANDROID_HOME=~/android-sdk
+        isRunner = System.getProperty("user.name").equals("runner")
+        sdkRoot = System.getenv("ANDROID_HOME")//or just replace it by direct path if you don't need github
+        if (sdkRoot == null)
+            sdkRoot = new File("SDK").getAbsolutePath()
+        sdkD8 = sdkRoot + "nope"
+        sdkJar = sdkRoot + "nope"//nopped in case folder didn't exist
+        sdkRootf = new File(sdkRoot)
+        if (sdkRootf.exists()) {
+            try {
+                String extension = System.getProperty('os.name').toLowerCase().contains('windows') ? ".bat" : "";
+                sdkD8 = new File(getLatestFolder(new File(sdkRootf, 'build-tools/')), ("d8" + extension)).getAbsolutePath()
+                sdkJar = new File(getLatestFolder(new File(sdkRootf, "platforms/")), "android.jar").getAbsolutePath()
+            } catch (ignored) {
+                //FileNotFoundException
+            }
+        }
+        if (!new File(sdkJar).exists())//redundant ?
+            sdkJar = new File(sdkRoot, "nope").getAbsolutePath()
+        if (!new File(sdkD8).exists())
+            sdkD8 = new File(sdkRoot, "nope").getAbsolutePath()
+        androidJarFile = new File(sdkJar)
+        mindustryExecutable = getMindustryFile()
+        mindustryServerExecutable = getMindustryServerFile()
+        //imagine writing json
+        modhjson = ""
+        modhjson += 'name: "' + modsNname + '"\n'
+        modhjson += 'displayName: "' + modsNdisplayName + '"\n'
+        modhjson += 'description: "' + modsNdescription + '"\n'
+        modhjson += 'author: "' + modsNauthor + '"\n'
+        modhjson += 'main: "' + modsNmain + '"\n'
+        modhjson += 'minGameVersion: ' + modsNminMindustryVersion + '\n'
+        modhjson += 'java: true\n'
+        modhjson += 'version: "' + modsNversion + '"\n'
+        modhjson += 'hidden: ' + modsNsupportVanillaServer + '\n'
+        githubRepoExist = false
+        if (project.hasProperty("githubRepo"))//supplied by workflow runner (gradle.yml)  -PgithubRepo="$GITHUB_REPOSITORY"
+        {
+            githubRepoExist = true
+            modhjson += 'repo: \"' + githubRepo + '\" \n'
+        } else
+            modhjson += 'repo: "' + modsNrepo + '"\n'
+
+
+        //From Root to every project
+        dependencies {
+            //
+            def be = System.getProperty("modsNBE") != null && !System.getProperty("modsNBE").isEmpty()
+            if (be) {
+                downloadMindustry(getMindustryURL(), getMindustryFile());
+            }
+            File mindustry = file(mindustryExecutable)
+
+            File mindustryServer = file(mindustryServerExecutable)
+       
+                compileOnly(files(mindustry))
+                compileOnly(files(mindustryServer))
+                //testCompileOnly(files(mindustry))
+                testImplementation(files(mindustryServer))
+                testImplementation(files(mindustry))
+            testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+            testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+            testRuntimeOnly(files(mindustryExecutable))
+            testRuntimeOnly(files(mindustryServerExecutable))
+
+            compileOnly group: 'org.jetbrains', name: 'annotations', version: '21.0.1'
+
+        }
+        tasks.withType(JavaCompile) {
+            options.encoding = "UTF-8"
+            options.compilerArgs += ["-Xlint:deprecation", "-g"]
+
+            options.forkOptions.jvmArgs.addAll([
+                    '--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
+                    '--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED'
+            ])
+        }
+        tasks.withType(Javadoc) {
+            options {
+                addStringOption('Xdoclint:none', '-quiet')
+                addStringOption('-release', '17')
+                links('https://mindustrygame.github.io/docs/')
+            }
+        }
+    }
+}
+subprojects {
+
+    dependencies {
+
+        testImplementation(files(mindustryExecutable))
+        testImplementation(files(mindustryServerExecutable))
+        testImplementation(rootProject)
+        //compileOnly(files(mindustryExecutable))
+        compileOnly(rootProject)
+    }
+
+}
+ext {
+    println System.getenv("ANDROID_HOME") == null ? "Android SDK doesn't exist, please specify ANDROID_HOME" : "Android SDK exist"
+    //rewrite mod.hjson everytime gradle rollin
+    //println System.getenv("ANDROID_HOME")
+    try {
+        File f = new File(projectDir, "mod.hjson")
+        f.delete()
+        Files.write(f.toPath(), modhjson.toString().getBytes(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+    } catch (ignored) {
+    }
+    File props = new File(projectDir, 'gradle.properties')
+    File atom = new File(projectDir, '../Atom')
+    if (atom.exists() && props.exists()) {
+        String s = new String(Runtime.getRuntime().exec("git rev-parse HEAD", new String[0], atom).getInputStream().readAllBytes()).trim();
+        if (s != atomHash) {
+            Properties properties = new Properties()
+            StringWriter writer = new StringWriter();
+            properties.load(props.toURI().toURL().openStream());
+            properties.put("atomHash", s);
+            properties.store(writer, "Touch")
+            Files.writeString(props.toPath(), writer.getBuffer().toString(), StandardOpenOption.WRITE);
+            atomHash = s;
+        }
+    }
+}
+
+
+//Root Module only
+dependencies {
+    writeBootstrapperConfig(rootDir)
+
+    if(androidJarFile.exists())
+        compileOnly(files(androidJarFile))
+}
+
+//make .class jar with executable main and MANIFEST.MF
+//your typical jar
+def localJarTasks = [":Atom:Atomic", ":Atom:Desktop"].findAll { findProject(it) != null }.collect { "${it}:jar" }
+task base(type: Jar) {
+    dependsOn(localJarTasks)
+    dependsOn(aproj(":core").tasks.named("classes"), aproj(":desktop").tasks.named("classes"))
+    dependsOn(":core:jar", ":desktop:jar")
+    archiveFileName = modsNname + ".jar"//Mindustry-Glopion,jar
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
+    from {
+        (configurations.runtimeClasspath + aproj(":core").configurations.runtimeClasspath + aproj(":desktop").configurations.runtimeClasspath).findAll { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+//Runtime library only, compile library like arc won't get included
+    }
+    from files(aproj(":core").sourceSets.main.output)
+    from files(aproj(":desktop").sourceSets.main.output)
+    with jar//what is this
+    manifest {
+        attributes(
+                'Main-Class': modsNJavaMain
+        )
+    }
+
+
+    from(rootDir) {
+        include "mod.hjson"//assuming the rootdir is actually current folder
+        include "icon.png"
+    }
+}
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+//not jar task
+//just handle making dexed jar after making typical jar
+task baseJar(type: Jar) {
+    dependsOn tasks.named('base')
+}
+
+task makeJar(type: Jar) {
+    dependsOn baseJar
+    manifest {
+        attributes(
+                'Main-Class': modsNJavaMain
+        )
+    }
+    archiveFileName = modsNname + "-Dexed.jar"
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    from() {
+        zipTree(new File(projectDir, "build/libs/${modsNname}.jar"))
+    }
+}
+
+
+
+
+//need this for jitpack, so i can read mods source code without using browser
+artifacts {
+    archives sourcesJar
+    archives tasks.named('base')
+}
+
+//h
+//add progress bar
+static void downloadMindustry(URL url, File download) {
+    downloadMindustry(url, download, null);
+}
+
+static void downloadMindustry(URL url, File download, String zipEntry) {
+    download.getParentFile().mkdirs();
+    if (download.exists()) return;
+
+    if (zipEntry != null) {
+        File zip = new File(download.getParentFile(), "package-" + download.getName() + ".zip");
+        downloadMindustry(url, zip, null);
+        java.util.zip.ZipFile archive = new java.util.zip.ZipFile(zip);
+        try {
+            java.util.zip.ZipEntry entry = archive.getEntry(zipEntry);
+            if (entry == null) throw new org.gradle.api.GradleException("Missing " + zipEntry + " in " + zip);
+            archive.getInputStream(entry).withStream { Files.copy(it, download.toPath(), StandardCopyOption.REPLACE_EXISTING) }
+        } finally {
+            archive.close()
+        }
+        return;
+    }
+
+    System.out.println("Downloading: " + url.toString());
+
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    BufferedInputStream input = new BufferedInputStream(con.getInputStream());
+    download.getAbsoluteFile().getParentFile().mkdirs();
+    RandomAccessFile output = new RandomAccessFile(download, "rw");
+
+    int bytesRead;
+    byte[] buffer = new byte[4096];
+    long nextLog = System.currentTimeMillis() + 4000
+    long readed = 0;
+    while ((bytesRead = input.read(buffer)) != -1) {
+        readed += bytesRead;
+        output.write(buffer, 0, bytesRead);
+        if (System.currentTimeMillis() > nextLog) {
+            System.out.println(readed / 1_000_000)
+            nextLog = System.currentTimeMillis() + 4000
+        }
+    }
+    output.close()
+
+}
+//don't crash
+static void copyToMindustry(File f) {
+    File target = new File(getAppDataDirectoryString("Mindustry"))
+    target = new File(target, "mods")
+    target = new File(target, f.getName())
+    target.getParentFile().mkdirs()
+    System.out.println("Copying: " + f.getAbsolutePath() + " to " + target.getAbsolutePath());
+    Files.copy(f.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+}
+
+static boolean useStaticMindustryPackages() {
+    return System.getProperty("modsNBE", null) == null;
+}
+
+static File staticMindustryCacheDir() {
+    return new File(getAppDataDirectoryString("Mindustry"), "build/cache/o7-Fire/Static-Mindustry-Package/" + System.getProperty("mindustryHash")).absoluteFile;
+}
+
+static String staticDesktopId() {
+    String os = System.getProperty('os.name').toLowerCase()
+    if (os.contains('win')) return 'windows-x64'
+    if (os.contains('mac')) return 'macos'
+    return 'linux-x64'
+}
+
+static String staticDesktopAsset() {
+    String os = System.getProperty('os.name').toLowerCase()
+    if (os.contains('win')) return 'mindustry-windows-64-bit.zip'
+    if (os.contains('mac')) return 'mindustry-macos.zip'
+    return 'mindustry-linux-64-bit.zip'
+}
+
+static URL getMindustryServerURL() {
+    if (!useStaticMindustryPackages()) {
+        String h = System.getProperty("modsNBE");
+        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/" + h + "/Mindustry-BE-Server-" + h + ".jar")
+    }
+    return new URL("https://github.com/o7-Fire/Static-Mindustry-Package/releases/download/" + System.getProperty("mindustryHash") + "/mindustry-server.zip");
+}
+
+static File getMindustryServerFile() {
+    if (!useStaticMindustryPackages()) {
+        URL u = getMindustryServerURL()
+        File mindustry = new File(new File(new File(getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+        return mindustry.getAbsoluteFile();
+    }
+    return new File(staticMindustryCacheDir(), "server.jar").absoluteFile;
+}
+
+static URL getMindustryURL() {
+    if (!useStaticMindustryPackages()) {
+        String h = System.getProperty("modsNBE");
+        return new URL("https://github.com/Anuken/MindustryBuilds/releases/download/" + h + "/Mindustry-BE-Desktop-" + h + ".jar")
+    }
+    return new URL("https://github.com/o7-Fire/Static-Mindustry-Package/releases/download/" + System.getProperty("mindustryHash") + "/" + staticDesktopAsset());
+}
+
+static File getMindustryFile() {
+    if (!useStaticMindustryPackages()) {
+        URL u = getMindustryURL()
+        File mindustry = new File(new File(new File(getAppDataDirectoryString("Mindustry")), "build/cache/"), u.getFile());
+        return mindustry.getAbsoluteFile();
+    }
+    return new File(new File(staticMindustryCacheDir(), staticDesktopId()), "desktop.jar").absoluteFile;
+}
+
+//how lazy to download this
+task download() {
+    doLast{
+        downloadMindustry(getMindustryServerURL(), getMindustryServerFile(), useStaticMindustryPackages() ? "server.jar" : null);
+        downloadMindustry(getMindustryURL(), getMindustryFile(), useStaticMindustryPackages() ? "jre/desktop.jar" : null);
+    }
+}
+tasks.withType(JavaCompile) {
+    dependsOn(download)
+}
+//don't want open file manager
+task copyMods() {
+    dependsOn tasks.named('base')//you don't need dex jar for pc
+    doLast {
+        File staleZip = new File(new File(getAppDataDirectoryString("Mindustry")), "mods/" + modsNname + ".zip")
+        if (staleZip.exists()) {
+            System.out.println("Deleting stale mod archive: " + staleZip.getAbsolutePath());
+            staleZip.delete()
+        }
+        File srcJar = new File(new File(projectDir.toString()), "build/libs/" + modsNname + ".jar")
+        copyToMindustry(srcJar)
+        File target = new File(projectDir.toString(), "config/mods/" + modsNname + ".jar")
+        target.getParentFile().mkdirs()
+        System.out.println("Copying: " + srcJar.getAbsolutePath() + " to " + target.getAbsolutePath());
+        Files.copy(srcJar.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        File localStaleZip = new File(projectDir.toString(), "config/mods/" + modsNname + ".zip")
+        if (localStaleZip.exists()) {
+            System.out.println("Deleting stale mod archive: " + localStaleZip.getAbsolutePath());
+            localStaleZip.delete()
+        }
+    }
+}
+//java -jar Mindustry.jar
+//cooler java -jar Mindustry.jar
+task run(type: JavaExec) {
+    dependsOn download
+    dependsOn copyMods//make class jar then copy it, why the hell you need to dex it
+    File mindustry = getMindustryFile()
+    println(mindustry.getAbsolutePath())
+    classpath = files(mindustry.getAbsolutePath())
+    //classpath += sourceSets.main.runtimeClasspath//will append classpath to java
+    mainClass.set("mindustry.desktop.DesktopLauncher")
+}
+task resolveDependencies {
+    doLast {
+        rootProject.allprojects { project ->
+            Set<Configuration> configurations = project.buildscript.configurations + project.configurations
+            configurations.findAll { c -> c.canBeResolved }.forEach { c -> c.resolve() }
+        }
+    }
+}
+task deploy {
+    dependsOn makeJar
+    dependsOn ":core:makeJar"
+    dependsOn ":desktop:base"
+    dependsOn ":desktop:unVersion"
+}
+test.dependsOn(download)
+test.dependsOn(copyMods)
+public static void writeBootstrapperConfig(File root){
+    String bootstrapConfigPath = "src/main/resources/glopion.bootstrapper.config.properties";
+    File current = new File(".").getAbsoluteFile();
+    File gradleProperties = new File(current, "gradle.properties");
+    if(!gradleProperties.exists()) gradleProperties = new File(root, "gradle.properties");
+
+    File bootstrapPropertiesFile = new File(current, bootstrapConfigPath);
+    if(!bootstrapPropertiesFile.exists()) bootstrapPropertiesFile = new File(root, bootstrapConfigPath);
+    Properties gradlePropertiesProperties = new Properties(), bootstrapperProperties = new Properties();
+
+    try {
+        gradlePropertiesProperties.load(new FileInputStream(gradleProperties));
+        bootstrapperProperties.load(new FileInputStream(bootstrapPropertiesFile));
+        String s = gradlePropertiesProperties.getProperty("mindustryHash");
+        bootstrapperProperties.setProperty("MindustryVersion", s );
+        bootstrapperProperties.setProperty("fooClient", gradlePropertiesProperties.getProperty("fooClient"))
+        bootstrapperProperties.setProperty("minAndroidApi", gradlePropertiesProperties.getProperty("minAndroidApi"))
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    //write
+    try {
+        bootstrapperProperties.store(new FileOutputStream(new File(root, bootstrapConfigPath)), "Dont edit this file, it is generated by the build script");
+        bootstrapperProperties.store(new FileOutputStream(bootstrapPropertiesFile), null);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}

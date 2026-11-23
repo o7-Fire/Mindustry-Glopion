@@ -1,0 +1,10 @@
+name: "Mindustry-Glopion-Core"
+displayName: "Mindustry-Glopion-Core"
+description: "Bottom Text"
+author: "o7-Fire"
+main: "org.o7.Fire.Glopion.ReleaseLauncher"
+minGameVersion: 160
+java: true
+version: "7.3.0:7.3.0"
+hidden: true
+repo: "o7-Fire/Mindustry-Glopion"
