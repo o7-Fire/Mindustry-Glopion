@@ -6,7 +6,7 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 
 def versionProperties = new Properties()
-file('core/src/main/resources/version.properties').withInputStream { versionProperties.load(it) }
+file('core/src/main/resources/glopion.version.properties').withInputStream { versionProperties.load(it) }
 ext.coreVersion = versionProperties.getProperty('coreVersion')
 ext.desktopVersion = versionProperties.getProperty('desktopVersion')
 ext.modsNversion = coreVersion + ':' + desktopVersion

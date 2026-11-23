@@ -28,7 +28,9 @@ public class Version {
     private static final Properties properties = new Properties();
 
     static {
-        try (InputStream in = Version.class.getResourceAsStream("/version.properties")) {
+        // Use a Glopion-specific name: "/version.properties" belongs to Mindustry
+        // and would be shadowed on the launcher classpath, breaking Version.init().
+        try (InputStream in = Version.class.getResourceAsStream("/glopion.version.properties")) {
             if (in != null) properties.load(in);
         } catch (IOException ignored) {
         }
