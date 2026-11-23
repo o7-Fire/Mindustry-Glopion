@@ -345,6 +345,19 @@ task base(type: Jar) {
         include "icon.png"
     }
 }
+// The bootstrapper looks for this exact artifact name when it wants the
+// desktop-only deep-patching flavor. It is the full root jar (bootstrapper +
+// core + desktop), unlike :desktop:base which lacks the bootstrapper itself.
+task deepPatch(type: Jar) {
+    dependsOn tasks.named('base')
+    archiveFileName = modsNname + "-DeepPatch.jar"
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    manifest.attributes('Main-Class': modsNJavaMain)
+    from {
+        zipTree(tasks.named('base').flatMap { it.archiveFile })
+    }
+    exclude 'META-INF/MANIFEST.MF'
+}
 task sourcesJar(type: Jar, dependsOn: classes) {
     archiveClassifier.set('sources')
     from sourceSets.main.allSource
@@ -545,6 +558,7 @@ task resolveDependencies {
 }
 task deploy {
     dependsOn makeJar
+    dependsOn tasks.named('deepPatch')
     dependsOn ":core:makeJar"
     dependsOn ":desktop:base"
     dependsOn ":desktop:unVersion"

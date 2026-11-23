@@ -43,16 +43,22 @@ jobs:
 
       - name: Read version
         id: version
-        run: echo "value=$(cat Version)" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION=$(cat Version)
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          # Git refs cannot contain ':', so v0.8.5:0.7.5 becomes v0.8.5-0.7.5
+          echo "tag=v${VERSION//:/-}" >> "$GITHUB_OUTPUT"
 
       - name: Create release draft
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: Snapshot
+          tag_name: ${{ steps.version.outputs.tag }}
           name: ${{ steps.version.outputs.value }}
           body_path: Changelog.md
           draft: true
+          overwrite_files: true
           files: |
             build/libs/Mindustry-Glopion-Dexed.jar
+            build/libs/Mindustry-Glopion-DeepPatch.jar
             core/build/libs/core-Dexed.jar
             desktop/build/libs/desktop.jar
