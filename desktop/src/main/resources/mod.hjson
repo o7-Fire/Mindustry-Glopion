@@ -1,0 +1,10 @@
+name: "Mindustry-Glopion-Desktop"
+displayName: "Mindustry-Glopion-Desktop"
+description: "Bottom Text"
+author: "o7-Fire"
+main: "org.o7.Fire.Glopion.DesktopLauncher"
+minGameVersion: 160
+java: true
+version: "0.8.5:0.7.5"
+hidden: true
+repo: "o7-Fire/Mindustry-Glopion"

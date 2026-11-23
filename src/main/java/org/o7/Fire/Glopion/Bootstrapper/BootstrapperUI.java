@@ -1,0 +1,198 @@
+package org.o7.Fire.Glopion.Bootstrapper;
+
+import arc.Core;
+import arc.Events;
+import arc.files.Fi;
+import arc.func.Boolp;
+import arc.func.Cons;
+import arc.func.Floatc;
+import arc.scene.ui.layout.Cell;
+import arc.scene.ui.layout.Table;
+import arc.util.Log;
+import arc.util.Strings;
+import arc.util.Threads;
+import mindustry.game.EventType;
+import mindustry.gen.Icon;
+import mindustry.graphics.Pal;
+import mindustry.mod.Mod;
+import mindustry.ui.Bar;
+import mindustry.ui.dialogs.BaseDialog;
+import org.o7.Fire.Glopion.Bootstrapper.UI.DependencyManager;
+import org.o7.Fire.Glopion.Bootstrapper.UI.FlavorDialog;
+import org.o7.Fire.Glopion.Bootstrapper.UI.InfoDialog;
+import org.o7.Fire.Glopion.Bootstrapper.UI.ProviderURLDialog;
+
+import java.io.BufferedInputStream;
+import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static mindustry.Vars.ui;
+import static org.o7.Fire.Glopion.Bootstrapper.Main.*;
+
+public class BootstrapperUI extends Mod {
+    public FlavorDialog flavorDialog;
+    public ProviderURLDialog providerURLDialog;
+    public DependencyManager dependencyManager;
+    public Cell<Table> tableCell = null;
+    public Table t = null;
+    
+    public static void download(String url, Fi dest, Runnable done, Cons<Throwable> err) {
+
+        download(url, dest, i -> {} , v ->  {}, () -> false, done, err);
+    }
+    public static ExecutorService executorService = null;
+    static {
+        try{
+            executorService = Executors.newCachedThreadPool((r) -> {
+                Thread thread = new Thread(r, "AsyncExecutor-Thread");
+                thread.setDaemon(true);
+                thread.setUncaughtExceptionHandler((t, e) -> {
+                    e.printStackTrace();
+                });
+                return thread;
+            });
+        }catch(Throwable ignored){}
+    }
+    public static void download(String furl, Fi dest, Longc length, Floatc progressor, Boolp canceled, Runnable done, Cons<Throwable> error) {
+        Threads.daemon(() -> {
+            try {
+                dest.parent().mkdirs();
+                dest.delete();
+                HttpURLConnection con = (HttpURLConnection) new URL(furl).openConnection();
+                BufferedInputStream in = new BufferedInputStream(con.getInputStream());
+                RandomAccessFile out = new RandomAccessFile(dest.file(),"rw");
+                
+                byte[] data = new byte[4096];
+                long size = -1;
+                try {
+                    size = Long.parseLong(con.getHeaderField("content-length"));
+                }catch(Exception ignored){}
+                long counter = 0;
+                length.get( size);
+                int x;
+                while ((x = in.read(data, 0, data.length)) >= 0 && !canceled.get()) {
+                    counter += x;
+                    float total = (float) counter / (float) size;
+                    if(executorService != null)
+                        executorService.submit(()->progressor.get(total));
+                    out.write(data, 0, x);
+                }
+                out.close();
+                in.close();
+                
+                if (!canceled.get()){
+                    done.run();
+                    Log.infoTag("Downloader", furl + " has been downloaded to " + dest.absolutePath());
+                }
+            }catch(Throwable e){
+                error.get(e);
+            }
+            
+        });
+    }
+    
+    public static void downloadConfirm(String url, Fi jar, Runnable done) {
+        ui.showCustomConfirm(url, jar.absolutePath() + "\n doesn't exist\n Do you want download", "Yes", "No", () -> BootstrapperUI.downloadGUI(url, jar, done), Main::disable);
+    }
+    public static void downloadGUI(String url, Fi jar, Runnable done) {
+        downloadGUI(url, jar, done, ()->{});
+    }
+    public static void downloadGUI(String url, Fi jar, Runnable done, Runnable onCance) {
+        
+        try {
+            boolean[] cancel = {false};
+            float[] progress = {0};
+            long[] length = {0};
+            
+            
+            BaseDialog dialog = new BaseDialog("Downloading: " + jar.name());
+            download(url, jar, i -> length[0] = i, v -> progress[0] = v, () -> cancel[0], () -> {
+                Main.runOnUI(() -> {
+                    done.run();
+                    dialog.hide();
+                });
+            }, e -> {
+                Main.runOnUI(() -> {
+                    dialog.hide();
+                    ui.showException(e);
+                });
+            });
+            
+            dialog.cont.add(new Bar(() -> length[0] == 0 ? "Downloading: " + url : SharedBootstrapper.humanReadableByteCountSI((long) (length[0] * progress[0])) + "/" + SharedBootstrapper.humanReadableByteCountSI(length[0]), () -> Pal.accent, () -> progress[0])).width(400f).height(70f);
+            dialog.buttons.button("@cancel", Icon.cancel, () -> {
+                cancel[0] = true;
+                dialog.hide();
+                onCance.run();
+            }).size(210f, 64f);
+            dialog.setFillParent(false);
+            dialog.show();
+        }catch(Exception e){
+            ui.showException(e);
+        }
+    
+    
+    }
+    
+    @Override
+    public void init() {
+        providerURLDialog = new ProviderURLDialog(this);
+        flavorDialog = new FlavorDialog(this);
+        dependencyManager = new DependencyManager();
+        fetchRelease(Main::tryDownload);
+        tableCell = ui.settings.game.row().table().growX();
+        t = tableCell.get();
+        Main.runOnUI(this::buildUI);
+        Events.on(EventType.ResizeEvent.class, s -> buildUI());
+    }
+    
+    public void buildUI() {
+        t.reset();
+        t.add("Glopion Bootstrapper Settings ").growX().center().row();
+        t.add("Bootstrapper Version: [accent]" + "["+SharedBootstrapper.version+"]").growX().center().row();
+        t.check("Force Update", Core.settings.getBool("glopion-auto-update", false), b -> Core.settings.put("glopion-auto-update", b)).row();
+        t.button("Glopion Flavor [accent]" + Core.settings.getString("glopion-flavor", flavor), flavorDialog::show).disabled(s -> release.isEmpty()).growX().row();
+        t.button("Provider URL", providerURLDialog::show).growX().row();
+        if(SharedBootstrapper.downloadList.size() != 0)
+        t.button("Dependency", dependencyManager::show).growX().row();
+        t.button("Refresh", () -> {
+            buildUI();
+            fetchRelease(() -> {
+                buildUI();
+                downloadIfNotExist();
+            });
+        }).growX().row();
+        t.button("Error: " + error.size(), () -> {
+            new BaseDialog("Error") {
+                {
+                    addCloseButton();
+                    cont.clear();
+                    if (error.isEmpty()){
+                        cont.add("None").growX().growY();
+                    }else{
+                        for (Throwable t : error) {
+                            cont.add(Strings.neatError(t, false)).growX().growY().row();
+                        }
+                    }
+                }
+            }.show();
+        }).growX().row();
+        t.button("Purge Local Glopion", () -> {
+            jar.delete();
+            downloadIfNotExist();
+        }).growX().row();
+        t.button("Reset Bootstrapper Configuration", () -> {
+            Core.settings.remove("glopion-auto-update");
+            Core.settings.remove("glopion-url");
+            Core.settings.remove("glopion-flavor");
+            ui.showInfoFade("Bootstrapper Configuration Reseted");
+            buildUI();
+        }).growX().row();
+        String load = loaded == null ? "None" : loaded.getClass().getSimpleName();
+        t.button("Loaded: [accent]" + load, () -> new InfoDialog("Loaded Glopion", info + "\nURL: " + release.getProperty(flavor)).show()).growX().row();
+        
+        
+    }
+}

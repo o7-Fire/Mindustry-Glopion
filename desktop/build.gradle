@@ -1,0 +1,187 @@
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+static String getHttp(String jarUrl, String qualified) {
+    try {
+        URL jarfile = new URL(jarUrl)
+        HttpURLConnection connection = jarfile.openConnection()
+        InputStream inputStream = jarfile.openStream()
+        if (inputStream != null) {
+            return connection.getContentLengthLong() + "-" + qualified + " " + jarUrl
+        }
+    } catch (FileNotFoundException e) {
+        //System.err.println(e.toString());
+        //System.err.println(jarUrl);
+    } catch (Exception e) {
+        System.err.println(e.toString())
+        System.err.println(jarUrl)
+    }
+    return null
+}
+
+
+dependencies {
+    compileOnly(atomModule(":Atomic")) {
+        because("runtime")
+    }
+    compileOnly(atomModule(":Desktop")) {
+        because("runtime")
+    }
+    compileOnly("com.github.Anuken.Mindustry:server:$mindustryHash")
+    compileOnly("com.github.Anuken.Arc:backend-headless:$arcHash")
+    //compileOnly (group: 'org.jblas', name: 'jblas', version: '1.2.5') {because("runtime")}
+    compileOnly(group: 'io.jenetics', name: 'jenetics', version: '6.2.0') {
+        because("runtime")
+    }
+
+    compileOnly(group: 'org.jfree', name: 'jfreechart', version: '1.5.3') {
+        because("runtime")
+    }
+
+    testImplementation group: 'com.aparapi', name: 'aparapi', version: '3.0.0'
+    testImplementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
+    testImplementation group: 'org.jblas', name: 'jblas', version: '1.2.5'
+    testImplementation(atomModule(":Atomic"))
+    testImplementation(atomModule(":Desktop"))
+    testImplementation(aproj(":core"))
+    implementation(aproj(":core")) {
+        exclude group: "com.github.o7-Fire.Atomic-Library", module: "Atomic"
+    }
+
+}
+//dont include implementation
+task writeDependency() {
+    File txt = new File(projectDir, "src/main/resources/dependencies")
+    txt.parentFile.mkdirs()
+    txt = txt.getAbsoluteFile()
+    txt.createNewFile()
+    doLast {
+        println txt
+        txt.delete()
+        Properties depends = new Properties()
+        ArrayList<Future<String>> task = new ArrayList<>()
+        ExecutorService service = Executors.newCachedThreadPool()
+        HashSet<String> exist = new HashSet<>()
+        configurations.runtimeClasspath.getResolvedConfiguration().getResolvedArtifacts().each {
+            ModuleVersionIdentifier dep = it.getModuleVersion().getId()
+            String name = "$dep.group:$dep.name:$dep.version";
+            if(it.classifier != null) {
+                name = name + ":" + it.classifier;
+            }
+            exist.add(name)
+        }
+        println configurations
+        def conf = configurations.compileClasspath.getResolvedConfiguration().getResolvedArtifacts() + configurations.runtimeClasspath.getResolvedConfiguration().getResolvedArtifacts()
+        def skip = ["com.github.Anuken", "annotations", "android", "ios", "macos"]
+        conf.each {
+            ModuleVersionIdentifier dep = it.getModuleVersion().getId()
+            if (exist.contains("$dep.group:$dep.name")) return;
+            String name = "$dep.group:$dep.name:$dep.version";
+            if(it.classifier != null) {
+                name = name + ":" + it.classifier;
+            }
+            for(String s : skip) {
+                if (name.contains(s)) return ;
+            }
+
+            for (ArtifactRepository repository : project.repositories.asList()) {
+                try {
+                    String url = repository.properties.get('url')
+                    if (!url.startsWith("http")) continue;
+                    if (!url.endsWith("/"))
+                        url = url + "/"
+                    String jarUrl = String.format("%s%s/%s/%s/%s-%s.jar",
+                            url.toString(),
+                            dep.group.replace('.', '/'),
+                            dep.name, dep.version,
+                            dep.name, dep.version)
+
+                    if(it.classifier != null){
+                        jarUrl = String.format("%s%s/%s/%s/%s-%s-%s.jar",
+                                url.toString(),
+                                dep.group.replace('.', '/'),
+                                dep.name, dep.version,
+                                dep.name, dep.version, it.classifier)
+                    }
+
+                    Future<String> f = service.submit(new Callable<String>() {//so you can't use lambda, day ruined
+                        @Override
+                        String call() throws Exception {
+                            return getHttp(jarUrl, name)
+                        }
+                    })
+                    task.add(f)
+                } catch (Exception e) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+
+        println task.size() + " searching"
+        for (Future<String> f : task) {
+            //println f.get()
+            String kyys = f.get()
+            if (kyys == null) continue
+
+            String[] kyss = kyys.split(" ")
+            String qualified = kyss[0], jarUrl = kyss[1]
+
+            println(qualified + " -> " + jarUrl)
+            if (depends.getProperty(qualified))
+                jarUrl = depends.getProperty(qualified) + " " + jarUrl
+            depends.setProperty(qualified, jarUrl)
+        }
+        Calendar c = Calendar.getInstance()
+        String date = String.format(Locale.UK, "%tl:%tM:%tS %tp %tB %te, %tY", c, c, c, c, c, c, c)
+        depends.store(new FileWriter(txt), "this tbh \n" + date)
+
+
+    }
+}
+task base(type: Jar, dependsOn: [":core:compileJava", ":core:jar"]) {
+    if (findProject(":Atom:Atomic") != null) {
+        dependsOn(":Atom:Atomic:jar")
+    }
+    if (findProject(":Atom:Desktop") != null) {
+        dependsOn(":Atom:Desktop:jar")
+    }
+    archiveFileName = "desktop.jar"
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    manifest.attributes('Main-Class': modsNJavaMain)//what
+    from files(aproj(":core").sourceSets.main.output)//Include core project class, cuz gradle is shit
+    with jar
+    from {
+        configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+
+
+}
+task unVersion(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.main.compileClasspath
+    mainClass.set("org.o7.Fire.Glopion.Version")
+    setWorkingDir(rootDir)
+}
+task runHeadlessGlopion(type: JavaExec) {
+    dependsOn(':copyMods')
+    classpath = sourceSets.main.compileClasspath + sourceSets.main.runtimeClasspath + files(rootProject.sourceSets.main.output.resourcesDir)
+    mainClass.set('org.o7.Fire.Glopion.Premain.Run$Server')
+    setWorkingDir(rootDir)
+    systemProperty('file.encoding', 'UTF-8')
+}
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+artifacts {
+    archives sourcesJar
+    archives tasks.named('base')
+}

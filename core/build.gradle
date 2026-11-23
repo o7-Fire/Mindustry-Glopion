@@ -1,0 +1,57 @@
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+dependencies {
+    implementation(atomModule(":Atomic"))
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.7'
+    implementation group: 'org.reflections', name: 'reflections', version: '0.9.12'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.2'
+
+    compileOnly(urlFile(fooClient))
+    testCompileOnly(urlFile(fooClient))
+    if(androidJarFile.exists()) {
+        compileOnly(files(androidJarFile))
+        println androidJarFile.absolutePath
+    }else{
+        println androidJarFile.absolutePath + " doesn't exist"
+    }
+}
+task base(type: Jar){
+    if (findProject(":Atom:Atomic") != null) {
+        dependsOn(":Atom:Atomic:jar")
+    }
+    archiveFileName = "core.jar"//Mindustry-Glopion,jar
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)//stop including duplicated copy of library, D8 really mad
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }//Runtime library only, compile library like arc won't get included
+    }
+    with jar
+    manifest.attributes('Main-Class': modsNJavaMain)//what
+
+}
+
+
+
+task baseJar{
+    dependsOn tasks.named('base')
+}
+
+task makeJar(type: Jar){
+    dependsOn baseJar
+    archiveFileName = "core-Dexed.jar"
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    from() {
+        zipTree(new File(projectDir, "build/libs/core.jar"))
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+artifacts {
+    archives sourcesJar
+    archives tasks.named('base')
+}
