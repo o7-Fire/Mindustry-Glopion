@@ -34,8 +34,8 @@ public class Version {
         }
     }
 
-    public static String desktop = properties.getProperty("version", "");
-    public static String core = properties.getProperty("version", "");
+    public static String desktop = properties.getProperty("desktopVersion", "");
+    public static String core = properties.getProperty("coreVersion", "");
 
     public static boolean isCore() {
         return desktop.isEmpty();

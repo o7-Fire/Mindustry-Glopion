@@ -7,7 +7,9 @@ import java.nio.file.StandardOpenOption
 
 def versionProperties = new Properties()
 file('core/src/main/resources/version.properties').withInputStream { versionProperties.load(it) }
-ext.modsNversion = versionProperties.getProperty('version') + ':' + versionProperties.getProperty('version')
+ext.coreVersion = versionProperties.getProperty('coreVersion')
+ext.desktopVersion = versionProperties.getProperty('desktopVersion')
+ext.modsNversion = coreVersion + ':' + desktopVersion
 
 buildscript {
     repositories {//more than you need
@@ -83,6 +85,9 @@ allprojects {
     tasks.withType(Test) {
 
         useJUnitPlatform()
+        // Gradle 9 fails a task that has sources but no JUnit-discoverable tests
+        // (e.g. :core:test, which only holds helper classes).
+        failOnNoDiscoveredTests = false
         finalizedBy(jacocoTestReport)
         testLogging {
             // set options for log level LIFECYCLE
@@ -150,7 +155,9 @@ allprojects {
     }
     ext.urlFile = { url ->
         String name = url.substring(url.lastIndexOf('/') + 1)
-        File file = new File("$buildDir/download/${name}")
+        // Do not cache inside buildDir: `gradlew clean` deletes it after this
+        // closure runs at configuration time, leaving the compile classpath empty.
+        File file = new File(rootDir, ".gradle/download/${name}")
         file.parentFile.mkdirs()
         if (!file.exists()) {
             println("Downloading $url")
@@ -237,6 +244,8 @@ allprojects {
                 testImplementation(files(mindustry))
             testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
             testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+            // Gradle 9 no longer puts the launcher on the test runtime classpath automatically.
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.7.0'
             testRuntimeOnly(files(mindustryExecutable))
             testRuntimeOnly(files(mindustryServerExecutable))
 
@@ -488,8 +497,10 @@ task download() {
         downloadMindustry(getMindustryURL(), getMindustryFile(), useStaticMindustryPackages() ? "jre/desktop.jar" : null);
     }
 }
-tasks.withType(JavaCompile) {
-    dependsOn(download)
+allprojects {
+    tasks.withType(JavaCompile) {
+        dependsOn(rootProject.tasks.named('download'))
+    }
 }
 //don't want open file manager
 task copyMods() {

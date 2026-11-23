@@ -5,6 +5,6 @@ author: "o7-Fire"
 main: "org.o7.Fire.Glopion.Bootstrapper.Main"
 minGameVersion: 160
 java: true
-version: "7.3.0:7.3.0"
+version: "0.8.5:0.7.5"
 hidden: true
 repo: "o7-Fire/Mindustry-Glopion"
